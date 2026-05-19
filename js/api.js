@@ -1,0 +1,294 @@
+import { esc, showToast, skeletons, buildFilters, renderRoles } from './main.js';
+import { saveCachedJobs, loadCachedJobs, cachedLiveJobs, lastFetchTime } from './store.js';
+
+export function sanitizeData(array) {
+  if (!Array.isArray(array)) return array;
+  return array.map(j => ({
+    id: j.id || j.ID || String(Math.random()),
+    company: j.company || j.Company || '',
+    title: j.title || j.Title || '',
+    dept: j.dept || j.Department || j.Dept || '',
+    location: j.location || j.Location || '',
+    posted: j.posted || j.Posted || '',
+    url: j.url || j.URL || j.Url || ''
+  }));
+}
+
+export const delay = ms => new Promise(res => setTimeout(res, ms));
+
+export const FETCH_COMPANIES = [
+  { name:'Pfizer', ats:'Workday', subdomain:'pfizer', tenant:'PfizerCareers', wdNum:1 },
+  { name:'Merck', ats:'Workday', subdomain:'msd', tenant:'SearchJobs', wdNum:5 },
+  { name:'Eli Lilly', ats:'Workday', subdomain:'lilly', tenant:'LLY', wdNum:5 },
+  { name:'AstraZeneca', ats:'Workday', subdomain:'astrazeneca', tenant:'Careers', wdNum:3 },
+  { name:'Novartis', ats:'Workday', subdomain:'novartis', tenant:'Novartis_Careers', wdNum:3 },
+  { name:'GSK', ats:'Workday', subdomain:'gsk', tenant:'GSKCareers', wdNum:3 },
+  { name:'Regeneron', ats:'Workday', subdomain:'regeneron', tenant:'careers', wdNum:1 },
+  { name:'Biogen', ats:'Workday', subdomain:'biibhr', tenant:'external', wdNum:3 },
+  { name:'Gilead', ats:'Workday', subdomain:'gilead', tenant:'gileadcareers', wdNum:1 },
+  { name:'Vertex', ats:'Workday', subdomain:'vrtx', tenant:'Vertex_Careers', wdNum:501 },
+  { name:'Amgen', ats:'Workday', subdomain:'amgen', tenant:'Careers', wdNum:1 },
+  { name:'Sanofi', ats:'Workday', subdomain:'sanofi', tenant:'SanofiCareers', wdNum:3 },
+  { name:'BMS', ats:'Workday', subdomain:'bristolmyerssquibb', tenant:'BMS', wdNum:5 },
+  { name:'Takeda', ats:'Workday', subdomain:'takeda', tenant:'External', wdNum:1 },
+  { name:'AbbVie', ats:'Workday', subdomain:'abbvie', tenant:'abbvie', wdNum:1 },
+  { name:'Moderna', ats:'Workday', subdomain:'modernatx', tenant:'M_tx', wdNum:1 },
+  { name:'Alnylam', ats:'Workday', subdomain:'alnylam', tenant:'Careers', wdNum:1 },
+  { name:'Argenx', ats:'Workday', subdomain:'argenx', tenant:'External_Careers', wdNum:3 },
+  { name:'Ascendis', ats:'Workable', subdomain:'', tenant:'ascendis-pharma', wdNum:0 },
+  { name:'Acadia', ats:'Workday', subdomain:'acadia', tenant:'Acadia_Careers', wdNum:1 },
+  { name:'Novo Nordisk', ats:'Workday', subdomain:'novonordisk', tenant:'novonordisk', wdNum:3 },
+  { name:'J&J', ats:'Workday', subdomain:'jj', tenant:'JJ', wdNum:5 },
+  { name:'Daiichi Sankyo', ats:'Workday', subdomain:'daiichisankyo', tenant:'DS_External', wdNum:3 },
+  { name:'Sarepta', ats:'Workday', subdomain:'sarepta', tenant:'sarepta_external', wdNum:5 },
+  { name:'Ultragenyx', ats:'Workday', subdomain:'ultragenyx', tenant:'ultragenyx', wdNum:1 },
+  { name:'Insmed', ats:'Workday', subdomain:'insmed', tenant:'external', wdNum:5 },
+  { name:'Blueprint Medicines', ats:'Greenhouse', subdomain:'', tenant:'blueprintmedicines', wdNum:0 },
+  { name:'Cytokinetics', ats:'Workday', subdomain:'cytokinetics', tenant:'Cytokinetics', wdNum:1 },
+  { name:'IQVIA', ats:'Workday', subdomain:'iqvia', tenant:'IQVIA', wdNum:1 }
+];
+
+export let all_jobs = []; 
+export let pfizer_filtered = [];
+export let addedRoleSet = new Set(JSON.parse(localStorage.getItem('rxp-added-roles')||'[]'));
+export let selectedCompanies = new Set(['Pfizer','Merck','Eli Lilly','Regeneron','Biogen','Gilead','Vertex','BMS']);
+
+export function setPfizerFiltered(list) { pfizer_filtered = list; }
+export function setAllJobs(list) { all_jobs = list; }
+
+export function saveAddedRoles(){ try{ localStorage.setItem('rxp-added-roles', JSON.stringify([...addedRoleSet])); }catch(e){} }
+
+export function buildCompanyCheckboxes(){
+  document.getElementById('company-checkboxes').innerHTML = FETCH_COMPANIES.map(c=>`
+    <div class="co-check-item ${selectedCompanies.has(c.name)?'selected':''}" id="cc-${c.name.replace(/\s/g,'-')}" onclick="toggleCoSelect('${c.name}',this)">
+      <div class="co-check-box">${selectedCompanies.has(c.name)?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
+      <div style="flex:1;min-width:0"><div class="co-check-name">${esc(c.name)}</div><div class="co-check-ats">${esc(c.ats)}</div></div>
+      <div class="co-check-status" id="cs-${c.name.replace(/\s/g,'-')}"></div>
+    </div>`).join('');
+}
+
+export function toggleCoSelect(name, el){
+  if(selectedCompanies.has(name)){ selectedCompanies.delete(name); el.classList.remove('selected'); el.querySelector('.co-check-box').innerHTML='';
+  } else { selectedCompanies.add(name); el.classList.add('selected'); el.querySelector('.co-check-box').innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'; }
+  renderRoles();
+}
+export function selectAllCompanies(){ FETCH_COMPANIES.forEach(c=>{ selectedCompanies.add(c.name); const el = document.getElementById('cc-'+c.name.replace(/\s/g,'-')); if(el){ el.classList.add('selected'); el.querySelector('.co-check-box').innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'; } }); renderRoles(); }
+export function selectNoneCompanies(){ selectedCompanies.clear(); FETCH_COMPANIES.forEach(c=>{ const el = document.getElementById('cc-'+c.name.replace(/\s/g,'-')); if(el){ el.classList.remove('selected'); el.querySelector('.co-check-box').innerHTML=''; } }); renderRoles(); }
+
+export async function fetchAllCompanyJobs(){
+  const selected = FETCH_COMPANIES.filter(c=>selectedCompanies.has(c.name));
+  if(!selected.length){ showToast('Select at least one company'); return; }
+  const btn = document.getElementById('btn-fetch'); const statusEl = document.getElementById('fetch-status');
+  const container = document.getElementById('roles-container'); const progressDiv = document.getElementById('fetch-progress');
+  btn.disabled=true; btn.classList.add('spinning'); statusEl.className='fetch-status loading'; statusEl.textContent=`Fetching politely from ${selected.length} companies…`;
+  container.innerHTML=skeletons(8); progressDiv.style.display='block'; all_jobs = [];
+
+  document.getElementById('progress-list').innerHTML = selected.map(c=>`
+    <div class="progress-item" id="pi-${c.name.replace(/\s/g,'-')}">
+      <div class="progress-label">${esc(c.name)}</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-${c.name.replace(/\s/g,'-')}" style="width:0%"></div></div><div class="progress-count" id="pc-${c.name.replace(/\s/g,'-')}">—</div>
+    </div>`).join('');
+
+  let activeQueues = selected.map(c => ({
+    company: c,
+    offset: 0,
+    total: null,
+    done: false,
+    key: c.name.replace(/\s/g,'-'),
+    coStatusEl: document.getElementById('cs-'+c.name.replace(/\s/g,'-')),
+    coCheckEl: document.getElementById('cc-'+c.name.replace(/\s/g,'-')),
+    jobCount: 0
+  }));
+
+  activeQueues.forEach(q => {
+    if(q.coStatusEl) q.coStatusEl.textContent = 'fetching...';
+    if(q.coCheckEl) q.coCheckEl.classList.add('loading');
+  });
+
+  async function fetchQueue(q, index) {
+    await delay(index * 200);
+    while(!q.done) {
+      try {
+        if (q.company.ats === 'Workday') {
+          const LIMIT = 20;
+          const BASE = `/api/${q.company.subdomain}`;
+          const res = await fetch(BASE, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({ limit: LIMIT, offset: q.offset, searchText:'', appliedFacets: {} }) });
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if(!data.jobPostings) throw new Error('No jobPostings');
+          
+          if(q.total === null) {
+            q.total = data.total || data.jobPostings.length;
+            if (q.total > 1000) q.total = 1000;
+          }
+          
+          const jobs = data.jobPostings.map(j => normalizeJob(j, q.company));
+          all_jobs = all_jobs.concat(jobs);
+          q.jobCount += jobs.length;
+          q.offset += LIMIT;
+          
+          setPBar(q.key, q.jobCount, q.total);
+          
+          if (data.jobPostings.length < LIMIT || q.offset >= q.total) {
+            q.done = true;
+          }
+        } else {
+          let jobs = [];
+          if (q.company.ats === 'Greenhouse') {
+            const res = await fetch(`/api/greenhouse/${q.company.tenant}`); if(!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            jobs = (data.jobs||[]).map(j=>({ id: String(j.id), company: q.company.name, title: j.title||'', dept: j.departments?.[0]?.name||'', location: j.location?.name||'', posted: j.updated_at ? new Date(j.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: j.absolute_url||`https://boards.greenhouse.io/${q.company.tenant}` }));
+          } else if (q.company.ats === 'Workable') {
+            const res = await fetch(`/api/workable/${q.company.tenant}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ query: '' }) }); if(!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            jobs = (data.results||[]).map(j=>({ id: j.shortcode||String(Math.random()), company: q.company.name, title: j.title||'', dept: j.department||'', location: [j.city, j.state, j.country].filter(Boolean).join(', '), posted: j.published_on ? new Date(j.published_on).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: `https://apply.workable.com/${q.company.tenant}/j/${j.shortcode}/` }));
+          }
+          
+          all_jobs = all_jobs.concat(jobs);
+          q.jobCount += jobs.length;
+          setPBar(q.key, q.jobCount, q.jobCount);
+          q.done = true;
+        }
+
+        if (q.done) {
+          if(q.coCheckEl) { q.coCheckEl.classList.remove('loading'); q.coCheckEl.classList.add('done'); }
+          if(q.coStatusEl) q.coStatusEl.textContent = `${q.jobCount} / ${q.total || q.jobCount} loaded`;
+        }
+
+      } catch(e) {
+        console.error(`Failed fetching ${q.company.name}:`, e);
+        if(q.coCheckEl) { 
+          q.coCheckEl.classList.remove('loading'); 
+          if (q.jobCount === 0) q.coCheckEl.classList.add('error');
+          else q.coCheckEl.classList.add('done');
+        }
+        const text = `${q.jobCount} / ${q.total || '?'} loaded`;
+        if(q.coStatusEl) q.coStatusEl.textContent = text; 
+        const pcEl = document.getElementById('pc-'+q.key);
+        if(pcEl) pcEl.textContent = text;
+        q.done = true;
+      }
+      
+      await delay(250);
+    }
+  }
+
+  await Promise.all(activeQueues.map((q, index) => fetchQueue(q, index)));
+
+  const successCount = activeQueues.filter(q => q.jobCount > 0).length;
+  const count = all_jobs.length; 
+  statusEl.className = count>0 ? 'fetch-status success' : 'fetch-status error';
+  statusEl.textContent = count>0 ? `✓ ${count} jobs loaded from ${successCount} companies · ${new Date().toLocaleTimeString()}` : '✗ Fetch failed. Ensure _redirects file is active on your host.';
+
+  if(count>0){ 
+    buildFilters(); renderRoles(); 
+    document.getElementById('sb-roles').textContent = count; 
+    document.getElementById('live-roles-count').textContent = count; 
+    document.getElementById('roles-footer').style.display='flex';
+    await saveCachedJobs(all_jobs);
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="fetch-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Refresh Live Jobs`;
+  } else { 
+    container.innerHTML = `<div class="fetch-empty"><div class="fetch-empty-title">Fetch failed</div><div class="fetch-empty-sub">Check the browser console or your API proxies.</div></div>`; 
+  }
+  btn.disabled=false; btn.classList.remove('spinning'); setTimeout(()=>{ progressDiv.style.display='none'; }, 3000);
+}
+
+export function setPBar(key, done, total){ const pct = total>0 ? Math.round((done/total)*100) : 100; const pb = document.getElementById('pb-'+key); const pc = document.getElementById('pc-'+key); if(pb) pb.style.width=pct+'%'; if(pc) pc.textContent = total>0 ? `${done}/${total}` : done+' jobs'; }
+
+export function normalizeJob(j, c){
+  const title = j.title||j.jobPostingTitle||''; const loc = (j.locationsText||j.primaryLocation||j.bulletFields?.[0]||'').replace(/^\|+/,'').trim(); const dept = (j.jobCategory||j.categories?.[0]?.value||'').trim();
+  let posted = j.postedOn || ''; if (posted && !posted.toLowerCase().includes('ago') && !posted.toLowerCase().includes('today')) { const d = new Date(posted); if(!isNaN(d)) posted = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+  const id = (j.bulletFields?.[1]||j.externalPath||String(Math.random())).replace(/\//g,'_'); const path = j.externalPath||'';
+  let url = '';
+  if (c.ats === 'Workday') {
+    url = path ? `https://${c.subdomain}.wd${c.wdNum}.myworkdayjobs.com/en-US/${c.tenant}${path}` : `https://${c.subdomain}.wd${c.wdNum}.myworkdayjobs.com/${c.tenant}`;
+  } else {
+    url = j.absolute_url || path || `https://careers.${c.name.toLowerCase().replace(/\s/g,'')}.com`;
+  }
+  return { id:`${c.name}_${id}`, company: c.name, title, dept, location:loc, posted, url };
+}
+
+export async function forceRefreshBaseline() {
+  showToast('Syncing...');
+  try {
+    const res = await fetch('./jobs-baseline.json');
+    if (res.ok) {
+      let data = await res.json();
+      data = sanitizeData(data);
+      all_jobs = data;
+      await saveCachedJobs(data);
+      buildFilters();
+      renderRoles();
+      const count = all_jobs.length;
+      document.getElementById('sb-roles').textContent = count; 
+      document.getElementById('live-roles-count').textContent = count; 
+      document.getElementById('roles-footer').style.display='flex';
+      const rCount = document.getElementById('r-count');
+      if (rCount) rCount.textContent = count + ' roles';
+      const statusEl = document.getElementById('fetch-status');
+      if (statusEl) {
+        statusEl.className = 'fetch-status success';
+        statusEl.textContent = `✓ ${count} roles loaded`;
+      }
+    }
+  } catch(e) {
+    console.error('Force refresh failed:', e);
+  }
+}
+
+export async function initCachedLibrary() {
+  const updateUI = (timeAgo) => {
+    if (all_jobs.length > 1000) {
+      console.warn(`Warning: all_jobs array contains ${all_jobs.length} items. We might need to trim the baseline file.`);
+    }
+    if (all_jobs.length > 0) {
+      const statusEl = document.getElementById('fetch-status');
+      if (statusEl) {
+        statusEl.className = 'fetch-status success';
+        statusEl.textContent = `✓ ${all_jobs.length} roles loaded`;
+      }
+      
+      const rCount = document.getElementById('r-count');
+      if (rCount) rCount.textContent = all_jobs.length + ' roles';
+      
+      const sbRoles = document.getElementById('sb-roles');
+      if (sbRoles) sbRoles.textContent = all_jobs.length;
+      
+      const liveRolesCount = document.getElementById('live-roles-count');
+      if (liveRolesCount) liveRolesCount.textContent = all_jobs.length;
+
+      buildFilters();
+      renderRoles();
+      
+      const footer = document.getElementById('roles-footer');
+      if (footer) footer.style.display = 'flex';
+      
+      const btn = document.getElementById('btn-fetch');
+      if (btn) {
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="fetch-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Refresh Live Jobs`;
+      }
+    }
+  };
+
+  await loadCachedJobs();
+  let localCachedJobs = cachedLiveJobs;
+  if (localCachedJobs && localCachedJobs.length > 0) {
+    localCachedJobs = sanitizeData(localCachedJobs);
+  }
+
+  if (!localCachedJobs || localCachedJobs.length === 0) {
+    await forceRefreshBaseline();
+  } else {
+    all_jobs = localCachedJobs;
+    let timeAgo = '';
+    if (lastFetchTime) {
+      const mins = Math.floor((Date.now() - new Date(lastFetchTime).getTime())/60000);
+      if (mins < 60) timeAgo = `${mins}m ago`;
+      else {
+        const hrs = Math.floor(mins/60);
+        if (hrs < 24) timeAgo = `${hrs} hours ago`;
+        else timeAgo = `${Math.floor(hrs/24)} days ago`;
+      }
+    }
+    updateUI(timeAgo);
+  }
+}

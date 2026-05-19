@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rx Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/main.css">
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="logo-dot"></div>Rx Pipeline</div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" id="tab-tracker" onclick="switchView('tracker')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      My Tracker
+      <span class="tab-badge" id="tracker-badge">0</span>
+    </button>
+    <button class="nav-tab" id="tab-library" onclick="switchView('library')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      Company Library
+      <span class="tab-badge" id="lib-badge">120</span>
+    </button>
+  </nav>
+  <div class="header-right">
+    <span class="stat-pill s-applied" id="stat-applied">0 Applied</span>
+    <span class="stat-pill s-int" id="stat-int">0 Interviewing</span>
+    <span class="stat-pill s-offers" id="stat-offers">0 Offers</span>
+    <button class="btn-export" onclick="exportCSV()" title="Export to CSV">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+    <button class="btn-primary" id="header-action" onclick="openModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Role
+    </button>
+  </div>
+</header>
+
+<div class="view active" id="view-tracker">
+  <div class="page">
+
+<div class="search-bar">
+  <div class="sb-input-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="sb-input" type="text" id="t-search" placeholder="Search companies or roles…" oninput="renderTracker();updateClearBtn()">
+  </div>
+  <select class="sb-select" id="sb-area" onchange="tFilters.area=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()">
+    <option value="">All Areas</option>
+    <option>Oncology</option>
+    <option>Rare Disease</option>
+    <option>Immunology</option>
+    <option>Vaccines</option>
+    <option>Neuroscience</option>
+    <option>Cardiovascular</option>
+    <option>Metabolic / Endocrine</option>
+    <option>Infectious Disease</option>
+    <option>Ophthalmology</option>
+    <option>Diversified</option>
+    <option>Other</option>
+  </select>
+  <select class="sb-select" id="sb-level" onchange="tFilters.level=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()">
+    <option value="">All Levels</option>
+    <option>Analyst</option>
+    <option>Associate</option>
+    <option>Manager</option>
+    <option>Senior Manager</option>
+    <option>Director</option>
+    <option>Senior Director</option>
+    <option>VP</option>
+    <option value="SVP / EVP">SVP / EVP</option>
+    <option>C-Suite</option>
+  </select>
+  <select class="sb-select" id="sb-func" onchange="tFilters.func=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()">
+    <option value="">All Functions</option>
+    <option>Forecasting</option>
+    <option>Commercial Analytics</option>
+    <option>Market Access</option>
+    <option>Medical Affairs</option>
+    <option>Finance</option>
+    <option>Business Development</option>
+    <option>Strategy</option>
+    <option>Marketing</option>
+    <option>Clinical</option>
+    <option>Regulatory</option>
+    <option>Operations</option>
+    <option>Other</option>
+  </select>
+  <select class="sb-select" id="sb-type" onchange="tFilters.type=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()" style="border-right:none">
+    <option value="">All Types</option>
+    <option>Full-Time</option>
+    <option>Contract</option>
+    <option>Consulting</option>
+    <option value="Interim">Interim / Fractional</option>
+    <option>Remote</option>
+    <option>Hybrid</option>
+  </select>
+  <button class="sb-clear" id="sb-clear-btn" onclick="clearSearchBar()">✕ Clear</button>
+</div>
+
+<div class="kanban">
+  <div class="column">
+    <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#6b7099"></div>Sourced</div><span class="col-count" id="cnt-Sourced">0</span></div>
+    <div class="col-body" id="body-Sourced"></div>
+  </div>
+  <div class="column">
+    <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#4fffb0"></div>Applied</div><span class="col-count" id="cnt-Applied">0</span></div>
+    <div class="col-body" id="body-Applied"></div>
+  </div>
+  <div class="column">
+    <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#7c6fff"></div>Interviewing</div><span class="col-count" id="cnt-Interviewing">0</span></div>
+    <div class="col-body" id="body-Interviewing"></div>
+  </div>
+  <div class="column">
+    <div class="col-header"><div class="col-title"><div class="col-dot" style="background:#ff8c42"></div>Offer / Closed</div><span class="col-count" id="cnt-Offer">0</span></div>
+    <div class="col-body" id="body-Offer"></div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<div class="view" id="view-library">
+  <div class="page">
+    <div class="lib-header">
+      <div class="lib-title">Company Library</div>
+      <div class="lib-sub"><strong id="lib-count">1</strong> company · <strong id="live-roles-count">20 sources</strong> · live job fetcher across Workday, Greenhouse &amp; Workable ATS systems</div>
+    </div>
+
+<div class="lib-subtabs">
+  <button class="lib-subtab active" id="subtab-companies" onclick="switchLibTab('companies')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Companies
+    <span class="subtab-badge" id="sb-companies">62</span>
+  </button>
+  <button class="lib-subtab" id="subtab-roles" onclick="switchLibTab('roles')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Live Roles
+    <span class="subtab-badge live" id="sb-roles">28</span>
+  </button>
+</div>
+
+<div id="lib-panel-companies">
+  <div class="lib-toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" type="text" id="l-search" placeholder="Search companies…" oninput="renderCompanyIntelligence()">
+    </div>
+    <span class="result-count" id="l-count"></span>
+    <div class="view-toggle">
+      <button class="view-btn active" id="vbtn-grid" onclick="setLibView('grid')" title="Grid">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+      <button class="view-btn" id="vbtn-list" onclick="setLibView('list')" title="List">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="lib-container" class="company-grid"></div>
+</div>
+
+<div id="lib-panel-roles" style="display:none">
+
+  <div class="company-selector-wrap">
+    <div class="cs-header">
+      <div class="cs-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Select Companies to Fetch
+      </div>
+      <div class="cs-actions">
+        <button class="cs-action-btn" onclick="selectAllCompanies()">Select All</button>
+        <button class="cs-action-btn" onclick="selectNoneCompanies()">Clear</button>
+      </div>
+    </div>
+    <div class="company-checkboxes" id="company-checkboxes"></div>
+  </div>
+
+  <div class="fetch-bar">
+    <div class="fetch-bar-left">
+      <span class="fetch-status" id="fetch-status">Select companies above and click fetch</span>
+    </div>
+    <div class="fetch-bar-right">
+      <span class="result-count" id="r-count"></span>
+      <button class="btn-export" onclick="forceRefreshBaseline()" title="Restore from Server" style="margin-right:8px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 21 12 16 7 21"/><line x1="12" y1="16" x2="12" y2="3"/></svg>
+        LOAD ALL
+      </button>
+      <button class="btn-fetch" id="btn-fetch" onclick="fetchAllCompanyJobs()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="fetch-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        Fetch Live Jobs
+      </button>
+    </div>
+  </div>
+
+  <div id="fetch-progress" style="display:none">
+    <div class="progress-list" id="progress-list"></div>
+  </div>
+
+  <div class="lib-toolbar" id="roles-filters" style="display:none">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" type="text" id="r-search" placeholder="Search title, area, department, location…" oninput="renderRoles()">
+    </div>
+    <select class="filter-select" id="r-area" onchange="renderRoles()">
+      <option value="">All Areas</option>
+      <option>Oncology</option><option>Rare Disease</option><option>Immunology</option>
+      <option>Neuroscience</option><option>Cardiovascular</option><option>Vaccines</option>
+      <option>Metabolic / Endocrine</option><option>Infectious Disease</option>
+      <option>Ophthalmology</option><option>Diversified</option>
+    </select>
+    <select class="filter-select" id="r-company" onchange="renderRoles()">
+      <option value="">All Companies</option>
+    </select>
+    <select class="filter-select" id="r-func" onchange="renderRoles()">
+      <option value="">All Functions</option>
+    </select>
+    <select class="filter-select" id="r-dept" onchange="renderRoles()">
+      <option value="">All Departments</option>
+    </select>
+    <select class="filter-select" id="r-loc" onchange="renderRoles()">
+      <option value="">All Locations</option>
+    </select>
+    <button class="filter-clear-btn" id="r-clear-btn" onclick="clearRoleFilters()" style="display:none">✕ Clear</button>
+    <button class="btn-export-roles" onclick="exportRolesCSV()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+  </div>
+
+  <div id="roles-container">
+    <div class="fetch-empty">
+      <div class="fetch-empty-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+      </div>
+      <div class="fetch-empty-title">No jobs loaded yet</div>
+      <div class="fetch-empty-sub">Select one or more companies above, then click Fetch Live Jobs to pull listings directly from their career sites</div>
+    </div>
+  </div>
+
+  <div class="roles-footer" id="roles-footer" style="display:none">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="footer-text">Live data pulled directly from company career sites via API Proxies · Click any role to view · + Tracker adds to your pipeline</span>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Add Role</div>
+    <div class="form-grid">
+      <div class="field form-full"><label>Company Name *</label><input type="text" id="f-company" placeholder="e.g. Ascendis Pharma"></div>
+      <div class="field form-full"><label>Role / Title *</label><input type="text" id="f-role" placeholder="e.g. Director, US Forecasting"></div>
+      <div class="field form-full"><label>Careers URL</label><input type="url" id="f-url" placeholder="https://careers.company.com/…"></div>
+      <div class="field"><label>Therapeutic Area</label>
+        <select id="f-area">
+          <option value="">— Select —</option>
+          <option>Oncology</option><option>Rare Disease</option><option>Immunology</option>
+          <option>Vaccines</option><option>Neuroscience</option><option>Cardiovascular</option>
+          <option>Metabolic / Endocrine</option><option>Infectious Disease</option>
+          <option>Ophthalmology</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Job Type</label>
+        <select id="f-jobtype">
+          <option value="">— Select —</option>
+          <option>Full-Time</option><option>Contract</option><option>Consulting</option>
+          <option value="Interim">Interim / Fractional</option><option>Remote</option><option>Hybrid</option>
+        </select>
+      </div>
+      <div class="field"><label>Job Level</label>
+        <select id="f-level">
+          <option value="">— Select —</option>
+          <option>Analyst</option><option>Associate</option><option>Manager</option>
+          <option>Senior Manager</option><option>Director</option><option>Senior Director</option>
+          <option>VP</option><option value="SVP / EVP">SVP / EVP</option><option>C-Suite</option>
+        </select>
+      </div>
+      <div class="field"><label>Job Function</label>
+        <select id="f-func">
+          <option value="">— Select —</option>
+          <option>Commercial Analytics</option><option>Forecasting</option><option>Market Access</option>
+          <option>Medical Affairs</option><option>Finance</option><option>Business Development</option>
+          <option>Strategy</option><option>Marketing</option><option>Clinical</option>
+          <option>Regulatory</option><option>Operations</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Stage</label>
+        <select id="f-stage">
+          <option value="Sourced">Sourced</option><option value="Applied">Applied</option>
+          <option value="Interviewing">Interviewing</option><option value="Offer">Offer / Closed</option>
+        </select>
+      </div>
+      <div class="field"><label>Priority</label>
+        <select id="f-priority"><option value="med">Medium</option><option value="high">High</option><option value="low">Low</option></select>
+      </div>
+      <div class="field form-full"><label>Recruiter / Contact</label><input type="text" id="f-recruiter" placeholder="e.g. Sarah Holecko"></div>
+      <div class="field"><label>Next Interview Date</label><input type="date" id="f-intdate" style="color-scheme:dark"></div>
+      <div class="field"><label>Interview Type</label>
+        <select id="f-inttype">
+          <option value="">— Select —</option>
+          <option>Phone Screen</option><option>Hiring Manager</option>
+          <option>Panel Interview</option><option>Case Study</option>
+          <option>Final Round</option><option>Offer Call</option>
+        </select>
+      </div>
+      <div class="field form-full"><label>Notes</label><textarea id="f-notes" placeholder="Key details, pipeline, follow-up actions…"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveJob()">Save Role</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="notes-panel" id="notesPanel">
+  <div class="panel-header">
+    <div>
+      <div class="panel-company" id="panel-company">—</div>
+      <div class="panel-role" id="panel-role">—</div>
+    </div>
+    <button class="panel-close" onclick="closePanel()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="panel-meta" id="panel-meta"></div>
+  <div class="panel-body">
+
+<div>
+  <div class="panel-section-label">Interview Schedule</div>
+  <div class="interview-list" id="panel-interviews"></div>
+  <div class="add-interview-row" style="margin-top:10px">
+    <select id="pi-type" style="appearance:none">
+      <option value="">Type</option>
+      <option>Phone Screen</option><option>Hiring Manager</option>
+      <option>Panel Interview</option><option>Case Study</option>
+      <option>Final Round</option><option>Offer Call</option>
+    </select>
+    <input type="date" id="pi-date" style="color-scheme:dark">
+    <button class="btn-add-interview" onclick="addInterview()">+ Add</button>
+  </div>
+</div>
+
+<div>
+  <div class="panel-section-label">Notes &amp; Context</div>
+  <textarea class="panel-notes-area" id="panel-notes" placeholder="Pipeline details, key contacts, compensation range, follow-up actions…"></textarea>
+</div>
+
+<div>
+  <div class="panel-section-label">Activity Log</div>
+  <div class="activity-list" id="panel-activity"></div>
+</div>
+
+  </div>
+  <div class="panel-footer">
+    <button class="btn-panel-edit" onclick="closePanel();editJob(panelJobId)">Edit Role</button>
+    <button class="btn-panel-save" onclick="savePanel()">Save Notes</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>
