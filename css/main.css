@@ -128,6 +128,30 @@ cursor: pointer; transition: all 0.2s;
 .view { display: none; position: relative; z-index: 1; }
 .view.active { display: block; }
 
+/* ── GROUP HEADERS ── */
+.lib-group-header {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  padding: 24px 0 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.lib-group-grid { margin-bottom: 8px; }
+.co-group-header {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  padding: 12px 0 6px;
+  border-bottom: 1px solid var(--border);
+  margin: 8px 0 4px;
+  grid-column: 1 / -1;
+}
+
 /* ── HOME SCREEN ── */
 .home-page {
   min-height: calc(100vh - 64px);

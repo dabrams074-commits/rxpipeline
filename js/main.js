@@ -397,6 +397,47 @@ export function renderCompanyIntelligence() {
 
   const fetchStr = all_jobs.length > 0 ? new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never';
 
+  const groups = [...new Set(FETCH_COMPANIES.map(c => c.group))];
+  const byGroup = Object.fromEntries(groups.map(g => [g, []]));
+  list.forEach(c => {
+    const co = FETCH_COMPANIES.find(f => f.name === c.name);
+    const grp = co?.group || 'Other';
+    if (!byGroup[grp]) byGroup[grp] = [];
+    byGroup[grp].push(c);
+  });
+
+  container.innerHTML = groups.filter(g => byGroup[g]?.length).map(g => `
+    <div class="lib-group-header">${esc(g)}</div>
+    <div class="company-grid lib-group-grid">${byGroup[g].map(c => {
+      const starred = starredCos.has(c.name);
+      return `<div class="co-card" style="position:relative;">
+      <div class="co-card-inner">
+        <div class="co-avatar" style="background:${starred ? '#ffcc00' : 'var(--border)'}; color:${starred ? '#000' : '#fff'}; width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:1.1rem; flex-shrink:0;">
+          ${c.name.charAt(0)}
+        </div>
+        <div style="flex:1;min-width:0;margin-left:12px;">
+          <div class="co-name" style="display:flex;justify-content:space-between;align-items:center;font-weight:600;color:var(--text);font-size:1rem;">
+            ${esc(c.name)}
+            <button onclick="toggleStar('${esc(c.name).replace(/'/g, "\\'")}')" style="background:none;border:none;cursor:pointer;color:${starred ? '#ffcc00' : 'var(--muted)'};padding:0;display:flex;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="${starred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </div>
+          <div class="co-hq" style="color:var(--accent2);font-weight:500;margin-top:4px;font-size:0.8rem;">${c.count.toLocaleString()} Active Roles</div>
+        </div>
+      </div>
+      <div class="co-desc" style="font-size:0.75rem; color:var(--muted); margin-top:16px; border-top:1px solid var(--border); padding-top:12px;">
+        Last Fetched: ${fetchStr}
+      </div>
+      <div class="co-actions" style="margin-top:12px;">
+        <a class="btn-visit" href="https://careers.${c.name.toLowerCase().replace(/[\s&]/g, '')}.com" target="_blank" rel="noopener" style="width:100%;justify-content:center;padding:8px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text);text-decoration:none;font-weight:500;font-size:0.8rem;display:flex;align-items:center;gap:6px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Careers Site
+        </a>
+      </div>
+    </div>`;
+    }).join('')}</div>`).join('');
+
+  return; // grouped rendering done, skip old single-pass below
   container.innerHTML = list.map(c => {
     const starred = starredCos.has(c.name);
     return `<div class="co-card" style="position:relative;">

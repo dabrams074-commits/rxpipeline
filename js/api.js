@@ -17,35 +17,62 @@ export function sanitizeData(array) {
 export const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export const FETCH_COMPANIES = [
-  { name:'Pfizer', ats:'Workday', subdomain:'pfizer', tenant:'PfizerCareers', wdNum:1 },
-  { name:'Merck', ats:'Workday', subdomain:'msd', tenant:'SearchJobs', wdNum:5 },
-  { name:'Eli Lilly', ats:'Workday', subdomain:'lilly', tenant:'LLY', wdNum:5 },
-  { name:'AstraZeneca', ats:'Workday', subdomain:'astrazeneca', tenant:'Careers', wdNum:3 },
-  { name:'Novartis', ats:'Workday', subdomain:'novartis', tenant:'Novartis_Careers', wdNum:3 },
-  { name:'GSK', ats:'Workday', subdomain:'gsk', tenant:'GSKCareers', wdNum:3 },
-  { name:'Regeneron', ats:'Workday', subdomain:'regeneron', tenant:'careers', wdNum:1 },
-  { name:'Biogen', ats:'Workday', subdomain:'biibhr', tenant:'external', wdNum:3 },
-  { name:'Gilead', ats:'Workday', subdomain:'gilead', tenant:'gileadcareers', wdNum:1 },
-  { name:'Vertex', ats:'Workday', subdomain:'vrtx', tenant:'Vertex_Careers', wdNum:501 },
-  { name:'Amgen', ats:'Workday', subdomain:'amgen', tenant:'Careers', wdNum:1 },
-  { name:'Sanofi', ats:'Workday', subdomain:'sanofi', tenant:'SanofiCareers', wdNum:3 },
-  { name:'BMS', ats:'Workday', subdomain:'bristolmyerssquibb', tenant:'BMS', wdNum:5 },
-  { name:'Takeda', ats:'Workday', subdomain:'takeda', tenant:'External', wdNum:1 },
-  { name:'AbbVie', ats:'Workday', subdomain:'abbvie', tenant:'abbvie', wdNum:1 },
-  { name:'Moderna', ats:'Workday', subdomain:'modernatx', tenant:'M_tx', wdNum:1 },
-  { name:'Alnylam', ats:'Workday', subdomain:'alnylam', tenant:'Careers', wdNum:1 },
-  { name:'Argenx', ats:'Workday', subdomain:'argenx', tenant:'External_Careers', wdNum:3 },
-  { name:'Ascendis', ats:'Workable', subdomain:'', tenant:'ascendis-pharma', wdNum:0 },
-  { name:'Acadia', ats:'Workday', subdomain:'acadia', tenant:'Acadia_Careers', wdNum:1 },
-  { name:'Novo Nordisk', ats:'Workday', subdomain:'novonordisk', tenant:'novonordisk', wdNum:3 },
-  { name:'J&J', ats:'Workday', subdomain:'jj', tenant:'JJ', wdNum:5 },
-  { name:'Daiichi Sankyo', ats:'Workday', subdomain:'daiichisankyo', tenant:'DS_External', wdNum:3 },
-  { name:'Sarepta', ats:'Workday', subdomain:'sarepta', tenant:'sarepta_external', wdNum:5 },
-  { name:'Ultragenyx', ats:'Workday', subdomain:'ultragenyx', tenant:'ultragenyx', wdNum:1 },
-  { name:'Insmed', ats:'Workday', subdomain:'insmed', tenant:'external', wdNum:5 },
-  { name:'Blueprint Medicines', ats:'Greenhouse', subdomain:'', tenant:'blueprintmedicines', wdNum:0 },
-  { name:'Cytokinetics', ats:'Workday', subdomain:'cytokinetics', tenant:'Cytokinetics', wdNum:1 },
-  { name:'IQVIA', ats:'Workday', subdomain:'iqvia', tenant:'IQVIA', wdNum:1 }
+  // ── Large Pharma ──
+  { name:'Pfizer',                  group:'Large Pharma',    ats:'Workday',   subdomain:'pfizer',                 tenant:'PfizerCareers',          wdNum:1 },
+  { name:'Merck',                   group:'Large Pharma',    ats:'Workday',   subdomain:'msd',                    tenant:'SearchJobs',              wdNum:5 },
+  { name:'Eli Lilly',               group:'Large Pharma',    ats:'Workday',   subdomain:'lilly',                  tenant:'LLY',                     wdNum:5 },
+  { name:'AstraZeneca',             group:'Large Pharma',    ats:'Workday',   subdomain:'astrazeneca',            tenant:'Careers',                 wdNum:3 },
+  { name:'Novartis',                group:'Large Pharma',    ats:'Workday',   subdomain:'novartis',               tenant:'Novartis_Careers',        wdNum:3 },
+  { name:'GSK',                     group:'Large Pharma',    ats:'Workday',   subdomain:'gsk',                    tenant:'GSKCareers',              wdNum:3 },
+  { name:'Amgen',                   group:'Large Pharma',    ats:'Workday',   subdomain:'amgen',                  tenant:'Careers',                 wdNum:1 },
+  { name:'Sanofi',                  group:'Large Pharma',    ats:'Workday',   subdomain:'sanofi',                 tenant:'SanofiCareers',           wdNum:3 },
+  { name:'BMS',                     group:'Large Pharma',    ats:'Workday',   subdomain:'bristolmyerssquibb',     tenant:'BMS',                     wdNum:5 },
+  { name:'Takeda',                  group:'Large Pharma',    ats:'Workday',   subdomain:'takeda',                 tenant:'External',                wdNum:1 },
+  { name:'AbbVie',                  group:'Large Pharma',    ats:'Workday',   subdomain:'abbvie',                 tenant:'abbvie',                  wdNum:1 },
+  { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
+  { name:'Novo Nordisk',            group:'Large Pharma',    ats:'Workday',   subdomain:'novonordisk',            tenant:'novonordisk',             wdNum:3 },
+  { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'Roche',                   wdNum:1 },
+  { name:'Thermo Fisher',           group:'Large Pharma',    ats:'Workday',   subdomain:'thermofisher',           tenant:'ThermoFisherScientific',  wdNum:1 },
+  { name:'Becton Dickinson',        group:'Large Pharma',    ats:'Workday',   subdomain:'bd',                     tenant:'BD',                      wdNum:1 },
+  { name:'Zoetis',                  group:'Large Pharma',    ats:'Workday',   subdomain:'zoetis',                 tenant:'Zoetis',                  wdNum:1 },
+  { name:'Daiichi Sankyo',          group:'Large Pharma',    ats:'Workday',   subdomain:'daiichisankyo',          tenant:'DS_External',             wdNum:3 },
+  // ── Specialty Pharma ──
+  { name:'Regeneron',               group:'Specialty Pharma', ats:'Workday',  subdomain:'regeneron',             tenant:'careers',                 wdNum:1 },
+  { name:'Biogen',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'biibhr',                tenant:'external',                wdNum:3 },
+  { name:'Gilead',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'gilead',                tenant:'gileadcareers',           wdNum:1 },
+  { name:'Vertex',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'vrtx',                  tenant:'Vertex_Careers',          wdNum:501 },
+  { name:'Moderna',                 group:'Specialty Pharma', ats:'Workday',  subdomain:'modernatx',             tenant:'M_tx',                    wdNum:1 },
+  { name:'BioNTech',                group:'Specialty Pharma', ats:'Workday',  subdomain:'biontech',              tenant:'BioNTech',                wdNum:1 },
+  { name:'United Therapeutics',     group:'Specialty Pharma', ats:'Workday',  subdomain:'unither',               tenant:'UnitedTherapeutics',      wdNum:1 },
+  { name:'Royalty Pharma',          group:'Specialty Pharma', ats:'Greenhouse', subdomain:'', tenant:'royaltypharma', wdNum:0 },
+  { name:'Jazz Pharmaceuticals',    group:'Specialty Pharma', ats:'Workday',  subdomain:'jazzpharma',            tenant:'Jazz',                    wdNum:1 },
+  { name:'Incyte',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'incyte',                tenant:'incyte',                  wdNum:1 },
+  { name:'Acadia',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'acadia',                tenant:'Acadia_Careers',          wdNum:1 },
+  // ── Biotech ──
+  { name:'Alnylam',                 group:'Biotech',          ats:'Workday',  subdomain:'alnylam',               tenant:'Careers',                 wdNum:1 },
+  { name:'Argenx',                  group:'Biotech',          ats:'Workday',  subdomain:'argenx',                tenant:'External_Careers',        wdNum:3 },
+  { name:'Ascendis',                group:'Biotech',          ats:'Workable', subdomain:'',                      tenant:'ascendis-pharma',         wdNum:0 },
+  { name:'Sarepta',                 group:'Biotech',          ats:'Workday',  subdomain:'sarepta',               tenant:'sarepta_external',        wdNum:5 },
+  { name:'Ultragenyx',              group:'Biotech',          ats:'Workday',  subdomain:'ultragenyx',            tenant:'ultragenyx',              wdNum:1 },
+  { name:'Insmed',                  group:'Biotech',          ats:'Workday',  subdomain:'insmed',                tenant:'external',                wdNum:5 },
+  { name:'Blueprint Medicines',     group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'blueprintmedicines', wdNum:0 },
+  { name:'Cytokinetics',            group:'Biotech',          ats:'Workday',  subdomain:'cytokinetics',          tenant:'Cytokinetics',            wdNum:1 },
+  { name:'Genmab',                  group:'Biotech',          ats:'Workday',  subdomain:'genmab',                tenant:'GenmabExternal',          wdNum:1 },
+  { name:'Illumina',                group:'Biotech',          ats:'Workday',  subdomain:'illumina',              tenant:'illumina',                wdNum:1 },
+  { name:'Ionis',                   group:'Biotech',          ats:'Workday',  subdomain:'ionispharm',            tenant:'Ionis',                   wdNum:1 },
+  { name:'Exelixis',                group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'exelixis', wdNum:0 },
+  { name:'Madrigal',                group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'madrigalpharma', wdNum:0 },
+  { name:'Intra-Cellular',          group:'Biotech',          ats:'Workday',  subdomain:'intracellulartherapies', tenant:'ICT',                    wdNum:1 },
+  { name:'Neurocrine',              group:'Biotech',          ats:'Workday',  subdomain:'neurocrine',            tenant:'neurocrine',              wdNum:1 },
+  { name:'Natera',                  group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'natera',   wdNum:0 },
+  { name:'Halozyme',                group:'Biotech',          ats:'Workday',  subdomain:'halozyme',              tenant:'Halozyme',                wdNum:1 },
+  { name:'Arcus Biosciences',       group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'arcusbio', wdNum:0 },
+  { name:'Protagonist',             group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'protagonisttx', wdNum:0 },
+  { name:'Merus',                   group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'merus',    wdNum:0 },
+  { name:'Nuvalent',                group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'nuvalent', wdNum:0 },
+  { name:'Disc Medicine',           group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'discmedicine', wdNum:0 },
+  // ── CRO / Services ──
+  { name:'IQVIA',                   group:'CRO & Services',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
 ];
 
 export let all_jobs = []; 
@@ -59,12 +86,17 @@ export function setAllJobs(list) { all_jobs = list; }
 export function saveAddedRoles(){ try{ localStorage.setItem('rxp-added-roles', JSON.stringify([...addedRoleSet])); }catch(e){} }
 
 export function buildCompanyCheckboxes(){
-  document.getElementById('company-checkboxes').innerHTML = FETCH_COMPANIES.map(c=>`
-    <div class="co-check-item ${selectedCompanies.has(c.name)?'selected':''}" id="cc-${c.name.replace(/\s/g,'-')}" onclick="toggleCoSelect('${c.name}',this)">
-      <div class="co-check-box">${selectedCompanies.has(c.name)?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
-      <div style="flex:1;min-width:0"><div class="co-check-name">${esc(c.name)}</div><div class="co-check-ats">${esc(c.ats)}</div></div>
-      <div class="co-check-status" id="cs-${c.name.replace(/\s/g,'-')}"></div>
-    </div>`).join('');
+  const groups = [...new Set(FETCH_COMPANIES.map(c => c.group))];
+  document.getElementById('company-checkboxes').innerHTML = groups.map(group => {
+    const companies = FETCH_COMPANIES.filter(c => c.group === group);
+    return `<div class="co-group-header">${esc(group)}</div>` +
+      companies.map(c => `
+        <div class="co-check-item ${selectedCompanies.has(c.name)?'selected':''}" id="cc-${c.name.replace(/[\s&/]/g,'-')}" onclick="toggleCoSelect('${c.name.replace(/'/g,"\\'")}',this)">
+          <div class="co-check-box">${selectedCompanies.has(c.name)?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
+          <div style="flex:1;min-width:0"><div class="co-check-name">${esc(c.name)}</div><div class="co-check-ats">${esc(c.ats)}</div></div>
+          <div class="co-check-status" id="cs-${c.name.replace(/[\s&/]/g,'-')}"></div>
+        </div>`).join('');
+  }).join('');
 }
 
 export function toggleCoSelect(name, el){
@@ -72,8 +104,8 @@ export function toggleCoSelect(name, el){
   } else { selectedCompanies.add(name); el.classList.add('selected'); el.querySelector('.co-check-box').innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'; }
   renderRoles();
 }
-export function selectAllCompanies(){ FETCH_COMPANIES.forEach(c=>{ selectedCompanies.add(c.name); const el = document.getElementById('cc-'+c.name.replace(/\s/g,'-')); if(el){ el.classList.add('selected'); el.querySelector('.co-check-box').innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'; } }); renderRoles(); }
-export function selectNoneCompanies(){ selectedCompanies.clear(); FETCH_COMPANIES.forEach(c=>{ const el = document.getElementById('cc-'+c.name.replace(/\s/g,'-')); if(el){ el.classList.remove('selected'); el.querySelector('.co-check-box').innerHTML=''; } }); renderRoles(); }
+export function selectAllCompanies(){ FETCH_COMPANIES.forEach(c=>{ selectedCompanies.add(c.name); const el = document.getElementById('cc-'+c.name.replace(/[\s&/]/g,'-')); if(el){ el.classList.add('selected'); el.querySelector('.co-check-box').innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'; } }); renderRoles(); }
+export function selectNoneCompanies(){ selectedCompanies.clear(); FETCH_COMPANIES.forEach(c=>{ const el = document.getElementById('cc-'+c.name.replace(/[\s&/]/g,'-')); if(el){ el.classList.remove('selected'); el.querySelector('.co-check-box').innerHTML=''; } }); renderRoles(); }
 
 export async function fetchAllCompanyJobs(){
   const selected = FETCH_COMPANIES.filter(c=>selectedCompanies.has(c.name));
