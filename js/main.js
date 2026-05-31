@@ -463,6 +463,20 @@ export function buildFilters() {
   document.getElementById('roles-filters').style.display = 'flex';
 }
 
+function parsePostedDate(posted) {
+  if (!posted) return 0;
+  const p = posted.toLowerCase().trim();
+  if (p === 'today' || p === 'just posted') return Date.now();
+  const ago = p.match(/(\d+)\s*(hour|day|week|month)s?\s*ago/);
+  if (ago) {
+    const n = parseInt(ago[1]);
+    const ms = { hour: 3600000, day: 86400000, week: 604800000, month: 2592000000 }[ago[2]];
+    return Date.now() - n * ms;
+  }
+  const d = new Date(posted);
+  return isNaN(d) ? 0 : d.getTime();
+}
+
 function getFilteredRoles() {
   const q = (document.getElementById('r-search')?.value || '').toLowerCase(); 
   const areaFilter = document.getElementById('r-area')?.value || '';
@@ -478,7 +492,7 @@ function getFilteredRoles() {
     const mFunc = !funcFilter || func === funcFilter;
     const mCountry = !country || (r.location || '').split(',').pop().trim() === country;
     return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
-  });
+  }).sort((a, b) => parsePostedDate(b.posted) - parsePostedDate(a.posted));
 }
 
 function clearRoleFilters() { ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('r-clear-btn').style.display = 'none'; renderRoles(); }
