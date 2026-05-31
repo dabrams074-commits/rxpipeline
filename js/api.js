@@ -113,15 +113,14 @@ export async function fetchAllCompanyJobs(){
   btn.disabled=true; btn.classList.add('spinning'); statusEl.className='fetch-status loading'; statusEl.textContent=`Fetching politely from ${selected.length} companies…`;
   container.innerHTML=skeletons(8); progressDiv.style.display='block'; all_jobs = [];
 
-  let filtersBuilt = false;
   const liveRefresh = setInterval(() => {
-    if (all_jobs.length > 0) {
-      if (!filtersBuilt) { buildFilters(); filtersBuilt = true; }
-      renderRoles();
-      document.getElementById('sb-roles').textContent = all_jobs.length;
-      document.getElementById('live-roles-count').textContent = all_jobs.length;
+    const n = all_jobs.length;
+    if (n > 0) {
+      statusEl.textContent = `Loading… ${n} jobs so far`;
+      const sbRoles = document.getElementById('sb-roles');
+      if (sbRoles) sbRoles.textContent = n;
     }
-  }, 2000);
+  }, 1000);
 
   document.getElementById('progress-list').innerHTML = selected.map(c=>`
     <div class="progress-item" id="pi-${c.name.replace(/\s/g,'-')}">
