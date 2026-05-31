@@ -28,7 +28,7 @@ export const FETCH_COMPANIES = [
   { name:'Sanofi',                  group:'Large Pharma',    ats:'Workday',   subdomain:'sanofi',                 tenant:'SanofiCareers',           wdNum:3 },
   { name:'BMS',                     group:'Large Pharma',    ats:'Workday',   subdomain:'bristolmyerssquibb',     tenant:'BMS',                     wdNum:5 },
   { name:'Takeda',                  group:'Large Pharma',    ats:'Workday',   subdomain:'takeda',                 tenant:'External',                wdNum:1 },
-  { name:'AbbVie',                  group:'Large Pharma',    ats:'Workday',   subdomain:'abbvie',                 tenant:'AbbVie_External',         wdNum:1 },
+  { name:'AbbVie',                  group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'AbbVie',               wdNum:0 },
   { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
   { name:'Novo Nordisk',            group:'Large Pharma',    ats:'Workday',   subdomain:'novonordisk',            tenant:'NovoNordisk',             wdNum:3 },
   { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'Roche',                   wdNum:1 },
@@ -159,6 +159,18 @@ export async function fetchAllCompanyJobs(){
           if (data.jobPostings.length < LIMIT || q.offset >= q.total) {
             q.done = true;
           }
+        } else if (q.company.ats === 'SmartRecruiters') {
+          const LIMIT = 100;
+          const res = await fetch(`/api/smartrecruiters/${q.company.tenant}?limit=${LIMIT}&offset=${q.offset}`);
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if(q.total === null) q.total = data.totalFound || 0;
+          const jobs = (data.content||[]).map(j=>({ id: j.id||String(Math.random()), company: q.company.name, title: j.name||'', dept: j.department?.label||'', location: [j.location?.city, j.location?.country].filter(Boolean).join(', '), posted: j.releasedDate ? new Date(j.releasedDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: j.ref||`https://careers.smartrecruiters.com/${q.company.tenant}/` }));
+          all_jobs = all_jobs.concat(jobs);
+          q.jobCount += jobs.length;
+          q.offset += LIMIT;
+          setPBar(q.key, q.jobCount, q.total);
+          if(jobs.length < LIMIT || q.offset >= q.total) q.done = true;
         } else {
           let jobs = [];
           if (q.company.ats === 'Greenhouse') {
@@ -170,7 +182,6 @@ export async function fetchAllCompanyJobs(){
             const data = await res.json();
             jobs = (data.results||[]).map(j=>({ id: j.shortcode||String(Math.random()), company: q.company.name, title: j.title||'', dept: j.department||'', location: [j.city, j.state, j.country].filter(Boolean).join(', '), posted: j.published_on ? new Date(j.published_on).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: `https://apply.workable.com/${q.company.tenant}/j/${j.shortcode}/` }));
           }
-          
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
           setPBar(q.key, q.jobCount, q.jobCount);

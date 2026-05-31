@@ -44,3 +44,4 @@
 # ATS Proxies
 /api/greenhouse/* https://boards-api.greenhouse.io/v1/boards/:splat/jobs?content=true  200!
 /api/workable/* https://apply.workable.com/api/v3/accounts/:splat/jobs  200!
+/api/smartrecruiters/* https://api.smartrecruiters.com/v1/companies/:splat/postings  200!
