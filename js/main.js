@@ -444,7 +444,12 @@ function switchLibTab(tab) {
 // LIVE ROLES UI HELPERS
 // ══════════════════════════════════════════
 export function buildFilters() {
-  const companies = [...new Set(all_jobs.map(j => j.company).filter(Boolean))].sort(); const depts = [...new Set(all_jobs.map(j => j.dept).filter(Boolean))].sort(); const locs = [...new Set(all_jobs.map(j => j.location).filter(Boolean))].sort();
+  const companies = [...new Set(all_jobs.map(j => j.company).filter(Boolean))].sort();
+  const countries = [...new Set(all_jobs.map(j => {
+    if (!j.location) return null;
+    const parts = j.location.split(',');
+    return parts[parts.length - 1].trim();
+  }).filter(Boolean))].sort();
   const presentFuncs = new Set(all_jobs.map(j => inferFunc(j.title, j.dept || '')).filter(Boolean));
   const funcOptgroups = FUNC_GROUPS
     .filter(g => g.items.some(i => presentFuncs.has(i)) || presentFuncs.has(g.group))
@@ -454,8 +459,7 @@ export function buildFilters() {
     }).join('');
   document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
   document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups;
-  document.getElementById('r-dept').innerHTML = '<option value="">All Departments</option>' + depts.map(d => `<option>${esc(d)}</option>`).join('');
-  document.getElementById('r-loc').innerHTML = '<option value="">All Locations</option>' + locs.map(l => `<option>${esc(l)}</option>`).join('');
+  document.getElementById('r-loc').innerHTML = '<option value="">All Countries</option>' + countries.map(c => `<option>${esc(c)}</option>`).join('');
   document.getElementById('roles-filters').style.display = 'flex';
 }
 
@@ -463,9 +467,8 @@ function getFilteredRoles() {
   const q = (document.getElementById('r-search')?.value || '').toLowerCase(); 
   const areaFilter = document.getElementById('r-area')?.value || '';
   const funcFilter = document.getElementById('r-func')?.value || '';
-  const co = document.getElementById('r-company')?.value || ''; 
-  const dept = document.getElementById('r-dept')?.value || ''; 
-  const loc = document.getElementById('r-loc')?.value || '';
+  const co = document.getElementById('r-company')?.value || '';
+  const country = document.getElementById('r-loc')?.value || '';
   return all_jobs.filter(r => {
     const area = inferArea(r.title, r.dept || '');
     const func = inferFunc(r.title, r.dept || '');
@@ -473,11 +476,12 @@ function getFilteredRoles() {
     const mQ = !q || r.title.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q) || r.location.toLowerCase().includes(q) || r.company.toLowerCase().includes(q) || areaLower.includes(q);
     const mArea = !areaFilter || area === areaFilter;
     const mFunc = !funcFilter || func === funcFilter;
-    return mQ && mArea && mFunc && (!co || r.company === co) && (!dept || r.dept === dept) && (!loc || r.location === loc);
+    const mCountry = !country || (r.location || '').split(',').pop().trim() === country;
+    return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
   });
 }
 
-function clearRoleFilters() { ['r-search', 'r-area', 'r-func', 'r-company', 'r-dept', 'r-loc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('r-clear-btn').style.display = 'none'; renderRoles(); }
+function clearRoleFilters() { ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('r-clear-btn').style.display = 'none'; renderRoles(); }
 
 export function renderRoles() {
   const list = getFilteredRoles(); setPfizerFiltered(list); const container = document.getElementById('roles-container'); if (!container) return;
