@@ -525,12 +525,12 @@ function getFilteredRoles() {
   const co = document.getElementById('r-company')?.value || '';
   const country = document.getElementById('r-loc')?.value || '';
   return all_jobs.filter(r => {
-    const area = inferArea(r.title, r.dept || '');
-    const func = inferFunc(r.title, r.dept || '');
-    const areaLower = area.toLowerCase();
-    const mQ = !q || r.title.toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || r.company.toLowerCase().includes(q) || areaLower.includes(q);
+    if (!r._area) r._area = inferArea(r.title, r.dept || '');
+    if (!r._func) r._func = inferFunc(r.title, r.dept || '');
+    const area = r._area, func = r._func;
+    const mQ = !q || r.title.toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || r.company.toLowerCase().includes(q) || area.toLowerCase().includes(q);
     const mArea = !areaFilter || area === areaFilter;
-    const mFunc = !funcFilter || func === funcFilter;
+    const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
     const mCountry = !country || (r.location || '').split(',').pop().trim() === country;
     return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
   }).sort((a, b) => parsePostedDate(b.posted) - parsePostedDate(a.posted));
@@ -545,12 +545,14 @@ export function renderRoles() {
   if (countEl) countEl.textContent = list.length > limit ? `Showing ${limit} of ${list.length} roles` : list.length + ' roles';
   const cb = document.getElementById('r-clear-btn'); if (cb) cb.style.display = (document.getElementById('r-search')?.value || document.getElementById('r-area')?.value || document.getElementById('r-func')?.value || document.getElementById('r-company')?.value || document.getElementById('r-dept')?.value || document.getElementById('r-loc')?.value) ? 'inline-flex' : 'none';
   if (!list.length && all_jobs.length > 0) { container.innerHTML = '<div class="roles-empty">No roles match your filters</div>'; return; }
-  if (!list.length) return; container.innerHTML = '<div class="roles-grid">' + list.slice(0, limit).map(r => roleCardHTML(r)).join('') + '</div>';
+  if (!list.length) return;
+  const cards = list.slice(0, limit).map(r => { try { return roleCardHTML(r); } catch(e) { return ''; } }).join('');
+  container.innerHTML = '<div class="roles-grid">' + cards + '</div>';
 }
 
 function roleCardHTML(r) {
-  const area = inferArea(r.title, r.dept || '');
-  const func = inferFunc(r.title, r.dept || '');
+  const area = r._area || inferArea(r.title, r.dept || '');
+  const func = r._func || inferFunc(r.title, r.dept || '');
   const added = addedRoleSet.has(r.id); const safeR = JSON.stringify({ id: r.id, title: r.title, dept: r.dept || '', location: r.location || '', url: r.url, company: r.company }).replace(/"/g, '&quot;');
   return `<div class="role-card" onclick="window.open('${esc(r.url)}','_blank')">
     <div class="role-card-left">
