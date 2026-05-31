@@ -42,9 +42,9 @@ export const FETCH_COMPANIES = [
   { name:'Gilead',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'gilead',                tenant:'gileadcareers',           wdNum:1 },
   { name:'Vertex',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'vrtx',                  tenant:'Vertex_Careers',          wdNum:501 },
   { name:'Moderna',                 group:'Specialty Pharma', ats:'Workday',  subdomain:'modernatx',             tenant:'M_tx',                    wdNum:1 },
-  { name:'BioNTech',                group:'Specialty Pharma', ats:'Greenhouse', subdomain:'', tenant:'biontech',                wdNum:0 },
+  { name:'BioNTech',                group:'Specialty Pharma', ats:'Workday',   subdomain:'biontech',               tenant:'BioNTech',                wdNum:1 },
   { name:'United Therapeutics',     group:'Specialty Pharma', ats:'Workday',  subdomain:'unitedtherapeutics',    tenant:'UnitedTherapeutics',      wdNum:1 },
-  { name:'Royalty Pharma',          group:'Specialty Pharma', ats:'Greenhouse', subdomain:'', tenant:'royaltypharma', wdNum:0 },
+  { name:'Royalty Pharma',          group:'Specialty Pharma', ats:'Workday',   subdomain:'royaltypharma',          tenant:'RoyaltyPharma',           wdNum:1 },
   { name:'Jazz Pharmaceuticals',    group:'Specialty Pharma', ats:'Workday',  subdomain:'jazzpharma',            tenant:'Jazz',                    wdNum:1 },
   { name:'Incyte',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'incyte',                tenant:'incyte',                  wdNum:1 },
   { name:'Acadia',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'acadia',                tenant:'Acadia_Careers',          wdNum:1 },
@@ -140,8 +140,7 @@ export async function fetchAllCompanyJobs(){
       try {
         if (q.company.ats === 'Workday') {
           const LIMIT = 20;
-          const BASE = `/api/${q.company.subdomain}`;
-          const res = await fetch(BASE, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({ limit: LIMIT, offset: q.offset, searchText:'', appliedFacets: {} }) });
+          const res = await fetch('/.netlify/functions/wd', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ subdomain: q.company.subdomain, wdNum: q.company.wdNum, tenant: q.company.tenant, limit: LIMIT, offset: q.offset, searchText:'', appliedFacets: {} }) });
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           if(!data.jobPostings) throw new Error('No jobPostings');
