@@ -147,7 +147,6 @@ export async function fetchAllCompanyJobs(){
           
           if(q.total === null) {
             q.total = data.total || data.jobPostings.length;
-            if (q.total > 1000) q.total = 1000;
           }
           
           const jobs = data.jobPostings.map(j => normalizeJob(j, q.company));
