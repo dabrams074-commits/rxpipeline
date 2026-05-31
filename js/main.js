@@ -774,15 +774,10 @@ document.addEventListener('DOMContentLoaded', () => {
   updateHomeCards();
   initCachedLibrary();
 
-  const rSearch = document.getElementById('r-search');
-  if (rSearch) {
-    rSearch.removeAttribute('oninput');
-    let debounceTimer;
-    rSearch.addEventListener('input', () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => renderRoles(), 250);
-    });
-  }
+  ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => renderRoles());
+  });
 });
 
 // ══════════════════════════════════════════
