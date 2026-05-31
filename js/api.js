@@ -160,12 +160,11 @@ export async function fetchAllCompanyJobs(){
             q.done = true;
           }
         } else if (q.company.ats === 'Jibe') {
-          const LIMIT = 10;
-          const res = await fetch(`/api/jibe/${q.company.tenant}?keywords=&lang=en-gb&from=${q.offset}&num=${LIMIT}`);
+          // Jibe API ignores pagination params — fetch once and stop
+          const res = await fetch(`/api/jibe/${q.company.tenant}?keywords=&lang=en-gb&from=0&num=100`);
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           const jobsArr = data.jobs || [];
-          if(q.total === null) q.total = data.total_count ?? data.total ?? null;
           const jobs = jobsArr.map(j => {
             const d = j.data || j;
             const posted = d.posted_date ? new Date(d.posted_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
@@ -174,10 +173,9 @@ export async function fetchAllCompanyJobs(){
           });
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
-          q.offset += LIMIT;
-          if(q.total !== null) setPBar(q.key, q.jobCount, q.total);
-          else setPBar(q.key, q.jobCount, q.jobCount);
-          if(jobsArr.length < LIMIT || q.jobCount >= 1000 || (q.total !== null && q.offset >= q.total)) q.done = true;
+          q.total = q.jobCount;
+          setPBar(q.key, q.jobCount, q.jobCount);
+          q.done = true;
         } else if (q.company.ats === 'SmartRecruiters') {
           const LIMIT = 100;
           const res = await fetch(`/api/smartrecruiters/${q.company.tenant}?limit=${LIMIT}&offset=${q.offset}`);
