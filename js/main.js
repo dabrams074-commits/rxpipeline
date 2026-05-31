@@ -528,7 +528,7 @@ function getFilteredRoles() {
     const area = inferArea(r.title, r.dept || '');
     const func = inferFunc(r.title, r.dept || '');
     const areaLower = area.toLowerCase();
-    const mQ = !q || r.title.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q) || r.location.toLowerCase().includes(q) || r.company.toLowerCase().includes(q) || areaLower.includes(q);
+    const mQ = !q || r.title.toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || r.company.toLowerCase().includes(q) || areaLower.includes(q);
     const mArea = !areaFilter || area === areaFilter;
     const mFunc = !funcFilter || func === funcFilter;
     const mCountry = !country || (r.location || '').split(',').pop().trim() === country;
