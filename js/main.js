@@ -774,10 +774,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateHomeCards();
   initCachedLibrary();
 
-  ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', () => renderRoles());
-  });
 });
 
 // ══════════════════════════════════════════
