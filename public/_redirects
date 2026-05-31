@@ -39,6 +39,7 @@
 /api/halozyme            https://halozyme.wd1.myworkdayjobs.com/wday/cxs/halozyme/Halozyme/jobs  200!
 /api/biontech            https://biontech.wd1.myworkdayjobs.com/wday/cxs/biontech/BioNTech/jobs  200!
 /api/jazzpharma          https://jazzpharma.wd1.myworkdayjobs.com/wday/cxs/jazzpharma/Jazz/jobs  200!
+/api/madrigalpharma      https://madrigalpharma.wd501.myworkdayjobs.com/wday/cxs/madrigalpharma/Madrigal/jobs  200!
 
 # ATS Proxies
 /api/greenhouse/* https://boards-api.greenhouse.io/v1/boards/:splat/jobs?content=true  200!
