@@ -250,11 +250,11 @@ export async function initCachedLibrary() {
       const rCount = document.getElementById('r-count');
       if (rCount) rCount.textContent = all_jobs.length + ' roles';
       
-      const sbRoles = document.getElementById('sb-roles');
-      if (sbRoles) sbRoles.textContent = all_jobs.length;
-      
-      const liveRolesCount = document.getElementById('live-roles-count');
-      if (liveRolesCount) liveRolesCount.textContent = all_jobs.length;
+      const liveBadge = document.getElementById('live-badge');
+      if (liveBadge) liveBadge.textContent = all_jobs.length;
+
+      const homeRolesBadge = document.getElementById('home-roles-badge');
+      if (homeRolesBadge) homeRolesBadge.textContent = all_jobs.length + ' roles loaded';
 
       buildFilters();
       renderRoles();

@@ -21,18 +21,31 @@ export function showToast(msg) { const t = document.getElementById('toast'); t.t
 // ══════════════════════════════════════════
 // VIEW SWITCHING
 // ══════════════════════════════════════════
-let currentView = 'tracker';
+let currentView = 'home';
 function switchView(v) {
   currentView = v;
-  document.getElementById('view-tracker').classList.toggle('active', v === 'tracker');
-  document.getElementById('view-library').classList.toggle('active', v === 'library');
-  document.getElementById('tab-tracker').classList.toggle('active', v === 'tracker');
-  document.getElementById('tab-library').classList.toggle('active', v === 'library');
+  ['home', 'tracker', 'library', 'liveroles'].forEach(id => {
+    document.getElementById('view-' + id).classList.toggle('active', v === id);
+  });
+  ['tracker', 'library', 'liveroles'].forEach(id => {
+    const el = document.getElementById('tab-' + id);
+    if (el) el.classList.toggle('active', v === id);
+  });
   const btn = document.getElementById('header-action');
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Role';
   btn.onclick = openModal;
   if (v === 'library') renderLibrary();
   if (v === 'tracker') renderTracker();
+  if (v === 'home') updateHomeCards();
+}
+
+function updateHomeCards() {
+  const trackerBadge = document.getElementById('home-tracker-badge');
+  if (trackerBadge) trackerBadge.textContent = jobs.length + (jobs.length === 1 ? ' role tracked' : ' roles tracked');
+  const libBadge = document.getElementById('home-lib-badge');
+  if (libBadge) libBadge.textContent = FETCH_COMPANIES.length + ' companies';
+  const rolesBadge = document.getElementById('home-roles-badge');
+  if (rolesBadge) rolesBadge.textContent = all_jobs.length > 0 ? all_jobs.length + ' roles loaded' : 'Fetch to load';
 }
 
 // ══════════════════════════════════════════
@@ -692,13 +705,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const cnt = document.getElementById('lib-count');
   if (cnt) cnt.textContent = FETCH_COMPANIES.length;
-  document.getElementById('lib-badge').textContent = FETCH_COMPANIES.length;
-  document.getElementById('sb-companies').textContent = FETCH_COMPANIES.length;
-  document.getElementById('sb-roles').textContent = 'Live';
-  document.getElementById('live-roles-count').textContent = FETCH_COMPANIES.length + ' sources';
+  const libBadge = document.getElementById('lib-badge');
+  if (libBadge) libBadge.textContent = FETCH_COMPANIES.length;
+  const liveBadge = document.getElementById('live-badge');
+  if (liveBadge) liveBadge.textContent = 'Live';
   buildCompanyCheckboxes();
   loadJobs();
   renderTracker();
+  updateHomeCards();
   initCachedLibrary();
 
   const rSearch = document.getElementById('r-search');
@@ -734,7 +748,6 @@ window.renderLibrary = renderLibrary;
 window.renderCompanyIntelligence = renderCompanyIntelligence;
 window.toggleStar = toggleStar;
 window.setLibView = setLibView;
-window.switchLibTab = switchLibTab;
 window.toggleCoSelect = toggleCoSelect;
 window.selectAllCompanies = selectAllCompanies;
 window.selectNoneCompanies = selectNoneCompanies;
