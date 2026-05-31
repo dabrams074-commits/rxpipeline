@@ -160,7 +160,7 @@ export async function fetchAllCompanyJobs(){
             q.done = true;
           }
         } else if (q.company.ats === 'Jibe') {
-          const LIMIT = 100;
+          const LIMIT = 10;
           const res = await fetch(`/api/jibe/${q.company.tenant}?keywords=&lang=en-gb&from=${q.offset}&num=${LIMIT}`);
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
