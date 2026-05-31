@@ -177,7 +177,7 @@ export async function fetchAllCompanyJobs(){
           q.offset += LIMIT;
           if(q.total !== null) setPBar(q.key, q.jobCount, q.total);
           else setPBar(q.key, q.jobCount, q.jobCount);
-          if(jobsArr.length < LIMIT || (q.total !== null && q.offset >= q.total)) q.done = true;
+          if(jobsArr.length < LIMIT || q.jobCount >= 1000 || (q.total !== null && q.offset >= q.total)) q.done = true;
         } else if (q.company.ats === 'SmartRecruiters') {
           const LIMIT = 100;
           const res = await fetch(`/api/smartrecruiters/${q.company.tenant}?limit=${LIMIT}&offset=${q.offset}`);
