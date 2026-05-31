@@ -146,7 +146,9 @@ export async function fetchAllCompanyJobs(){
 
   async function fetchQueue(q, index) {
     await delay(index * 200);
+    let pages = 0;
     while(!q.done) {
+      if (++pages > 150) { q.done = true; break; }
       try {
         if (q.company.ats === 'Workday') {
           const LIMIT = 20;

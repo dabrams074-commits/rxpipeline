@@ -527,13 +527,14 @@ function getFilteredRoles() {
   return all_jobs.filter(r => {
     if (!r._area) r._area = inferArea(r.title, r.dept || '');
     if (!r._func) r._func = inferFunc(r.title, r.dept || '');
+    if (r._dateMs === undefined) r._dateMs = parsePostedDate(r.posted);
     const area = r._area, func = r._func;
     const mQ = !q || r.title.toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || r.company.toLowerCase().includes(q) || area.toLowerCase().includes(q);
     const mArea = !areaFilter || area === areaFilter;
     const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
     const mCountry = !country || (r.location || '').split(',').pop().trim() === country;
     return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
-  }).sort((a, b) => parsePostedDate(b.posted) - parsePostedDate(a.posted));
+  }).sort((a, b) => b._dateMs - a._dateMs);
 }
 
 function clearRoleFilters() { ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('r-clear-btn').style.display = 'none'; renderRoles(); }
