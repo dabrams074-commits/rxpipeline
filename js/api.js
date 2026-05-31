@@ -160,23 +160,22 @@ export async function fetchAllCompanyJobs(){
             q.done = true;
           }
         } else if (q.company.ats === 'Jibe') {
-          const res = await fetch('/.netlify/functions/gsk');
+          const LIMIT = 10;
+          const res = await fetch(`/api/jibe/${q.company.tenant}?keywords=&lang=en-gb&from=${q.offset}&num=${LIMIT}`);
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
-          const jobs = (data.jobs || []).map(j => ({
-            id: `GSK_${j.id||j.title}`,
-            company: q.company.name,
-            title: j.title||'',
-            dept: j.dept||'',
-            location: j.location||'',
-            posted: j.posted ? new Date(j.posted).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '',
-            url: j.url||'https://jobs.gsk.com/en-gb/jobs'
-          }));
+          const jobsArr = data.jobs || [];
+          const jobs = jobsArr.map(j => {
+            const d = j.data || j;
+            const posted = d.posted_date ? new Date(d.posted_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+            const loc = [d.city, d.state, d.country].filter(Boolean).join(', ');
+            return { id: d.req_id || String(Math.random()), company: q.company.name, title: d.title||'', dept: (d.categories||[])[0]?.name||'', location: loc, posted, url: d.apply_url||d.canonical_url||'https://jobs.gsk.com/en-gb/jobs' };
+          });
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
-          q.total = q.jobCount;
+          q.offset += LIMIT;
           setPBar(q.key, q.jobCount, q.jobCount);
-          q.done = true;
+          if(jobsArr.length < LIMIT || q.jobCount >= 1000) q.done = true;
         } else if (q.company.ats === 'SmartRecruiters') {
           const LIMIT = 100;
           const res = await fetch(`/api/smartrecruiters/${q.company.tenant}?limit=${LIMIT}&offset=${q.offset}`);
