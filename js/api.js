@@ -113,6 +113,10 @@ export async function fetchAllCompanyJobs(){
   btn.disabled=true; btn.classList.add('spinning'); statusEl.className='fetch-status loading'; statusEl.textContent=`Fetching politely from ${selected.length} companies…`;
   container.innerHTML=skeletons(8); progressDiv.style.display='block'; all_jobs = [];
 
+  const liveRefresh = setInterval(() => {
+    if (all_jobs.length > 0) { buildFilters(); renderRoles(); document.getElementById('sb-roles').textContent = all_jobs.length; document.getElementById('live-roles-count').textContent = all_jobs.length; }
+  }, 2000);
+
   document.getElementById('progress-list').innerHTML = selected.map(c=>`
     <div class="progress-item" id="pi-${c.name.replace(/\s/g,'-')}">
       <div class="progress-label">${esc(c.name)}</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-${c.name.replace(/\s/g,'-')}" style="width:0%"></div></div><div class="progress-count" id="pc-${c.name.replace(/\s/g,'-')}">—</div>
@@ -229,6 +233,8 @@ export async function fetchAllCompanyJobs(){
   }
 
   await Promise.all(activeQueues.map((q, index) => fetchQueue(q, index)));
+
+  clearInterval(liveRefresh);
 
   const successCount = activeQueues.filter(q => q.jobCount > 0).length;
   const count = all_jobs.length; 
