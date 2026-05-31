@@ -41,6 +41,9 @@
 /api/jazzpharma          https://jazzpharma.wd1.myworkdayjobs.com/wday/cxs/jazzpharma/Jazz/jobs  200!
 /api/madrigalpharma      https://madrigalpharma.wd501.myworkdayjobs.com/wday/cxs/madrigalpharma/Madrigal/jobs  200!
 
+# Jibe (iCIMS) Proxies
+/api/jibe/:cid  https://jobs.gsk.com/api/jobs  200!
+
 # ATS Proxies
 /api/greenhouse/* https://boards-api.greenhouse.io/v1/boards/:splat/jobs?content=true  200!
 /api/workable/* https://apply.workable.com/api/v3/accounts/:splat/jobs  200!

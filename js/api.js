@@ -23,7 +23,7 @@ export const FETCH_COMPANIES = [
   { name:'Eli Lilly',               group:'Large Pharma',    ats:'Workday',   subdomain:'lilly',                  tenant:'LLY',                     wdNum:5 },
   { name:'AstraZeneca',             group:'Large Pharma',    ats:'Workday',   subdomain:'astrazeneca',            tenant:'Careers',                 wdNum:3 },
   { name:'Novartis',                group:'Large Pharma',    ats:'Workday',   subdomain:'novartis',               tenant:'Novartis_Careers',        wdNum:3 },
-  { name:'GSK',                     group:'Large Pharma',    ats:'Workday',   subdomain:'gsk',                    tenant:'GSKCareers',              wdNum:3 },
+  { name:'GSK',                     group:'Large Pharma',    ats:'Jibe',      subdomain:'',                       tenant:'gsk',                     wdNum:0 },
   { name:'Amgen',                   group:'Large Pharma',    ats:'Workday',   subdomain:'amgen',                  tenant:'Careers',                 wdNum:1 },
   { name:'Sanofi',                  group:'Large Pharma',    ats:'Workday',   subdomain:'sanofi',                 tenant:'SanofiCareers',           wdNum:3 },
   { name:'BMS',                     group:'Large Pharma',    ats:'Workday',   subdomain:'bristolmyerssquibb',     tenant:'BMS',                     wdNum:5 },
@@ -159,6 +159,25 @@ export async function fetchAllCompanyJobs(){
           if (data.jobPostings.length < LIMIT || q.offset >= q.total) {
             q.done = true;
           }
+        } else if (q.company.ats === 'Jibe') {
+          const LIMIT = 100;
+          const res = await fetch(`/api/jibe/${q.company.tenant}?keywords=&lang=en-gb&from=${q.offset}&num=${LIMIT}`);
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          const jobsArr = data.jobs || [];
+          if(q.total === null) q.total = data.total_count ?? data.total ?? null;
+          const jobs = jobsArr.map(j => {
+            const d = j.data || j;
+            const posted = d.posted_date ? new Date(d.posted_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+            const loc = [d.city, d.state, d.country].filter(Boolean).join(', ');
+            return { id: d.req_id || String(Math.random()), company: q.company.name, title: d.title||'', dept: (d.categories||[])[0]?.name||'', location: loc, posted, url: d.apply_url||d.canonical_url||'https://jobs.gsk.com/en-gb/jobs' };
+          });
+          all_jobs = all_jobs.concat(jobs);
+          q.jobCount += jobs.length;
+          q.offset += LIMIT;
+          if(q.total !== null) setPBar(q.key, q.jobCount, q.total);
+          else setPBar(q.key, q.jobCount, q.jobCount);
+          if(jobsArr.length < LIMIT || (q.total !== null && q.offset >= q.total)) q.done = true;
         } else if (q.company.ats === 'SmartRecruiters') {
           const LIMIT = 100;
           const res = await fetch(`/api/smartrecruiters/${q.company.tenant}?limit=${LIMIT}&offset=${q.offset}`);
