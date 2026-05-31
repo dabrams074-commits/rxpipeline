@@ -164,17 +164,22 @@ export async function fetchAllCompanyJobs(){
             q.done = true;
           }
         } else if (q.company.ats === 'Jibe') {
+          if (!q.seenIds) q.seenIds = new Set();
           const LIMIT = 10;
           const res = await fetch(`/api/jibe/${q.company.tenant}?keywords=&lang=en-gb&from=${q.offset}&num=${LIMIT}`);
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           const jobsArr = data.jobs || [];
-          const jobs = jobsArr.map(j => {
+          const jobs = [];
+          for (const j of jobsArr) {
             const d = j.data || j;
+            const id = d.req_id || d.slug || '';
+            if (id && q.seenIds.has(id)) { q.done = true; break; }
+            if (id) q.seenIds.add(id);
             const posted = d.posted_date ? new Date(d.posted_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
             const loc = [d.city, d.state, d.country].filter(Boolean).join(', ');
-            return { id: d.req_id || String(Math.random()), company: q.company.name, title: d.title||'', dept: (d.categories||[])[0]?.name||'', location: loc, posted, url: d.apply_url||d.canonical_url||'https://jobs.gsk.com/en-gb/jobs' };
-          });
+            jobs.push({ id: `GSK_${id||Math.random()}`, company: q.company.name, title: d.title||'', dept: (d.categories||[])[0]?.name||'', location: loc, posted, url: d.apply_url||d.canonical_url||'https://jobs.gsk.com/en-gb/jobs' });
+          }
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
           q.offset += LIMIT;
