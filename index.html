@@ -74,18 +74,162 @@
   </select>
   <select class="sb-select" id="sb-func" onchange="tFilters.func=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()">
     <option value="">All Functions</option>
-    <option>Forecasting</option>
-    <option>Commercial Analytics</option>
-    <option>Market Access</option>
-    <option>Medical Affairs</option>
-    <option>Finance</option>
-    <option>Business Development</option>
-    <option>Strategy</option>
-    <option>Marketing</option>
-    <option>Clinical</option>
-    <option>Regulatory</option>
-    <option>Operations</option>
-    <option>Other</option>
+    <optgroup label="Commercial Operations">
+      <option value="Commercial Operations">— All Commercial Ops —</option>
+      <option>Sales Force Effectiveness</option>
+      <option>Field Sales</option>
+      <option>Commercial Operations</option>
+      <option>CRM Administration (Veeva)</option>
+      <option>Incentive Compensation</option>
+      <option>Field Force Deployment</option>
+      <option>Call Planning</option>
+      <option>Targeting &amp; Segmentation</option>
+      <option>Commercial Training</option>
+    </optgroup>
+    <optgroup label="Marketing">
+      <option value="Marketing">— All Marketing —</option>
+      <option>Brand/Product Management</option>
+      <option>Omnichannel Marketing</option>
+      <option>Digital Marketing</option>
+      <option>Customer Experience</option>
+      <option>Marketing Operations</option>
+      <option>Campaign Management</option>
+      <option>Medical Education Marketing</option>
+      <option>HCP Marketing</option>
+      <option>Patient Marketing</option>
+      <option>Promotional Review (MLR)</option>
+    </optgroup>
+    <optgroup label="Market Access &amp; Pricing">
+      <option value="Market Access &amp; Pricing">— All Market Access —</option>
+      <option>Payer Strategy</option>
+      <option>Reimbursement</option>
+      <option>HEOR</option>
+      <option>Formulary Access</option>
+      <option>Government Affairs</option>
+      <option>Contracting &amp; Pricing</option>
+      <option>GPO/IDN Strategy</option>
+      <option>340B</option>
+      <option>Access &amp; Reimbursement</option>
+    </optgroup>
+    <optgroup label="Commercial Analytics &amp; Insights">
+      <option value="Commercial Analytics &amp; Insights">— All Analytics —</option>
+      <option>Forecasting</option>
+      <option>Commercial Analytics</option>
+      <option>Market Research</option>
+      <option>Competitive Intelligence</option>
+      <option>Integrated Insights &amp; Strategy</option>
+      <option>Business Intelligence</option>
+      <option>Data Science</option>
+      <option>Real-World Evidence (RWE)</option>
+      <option>Performance Analytics</option>
+    </optgroup>
+    <optgroup label="Medical Affairs">
+      <option value="Medical Affairs">— All Medical Affairs —</option>
+      <option>Medical Science Liaisons (MSLs)</option>
+      <option>Medical Communications</option>
+      <option>Medical Information</option>
+      <option>Publication Planning</option>
+      <option>Advisory Boards</option>
+      <option>Evidence Generation</option>
+      <option>Medical Education</option>
+      <option>Scientific Affairs</option>
+    </optgroup>
+    <optgroup label="Clinical Development">
+      <option value="Clinical Development">— All Clinical —</option>
+      <option>Clinical Operations</option>
+      <option>Clinical Project Management</option>
+      <option>Clinical Data Management</option>
+      <option>Biostatistics</option>
+      <option>Clinical Pharmacology</option>
+      <option>Pharmacokinetics</option>
+      <option>Patient Recruitment</option>
+    </optgroup>
+    <optgroup label="Regulatory Affairs">
+      <option value="Regulatory Affairs">— All Regulatory —</option>
+      <option>Regulatory Strategy</option>
+      <option>Submissions</option>
+      <option>Labeling</option>
+      <option>CMC Regulatory</option>
+      <option>Regulatory Operations</option>
+      <option>International Regulatory</option>
+      <option>Pharmacovigilance/Drug Safety</option>
+    </optgroup>
+    <optgroup label="Research &amp; Discovery">
+      <option value="Research &amp; Discovery">— All Research —</option>
+      <option>Biology</option>
+      <option>Chemistry</option>
+      <option>Medicinal Chemistry</option>
+      <option>Translational Medicine</option>
+      <option>Bioinformatics</option>
+      <option>Computational Biology</option>
+      <option>Drug Discovery</option>
+    </optgroup>
+    <optgroup label="Manufacturing &amp; Supply Chain">
+      <option value="Manufacturing &amp; Supply Chain">— All Mfg &amp; Supply —</option>
+      <option>Manufacturing Sciences</option>
+      <option>Quality Assurance</option>
+      <option>Quality Control</option>
+      <option>Validation</option>
+      <option>Supply Chain Planning</option>
+      <option>Logistics</option>
+      <option>Procurement</option>
+      <option>Technical Operations</option>
+      <option>Process Development</option>
+    </optgroup>
+    <optgroup label="Finance">
+      <option value="Finance">— All Finance —</option>
+      <option>FP&amp;A</option>
+      <option>Commercial Finance</option>
+      <option>Business Development Finance</option>
+      <option>Accounting</option>
+      <option>Treasury</option>
+      <option>Tax</option>
+      <option>Internal Audit</option>
+    </optgroup>
+    <optgroup label="Business Development &amp; Strategy">
+      <option value="Business Development &amp; Strategy">— All BD &amp; Strategy —</option>
+      <option>Corporate Strategy</option>
+      <option>Licensing &amp; Acquisitions</option>
+      <option>Alliance Management</option>
+      <option>Portfolio Strategy</option>
+      <option>Pipeline Valuation</option>
+      <option>Corporate Development</option>
+    </optgroup>
+    <optgroup label="IT &amp; Digital">
+      <option value="IT &amp; Digital">— All IT &amp; Digital —</option>
+      <option>Commercial IT</option>
+      <option>Data Engineering</option>
+      <option>Enterprise Architecture</option>
+      <option>Digital Health</option>
+      <option>CRM/Veeva Administration</option>
+      <option>AI/ML</option>
+      <option>Cybersecurity</option>
+    </optgroup>
+    <optgroup label="HR &amp; Talent">
+      <option value="HR &amp; Talent">— All HR &amp; Talent —</option>
+      <option>Talent Acquisition</option>
+      <option>HR Business Partners</option>
+      <option>Compensation &amp; Benefits</option>
+      <option>Learning &amp; Development</option>
+      <option>Organizational Effectiveness</option>
+    </optgroup>
+    <optgroup label="Legal &amp; Compliance">
+      <option value="Legal &amp; Compliance">— All Legal —</option>
+      <option>Legal Counsel</option>
+      <option>Privacy</option>
+      <option>Compliance</option>
+      <option>Contracts</option>
+      <option>IP/Patents</option>
+      <option>Healthcare Law</option>
+    </optgroup>
+    <optgroup label="Patient Services &amp; Access">
+      <option value="Patient Services &amp; Access">— All Patient Services —</option>
+      <option>Patient Support Programs</option>
+      <option>Hub Services</option>
+      <option>Specialty Pharmacy Relations</option>
+      <option>Patient Advocacy</option>
+      <option>Access &amp; Reimbursement</option>
+    </optgroup>
   </select>
   <select class="sb-select" id="sb-type" onchange="tFilters.type=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()" style="border-right:none">
     <option value="">All Types</option>
@@ -281,10 +425,147 @@
       <div class="field"><label>Job Function</label>
         <select id="f-func">
           <option value="">— Select —</option>
-          <option>Commercial Analytics</option><option>Forecasting</option><option>Market Access</option>
-          <option>Medical Affairs</option><option>Finance</option><option>Business Development</option>
-          <option>Strategy</option><option>Marketing</option><option>Clinical</option>
-          <option>Regulatory</option><option>Operations</option><option>Other</option>
+          <optgroup label="Commercial Operations">
+            <option>Sales Force Effectiveness</option>
+            <option>Field Sales</option>
+            <option>Commercial Operations</option>
+            <option>CRM Administration (Veeva)</option>
+            <option>Incentive Compensation</option>
+            <option>Field Force Deployment</option>
+            <option>Call Planning</option>
+            <option>Targeting &amp; Segmentation</option>
+            <option>Commercial Training</option>
+          </optgroup>
+          <optgroup label="Marketing">
+            <option>Brand/Product Management</option>
+            <option>Omnichannel Marketing</option>
+            <option>Digital Marketing</option>
+            <option>Customer Experience</option>
+            <option>Marketing Operations</option>
+            <option>Campaign Management</option>
+            <option>Medical Education Marketing</option>
+            <option>HCP Marketing</option>
+            <option>Patient Marketing</option>
+            <option>Promotional Review (MLR)</option>
+          </optgroup>
+          <optgroup label="Market Access &amp; Pricing">
+            <option>Payer Strategy</option>
+            <option>Reimbursement</option>
+            <option>HEOR</option>
+            <option>Formulary Access</option>
+            <option>Government Affairs</option>
+            <option>Contracting &amp; Pricing</option>
+            <option>GPO/IDN Strategy</option>
+            <option>340B</option>
+            <option>Access &amp; Reimbursement</option>
+          </optgroup>
+          <optgroup label="Commercial Analytics &amp; Insights">
+            <option>Forecasting</option>
+            <option>Commercial Analytics</option>
+            <option>Market Research</option>
+            <option>Competitive Intelligence</option>
+            <option>Integrated Insights &amp; Strategy</option>
+            <option>Business Intelligence</option>
+            <option>Data Science</option>
+            <option>Real-World Evidence (RWE)</option>
+            <option>Performance Analytics</option>
+          </optgroup>
+          <optgroup label="Medical Affairs">
+            <option>Medical Science Liaisons (MSLs)</option>
+            <option>Medical Communications</option>
+            <option>Medical Information</option>
+            <option>Publication Planning</option>
+            <option>Advisory Boards</option>
+            <option>Evidence Generation</option>
+            <option>Medical Education</option>
+            <option>Scientific Affairs</option>
+          </optgroup>
+          <optgroup label="Clinical Development">
+            <option>Clinical Operations</option>
+            <option>Clinical Project Management</option>
+            <option>Clinical Data Management</option>
+            <option>Biostatistics</option>
+            <option>Clinical Pharmacology</option>
+            <option>Pharmacokinetics</option>
+            <option>Patient Recruitment</option>
+          </optgroup>
+          <optgroup label="Regulatory Affairs">
+            <option>Regulatory Strategy</option>
+            <option>Submissions</option>
+            <option>Labeling</option>
+            <option>CMC Regulatory</option>
+            <option>Regulatory Operations</option>
+            <option>International Regulatory</option>
+            <option>Pharmacovigilance/Drug Safety</option>
+          </optgroup>
+          <optgroup label="Research &amp; Discovery">
+            <option>Biology</option>
+            <option>Chemistry</option>
+            <option>Medicinal Chemistry</option>
+            <option>Translational Medicine</option>
+            <option>Bioinformatics</option>
+            <option>Computational Biology</option>
+            <option>Drug Discovery</option>
+          </optgroup>
+          <optgroup label="Manufacturing &amp; Supply Chain">
+            <option>Manufacturing Sciences</option>
+            <option>Quality Assurance</option>
+            <option>Quality Control</option>
+            <option>Validation</option>
+            <option>Supply Chain Planning</option>
+            <option>Logistics</option>
+            <option>Procurement</option>
+            <option>Technical Operations</option>
+            <option>Process Development</option>
+          </optgroup>
+          <optgroup label="Finance">
+            <option>FP&amp;A</option>
+            <option>Commercial Finance</option>
+            <option>Business Development Finance</option>
+            <option>Accounting</option>
+            <option>Treasury</option>
+            <option>Tax</option>
+            <option>Internal Audit</option>
+          </optgroup>
+          <optgroup label="Business Development &amp; Strategy">
+            <option>Corporate Strategy</option>
+            <option>Licensing &amp; Acquisitions</option>
+            <option>Alliance Management</option>
+            <option>Portfolio Strategy</option>
+            <option>Pipeline Valuation</option>
+            <option>Corporate Development</option>
+          </optgroup>
+          <optgroup label="IT &amp; Digital">
+            <option>Commercial IT</option>
+            <option>Data Engineering</option>
+            <option>Enterprise Architecture</option>
+            <option>Digital Health</option>
+            <option>CRM/Veeva Administration</option>
+            <option>AI/ML</option>
+            <option>Cybersecurity</option>
+          </optgroup>
+          <optgroup label="HR &amp; Talent">
+            <option>Talent Acquisition</option>
+            <option>HR Business Partners</option>
+            <option>Compensation &amp; Benefits</option>
+            <option>Learning &amp; Development</option>
+            <option>Organizational Effectiveness</option>
+          </optgroup>
+          <optgroup label="Legal &amp; Compliance">
+            <option>Legal Counsel</option>
+            <option>Privacy</option>
+            <option>Compliance</option>
+            <option>Contracts</option>
+            <option>IP/Patents</option>
+            <option>Healthcare Law</option>
+          </optgroup>
+          <optgroup label="Patient Services &amp; Access">
+            <option>Patient Support Programs</option>
+            <option>Hub Services</option>
+            <option>Specialty Pharmacy Relations</option>
+            <option>Patient Advocacy</option>
+            <option>Access &amp; Reimbursement</option>
+          </optgroup>
         </select>
       </div>
       <div class="field"><label>Stage</label>
