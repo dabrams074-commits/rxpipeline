@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rx Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/main.css?v=6">
+<link rel="stylesheet" href="./css/main.css?v=5">
 </head>
 <body>
 
@@ -459,69 +459,25 @@
 
 <div class="view" id="view-news">
   <div class="news-page">
-
-    <!-- Header -->
     <div class="news-header">
       <div>
-        <h2 class="news-title">Pharma News</h2>
-        <p class="news-sub">Company press releases &amp; industry headlines</p>
+        <h2 class="news-title">Industry News</h2>
+        <p class="news-sub">Pharma &amp; biotech headlines from leading publications</p>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <!-- View toggle -->
-        <div class="news-view-toggle">
-          <button id="news-view-grid" class="news-view-btn active" onclick="setNewsView('grid')" title="Grid view">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-          </button>
-          <button id="news-view-list" class="news-view-btn" onclick="setNewsView('list')" title="List view">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          </button>
-        </div>
-        <button class="btn-fetch" id="btn-news-refresh" onclick="loadNews()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-          Refresh
-        </button>
-      </div>
-    </div>
-
-    <!-- Mode toggle -->
-    <div class="news-mode-bar">
-      <button id="news-mode-company" class="news-mode-btn active" onclick="setNewsMode('company')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
-        Company Press Releases
-      </button>
-      <button id="news-mode-industry" class="news-mode-btn" onclick="setNewsMode('industry')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg>
-        Industry Aggregators
+      <button class="btn-fetch" id="btn-news-refresh" onclick="loadNews()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="news-fetch-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        Refresh
       </button>
     </div>
-
-    <!-- Filter bar -->
     <div class="news-filters">
-      <div class="news-search-wrap">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="news-search" type="text" placeholder="Search headlines…" oninput="clearTimeout(window._nrT);window._nrT=setTimeout(renderNews,200)">
-      </div>
-      <span id="news-filter-co-wrap" style="display:none">
-        <select id="news-filter-co" onchange="renderNews()" disabled>
-          <option value="">All Companies</option>
-        </select>
-      </span>
+      <select id="news-filter-co" onchange="renderNews()" disabled>
+        <option value="">All Companies</option>
+      </select>
       <select id="news-filter-ta" onchange="renderNews()" disabled>
         <option value="">All Therapeutic Areas</option>
       </select>
-      <span id="news-filter-src-wrap" style="display:none">
-        <select id="news-filter-src" onchange="renderNews()" disabled>
-          <option value="">All Sources</option>
-        </select>
-      </span>
-      <button class="news-clear-btn" onclick="
-        document.getElementById('news-search').value='';
-        document.getElementById('news-filter-co').value='';
-        document.getElementById('news-filter-ta').value='';
-        document.getElementById('news-filter-src').value='';
-        renderNews()">Clear</button>
+      <button class="news-clear-btn" onclick="document.getElementById('news-filter-co').value='';document.getElementById('news-filter-ta').value='';renderNews()">Clear</button>
     </div>
-
     <div id="news-status" class="fetch-status" style="margin-bottom:16px"></div>
     <div id="news-container">
       <div class="fetch-empty">
@@ -786,6 +742,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script type="module" src="./js/main.js?v=6"></script>
+<script type="module" src="./js/main.js?v=5"></script>
 </body>
 </html>
