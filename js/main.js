@@ -1,6 +1,7 @@
 import {
   STAGES, jobs, editId, tFilters, panelJobId,
-  saveJobs, loadJobs, setJobs, setEditId, setPanelJobId, resetTFilters
+  saveJobs, loadJobs, loadJobsFromCloud, saveJobsToCloud,
+  setJobs, setEditId, setPanelJobId, resetTFilters
 } from './store.js';
 
 import { initAuth, signInWithGoogle, signOut, startCheckout } from './auth.js';
@@ -966,7 +967,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Gate everything behind auth + subscription check
-  initAuth(() => {
+  initAuth(async () => {
     const cnt = document.getElementById('lib-count');
     if (cnt) cnt.textContent = FETCH_COMPANIES.length;
     const libBadge = document.getElementById('lib-badge');
@@ -974,7 +975,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const liveBadge = document.getElementById('live-badge');
     if (liveBadge) liveBadge.textContent = 'Live';
     buildCompanyCheckboxes();
-    loadJobs();
+
+    // Load jobs: try cloud first, fall back to localStorage
+    // If localStorage has data but cloud doesn't, migrate it up
+    const cloudLoaded = await loadJobsFromCloud();
+    if (!cloudLoaded) {
+      loadJobs(); // localStorage fallback
+      if (jobs.length > 0) saveJobsToCloud(); // migrate existing data to cloud
+    }
+
     renderTracker();
     updateHomeCards();
     initCachedLibrary();

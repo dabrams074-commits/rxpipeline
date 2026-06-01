@@ -1,3 +1,5 @@
+import { supabase } from './auth.js';
+
 export const STAGES = ['Sourced', 'Applied', 'Interviewing', 'Offer', 'Rejected'];
 export let jobs = [];
 export let editId = null;
@@ -7,17 +9,52 @@ export let panelJobId = null;
 export let cachedLiveJobs = [];
 export let lastFetchTime = null;
 
-export function saveJobs(){ try{ localStorage.setItem('rxp-jobs', JSON.stringify(jobs)); }catch(e){} }
-export function loadJobs(){
-  try{
+// ── localStorage (fast cache) ────────────────────────────────────────────────
+export function saveJobs() {
+  try { localStorage.setItem('rxp-jobs', JSON.stringify(jobs)); } catch(e) {}
+  // Debounce cloud saves — wait 1.5s after last change before writing to Supabase
+  clearTimeout(_cloudSaveTimer);
+  _cloudSaveTimer = setTimeout(saveJobsToCloud, 1500);
+}
+
+export function loadJobs() {
+  try {
     const d = localStorage.getItem('rxp-jobs');
-    if(d && JSON.parse(d).length > 0){
-      jobs = JSON.parse(d);
-    } else {
-      jobs = []; // True blank slate for production!
-      saveJobs();
+    jobs = (d && JSON.parse(d).length > 0) ? JSON.parse(d) : [];
+  } catch(e) { jobs = []; }
+}
+
+// ── Supabase cloud sync ──────────────────────────────────────────────────────
+let _cloudSaveTimer = null;
+
+export async function saveJobsToCloud() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from('user_data').upsert(
+      { user_id: user.id, jobs, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    );
+  } catch(e) { /* silent fail — localStorage still has the data */ }
+}
+
+export async function loadJobsFromCloud() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    const { data, error } = await supabase
+      .from('user_data')
+      .select('jobs')
+      .eq('user_id', user.id)
+      .single();
+    if (error || !data) return false;
+    if (Array.isArray(data.jobs)) {
+      jobs = data.jobs;
+      try { localStorage.setItem('rxp-jobs', JSON.stringify(jobs)); } catch(e) {}
+      return true;
     }
-  } catch(e){ jobs = []; }
+    return false;
+  } catch(e) { return false; }
 }
 
 function openDB() {
