@@ -36,8 +36,6 @@ export const FETCH_COMPANIES = [
   { name:'BMS',                     group:'Large Pharma',    ats:'Workday',   subdomain:'bristolmyerssquibb',     tenant:'BMS',                     wdNum:5 },
   { name:'Takeda',                  group:'Large Pharma',    ats:'Workday',   subdomain:'takeda',                 tenant:'External',                wdNum:1 },
   { name:'AbbVie',                  group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'AbbVie',               wdNum:0 },
-  { name:'Ipsen',                   group:'Large Pharma',    ats:'Workday',         subdomain:'ipsen',      tenant:'Ipsen_Careers', wdNum:103 },
-  { name:'Otsuka',                  group:'Large Pharma',    ats:'Workday',         subdomain:'vhr-otsuka', tenant:'External',      wdNum:1, cxsId:'vhr_otsuka' },
   { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
   { name:'Novo Nordisk',            group:'Large Pharma',    ats:'Workday',   subdomain:'novonordisk',            tenant:'NovoNordisk',             wdNum:3 },
   { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'roche-ext',               wdNum:3 },
@@ -45,6 +43,8 @@ export const FETCH_COMPANIES = [
   { name:'Becton Dickinson',        group:'Large Pharma',    ats:'Workday',   subdomain:'bdx',                    tenant:'BD',                      wdNum:1 },
   { name:'Zoetis',                  group:'Large Pharma',    ats:'Workday',   subdomain:'zoetis',                 tenant:'Zoetis',                  wdNum:1 },
   // ── Specialty Pharma ──
+  { name:'Ipsen',                   group:'Specialty Pharma', ats:'Workday',  subdomain:'ipsen',      tenant:'Ipsen_Careers', wdNum:103 },
+  { name:'Otsuka',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'vhr-otsuka', tenant:'External',      wdNum:1, cxsId:'vhr_otsuka' },
   { name:'Regeneron',               group:'Specialty Pharma', ats:'Workday',  subdomain:'regeneron',             tenant:'careers',                 wdNum:1 },
   { name:'Biogen',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'biibhr',                tenant:'external',                wdNum:3 },
   { name:'Gilead',                  group:'Specialty Pharma', ats:'Workday',  subdomain:'gilead',                tenant:'gileadcareers',           wdNum:1 },
@@ -77,6 +77,8 @@ export const FETCH_COMPANIES = [
   { name:'Protagonist',             group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'protagonist', wdNum:0 },
   { name:'Nuvalent',                group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'nuvalent', wdNum:0 },
   { name:'Disc Medicine',           group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'discmedicine', wdNum:0 },
+  // ── Established Brands ──
+  { name:'Viatris',                 group:'Established Brands', ats:'Workday', subdomain:'viatris',              tenant:'External',                wdNum:5 },
   // ── CRO / Services ──
   { name:'IQVIA',                   group:'CRO & Services',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
 ];
