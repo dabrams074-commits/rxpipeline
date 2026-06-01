@@ -1,72 +1,72 @@
 const UA = 'Mozilla/5.0 (compatible; FeedFetcher-Google/1.0)';
 const GN = q => `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en&gl=US&ceid=US:en`;
 
-// ── Wire-service industry RSS feeds ──────────────────────────────────────────
-// These are the actual feeds where pharma companies publish press releases.
-// BusinessWire, GlobeNewswire and PRNewswire all provide public pharma/biotech RSS.
-const WIRE_FEEDS = [
-  // BusinessWire
-  { url:'https://feed.businesswire.com/rss/home/?rss=G22&rssid=BWBIOTECHNOLOGY',     source:'Business Wire', topic:'Company News' },
-  { url:'https://feed.businesswire.com/rss/home/?rss=G22&rssid=BWPHARMACEUTICALS',   source:'Business Wire', topic:'Company News' },
-  { url:'https://feed.businesswire.com/rss/home/?rss=G22&rssid=BWHEALTHCARE',        source:'Business Wire', topic:'Company News' },
-  // GlobeNewswire
-  { url:'https://www.globenewswire.com/RssFeed/industry/Biotechnology',              source:'GlobeNewswire', topic:'Company News' },
-  { url:'https://www.globenewswire.com/RssFeed/industry/Pharmaceuticals',            source:'GlobeNewswire', topic:'Company News' },
-  // PRNewswire
-  { url:'https://www.prnewswire.com/rss/news-releases-list.rss?category=HEALTH',     source:'PR Newswire',   topic:'Company News' },
-  { url:'https://www.prnewswire.com/rss/news-releases-list.rss?category=PHARMACEUTICAL_BIOTECHNOLOGY_INDUSTRY', source:'PR Newswire', topic:'Company News' },
-];
-
-// ── General topic feeds ───────────────────────────────────────────────────────
-const TOPIC_FEEDS = [
-  { url:'https://www.fiercepharma.com/rss/xml',                                                                        source:'FiercePharma',   topic:'Industry' },
-  { url:'https://www.biopharmadive.com/feeds/news/',                                                                   source:'BioPharma Dive', topic:'Industry' },
-  { url:'https://www.statnews.com/feed/',                                                                               source:'STAT News',      topic:'Industry' },
-  { url:'https://endpts.com/feed/',                                                                                     source:'Endpoints News', topic:'Industry' },
-  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml',                   source:'FDA',            topic:'Regulatory' },
-  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/drug-approvals-and-databases/rss.xml',     source:'FDA Approvals',  topic:'Regulatory' },
-  { url:GN('pharma biotech drug pipeline clinical trial'),                                                              source:'Google News',    topic:'Pipeline' },
-  { url:GN('pharma biotech merger acquisition deal'),                                                                   source:'Google News',    topic:'M&A' },
-  { url:GN('pharma biotech earnings revenue quarterly results'),                                                        source:'Google News',    topic:'Earnings' },
+const ALL_FEEDS = [
+  // ── Wire services (actual company press releases) ──
+  { url:'https://www.globenewswire.com/RssFeed/industry/Biotechnology',                                  source:'GlobeNewswire',  topic:'Company News' },
+  { url:'https://www.globenewswire.com/RssFeed/industry/Pharmaceuticals',                                source:'GlobeNewswire',  topic:'Company News' },
+  { url:'https://www.prnewswire.com/rss/news-releases-list.rss',                                         source:'PR Newswire',    topic:'Company News' },
+  { url:'https://www.businesswire.com/rss/home/?rss=G22',                                                source:'Business Wire',  topic:'Company News' },
+  { url:'https://www.biospace.com/rss/',                                                                  source:'BioSpace',       topic:'Company News' },
+  // ── Industry aggregators ──
+  { url:'https://www.fiercepharma.com/rss/xml',                                                          source:'FiercePharma',   topic:'Industry' },
+  { url:'https://www.biopharmadive.com/feeds/news/',                                                     source:'BioPharma Dive', topic:'Industry' },
+  { url:'https://www.statnews.com/feed/',                                                                 source:'STAT News',      topic:'Industry' },
+  { url:'https://endpts.com/feed/',                                                                       source:'Endpoints News', topic:'Industry' },
+  // ── Regulatory ──
+  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml',     source:'FDA',            topic:'Regulatory' },
+  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/drug-approvals-and-databases/rss.xml', source:'FDA Approvals', topic:'Regulatory' },
+  // ── Google News topic feeds ──
+  { url:GN('pharma biotech drug pipeline clinical trial'),                                                source:'Google News',    topic:'Pipeline' },
+  { url:GN('pharma biotech merger acquisition deal'),                                                     source:'Google News',    topic:'M&A' },
+  { url:GN('pharma biotech earnings revenue quarterly results'),                                          source:'Google News',    topic:'Earnings' },
 ];
 
 exports.handler = async () => {
-  const fetchFeed = async (url, max) => {
-    try {
-      const res = await fetch(url, { headers:{ 'User-Agent': UA }, signal: AbortSignal.timeout(8000) });
-      if (!res.ok) return [];
-      return parseRSS(await res.text(), max);
-    } catch { return []; }
-  };
+  const debug = [];
 
-  const [wireResults, topicResults] = await Promise.all([
-    Promise.allSettled(WIRE_FEEDS.map(async f => {
-      const items = await fetchFeed(f.url, 20);
-      return items.map(a => ({ ...a, source: f.source, topic: f.topic }));
-    })),
-    Promise.allSettled(TOPIC_FEEDS.map(async f => {
-      const items = await fetchFeed(f.url, 10);
-      return items.map(a => ({ ...a, source: f.source, topic: f.topic }));
-    }))
-  ]);
+  const results = await Promise.allSettled(
+    ALL_FEEDS.map(async f => {
+      const start = Date.now();
+      try {
+        const res = await fetch(f.url, {
+          headers: { 'User-Agent': UA },
+          signal: AbortSignal.timeout(7000)
+        });
+        const status = res.status;
+        if (!res.ok) {
+          debug.push({ source: f.source, url: f.url, status, count: 0, ms: Date.now() - start });
+          return [];
+        }
+        const xml = await res.text();
+        const items = parseRSS(xml, 15);
+        debug.push({ source: f.source, url: f.url, status, count: items.length, ms: Date.now() - start });
+        return items.map(a => ({ ...a, source: f.source, topic: f.topic }));
+      } catch(e) {
+        debug.push({ source: f.source, url: f.url, error: e.message, count: 0, ms: Date.now() - start });
+        return [];
+      }
+    })
+  );
 
-  const wireArticles  = wireResults.flatMap(r  => r.status === 'fulfilled' ? r.value : []);
-  const topicArticles = topicResults.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+  const articles = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
 
   const seen = new Set();
-  const dedup = arr => arr.filter(a => { if (!a.url || seen.has(a.url)) return false; seen.add(a.url); return true; });
-
-  const all = [...dedup(wireArticles), ...dedup(topicArticles)];
-  all.sort((a, b) => b.dateMs - a.dateMs);
+  const deduped = articles.filter(a => {
+    if (!a.url || seen.has(a.url)) return false;
+    seen.add(a.url);
+    return true;
+  });
+  deduped.sort((a, b) => b.dateMs - a.dateMs);
 
   return {
     statusCode: 200,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=900' },
-    body: JSON.stringify(all)
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' },
+    body: JSON.stringify({ articles: deduped, debug })
   };
 };
 
-function parseRSS(xml, max = 20) {
+function parseRSS(xml, max = 15) {
   const items = [];
   const isAtom = /<entry[\s>]/.test(xml);
   const re = isAtom ? /<entry[\s>]([\s\S]*?)<\/entry>/g : /<item>([\s\S]*?)<\/item>/g;
