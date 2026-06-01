@@ -755,8 +755,8 @@ export function inferFunc(title, dept) {
 // ══════════════════════════════════════════
 // NEWS PAGE
 // ══════════════════════════════════════════
-const TOPICS = ['Industry','Pipeline','Regulatory','M&A','Earnings'];
-const TOPIC_LABELS = { Industry:'Industry Headlines', Pipeline:'Pipeline & Approvals', Regulatory:'Regulatory & FDA', 'M&A':'M&A & Deals', Earnings:'Earnings & Finance' };
+const TOPICS = ['Industry','Pipeline','Regulatory','M&A','Earnings','Company News'];
+const TOPIC_LABELS = { Industry:'Industry Headlines', Pipeline:'Pipeline & Approvals', Regulatory:'Regulatory & FDA', 'M&A':'M&A & Deals', Earnings:'Earnings & Finance', 'Company News':'Company News' };
 let newsLoaded = false;
 let newsArticles = [];
 
@@ -801,7 +801,12 @@ const NEWS_TA_MAP = [
 
 function tagArticle(a) {
   const text = (' ' + (a.title || '') + ' ' + (a.summary || '') + ' ').toLowerCase();
-  a._cos = NEWS_COMPANY_MAP.filter(c => c.terms.some(t => text.includes(t))).map(c => c.label);
+  // If article came from a company-specific feed, use that directly; otherwise keyword-match
+  if (a.company) {
+    a._cos = [a.company];
+  } else {
+    a._cos = NEWS_COMPANY_MAP.filter(c => c.terms.some(t => text.includes(t))).map(c => c.label);
+  }
   a._tas = NEWS_TA_MAP.filter(t => t.terms.some(k => text.includes(k))).map(t => t.label);
   return a;
 }
