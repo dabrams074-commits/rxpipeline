@@ -516,7 +516,7 @@ export function buildFilters() {
     .map(g => {
       const regularItems = g.items.filter(i => presentFuncs.has(i) && !i.startsWith('Other /'));
       const otherItem    = g.items.find(i => i.startsWith('Other /') && presentFuncs.has(i));
-      const otherOption  = otherItem ? `<option value="${esc(otherItem)}">⋯ ${esc(otherItem.replace('Other / ', ''))}</option>` : '';
+      const otherOption  = otherItem ? `<option value="${esc(otherItem)}">Other</option>` : '';
       return `<optgroup label="${esc(g.group)}"><option value="${esc(g.group)}">— All ${esc(g.group)} —</option>${regularItems.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('')}${otherOption}</optgroup>`;
     }).join('');
   document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
