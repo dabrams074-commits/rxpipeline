@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rx Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/main.css?v=12">
+<link rel="stylesheet" href="./css/main.css?v=13">
 </head>
 <body>
 
@@ -308,7 +308,13 @@
       <option>Patient Advocacy</option>
       <option>Access &amp; Reimbursement</option>
     </optgroup>
-    <option value="Other">Other / Unclassified</option>
+    <option value="Other / Commercial">Other / Commercial</option>
+    <option value="Other / Medical &amp; Scientific">Other / Medical &amp; Scientific</option>
+    <option value="Other / Manufacturing &amp; Quality">Other / Manufacturing &amp; Quality</option>
+    <option value="Other / Corporate Support">Other / Corporate Support</option>
+    <option value="Other / Admin &amp; Early Career">Other / Admin &amp; Early Career</option>
+    <option value="Other / Leadership &amp; General Mgmt">Other / Leadership &amp; General Mgmt</option>
+    <option value="Other / Uncategorized">Other / Uncategorized</option>
   </select>
   <select class="sb-select" id="sb-type" onchange="tFilters.type=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()" style="border-right:none">
     <option value="">All Types</option>
@@ -802,6 +808,6 @@
 </div>
 <!-- ── End Auth Overlay ─────────────────────────────────────────────────── -->
 
-<script type="module" src="./js/main.js?v=12"></script>
+<script type="module" src="./js/main.js?v=13"></script>
 </body>
 </html>

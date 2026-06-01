@@ -518,7 +518,16 @@ export function buildFilters() {
       return `<optgroup label="${esc(g.group)}"><option value="${esc(g.group)}">— All ${esc(g.group)} —</option>${presentItems.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('')}</optgroup>`;
     }).join('');
   document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
-  document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups + '<option value="Other">Other / Unclassified</option>';
+  document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups +
+    '<optgroup label="─ Other ─">' +
+    '<option value="Other / Commercial">Other / Commercial</option>' +
+    '<option value="Other / Medical &amp; Scientific">Other / Medical &amp; Scientific</option>' +
+    '<option value="Other / Manufacturing &amp; Quality">Other / Manufacturing &amp; Quality</option>' +
+    '<option value="Other / Corporate Support">Other / Corporate Support</option>' +
+    '<option value="Other / Admin &amp; Early Career">Other / Admin &amp; Early Career</option>' +
+    '<option value="Other / Leadership &amp; General Mgmt">Other / Leadership &amp; General Mgmt</option>' +
+    '<option value="Other / Uncategorized">Other / Uncategorized</option>' +
+    '</optgroup>';
   document.getElementById('r-loc').innerHTML = '<option value="">All Countries</option>' + countries.map(c => `<option>${esc(c)}</option>`).join('');
   document.getElementById('roles-filters').style.display = 'flex';
 }
@@ -887,15 +896,37 @@ export function inferFunc(title, dept) {
   if (t.includes('patient centricity') || t.includes('patient solutions') || t.includes('patient program') || t.includes('patient experience design') || t.includes('patient experience') || t.includes('market transformation') && t.includes('patient') || t.includes('psp coordinator') || t.includes('patient engagement partner') || t.includes('communications & patient') || t.includes('communications and patient')) return 'Patient Support Programs';
   if (t.includes('patient support') || t.includes('patient service')) return 'Patient Support Programs';
 
-  // ── Broad fallbacks ───────────────────────────────────────────────────────
+  // ── Tier 1 broad fallbacks → existing categories ─────────────────────────
   if (t.includes('engineer') || t.includes('automation') || t.includes('technician') || t.includes('maintenance')) return 'Technical Operations';
   if (t.includes('operations') || t.includes('operation ') || t.includes('operative') || t.includes('operator')) return 'Technical Operations';
   if (t.includes('laboratory') || t.includes('lab assistant') || t.includes('lab technician')) return 'Quality Control';
   if (t.includes('scientist') || t.includes('researcher') || t.includes('research associate')) return 'Biology';
   if (t.includes('manager') && t.includes('medical')) return 'Medical Affairs';
   if (t.includes('program management') || t.includes('program manager') || t.includes('programme manager') || t.includes('project management') || t.includes('strategic enablement pmo') || t.includes('pmo') && t.includes('manager')) return 'Clinical Project Management';
+  // Broad medical catch — any remaining "medical" title goes to Medical Affairs
+  if (t.includes('medical') || t.includes('physician') || /\bmd\b/.test(t) || /\brn\b/.test(t)) return 'Medical Affairs';
+  // Broad sales/commercial — director/manager with commercial TA context
+  if ((t.includes('director') || t.includes('manager') || t.includes('lead')) && (t.includes('oncol') || t.includes('hematol') || t.includes('cardio') || t.includes('immuno') || t.includes('neuro') || t.includes('rare') || t.includes('respiratory') || t.includes('dermat'))) return 'Field Sales';
+  // Broad research catch
+  if (t.includes('research') || t.includes('science') || t.includes('biology') || t.includes('lab ') || /\blab\b/.test(t)) return 'Biology';
+  // Broad analyst catch → Commercial Analytics
+  if (t.includes('analyst') || t.includes('analysis')) return 'Commercial Analytics';
+  // Broad coordinator/associate catch by context
+  if ((t.includes('coordinator') || t.includes('associate') || t.includes('specialist') || t.includes('manager') || t.includes('director')) && t.includes('commercial')) return 'Commercial Operations';
+  if ((t.includes('coordinator') || t.includes('specialist')) && (t.includes('quality') || t.includes('gmp'))) return 'Quality Assurance';
+  if ((t.includes('coordinator') || t.includes('manager') || t.includes('associate')) && (t.includes('supply') || t.includes('logistics') || t.includes('warehouse'))) return 'Supply Chain Planning';
+  if (t.includes('nurse') || t.includes('health care') || t.includes('healthcare') && t.includes('professional')) return 'Medical Affairs';
 
-  return 'Other';
+  // ── Tier 2 "Other / X" sub-buckets ───────────────────────────────────────
+  // These catch what's truly ambiguous but keep it grouped meaningfully
+  if (t.includes('sales') || t.includes('commercial') || t.includes('business') && (t.includes('director') || t.includes('manager') || t.includes('lead'))) return 'Other / Commercial';
+  if (t.includes('medical') || t.includes('clinical') || t.includes('science') || t.includes('pharma')) return 'Other / Medical & Scientific';
+  if (t.includes('quality') || t.includes('manufactur') || t.includes('production') || t.includes('plant') || t.includes('supply')) return 'Other / Manufacturing & Quality';
+  if (t.includes('finance') || t.includes('account') || t.includes('legal') || t.includes('hr') || t.includes('people') || t.includes('talent')) return 'Other / Corporate Support';
+  if (t.includes('admin') || t.includes('assistant') || t.includes('coordinator') || t.includes('support') || t.includes('intern') || t.includes('aprendiz') || t.includes('stagiair') || t.includes('pasante') || t.includes('trainee') || t.includes('co-op')) return 'Other / Admin & Early Career';
+  if (t.includes('director') || t.includes('manager') || t.includes('lead') || t.includes('head of') || t.includes('vice president') || /\bvp\b/.test(t)) return 'Other / Leadership & General Mgmt';
+
+  return 'Other / Uncategorized';
 }
 // ══════════════════════════════════════════
 // NEWS PAGE
