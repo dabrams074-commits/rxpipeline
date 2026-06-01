@@ -32,11 +32,11 @@ export const FETCH_COMPANIES = [
   { name:'Novartis',                group:'Large Pharma',    ats:'Workday',   subdomain:'novartis',               tenant:'Novartis_Careers',        wdNum:3 },
   { name:'GSK',                     group:'Large Pharma',    ats:'Jibe',      subdomain:'',                       tenant:'gsk',                     wdNum:0 },
   { name:'Amgen',                   group:'Large Pharma',    ats:'Workday',   subdomain:'amgen',                  tenant:'Careers',                 wdNum:1 },
-  // { name:'Sanofi',                  group:'Large Pharma',    ats:'Workday',   subdomain:'sanofi',                 tenant:'SanofiCareers',           wdNum:3 },
+  { name:'Sanofi',                  group:'Large Pharma',    ats:'Workday',   subdomain:'sanofi',                 tenant:'SanofiCareers',           wdNum:3 },
   { name:'BMS',                     group:'Large Pharma',    ats:'Workday',   subdomain:'bristolmyerssquibb',     tenant:'BMS',                     wdNum:5 },
   { name:'Takeda',                  group:'Large Pharma',    ats:'Workday',   subdomain:'takeda',                 tenant:'External',                wdNum:1 },
   { name:'AbbVie',                  group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'AbbVie',               wdNum:0 },
-  // { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
+  { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
   { name:'Novo Nordisk',            group:'Large Pharma',    ats:'Workday',   subdomain:'novonordisk',            tenant:'NovoNordisk',             wdNum:3 },
   { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'Roche',                   wdNum:1 },
   { name:'Thermo Fisher',           group:'Large Pharma',    ats:'Workday',   subdomain:'thermofisher',           tenant:'ThermoFisherScientific',  wdNum:1 },
@@ -77,7 +77,7 @@ export const FETCH_COMPANIES = [
   { name:'Nuvalent',                group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'nuvalent', wdNum:0 },
   { name:'Disc Medicine',           group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'discmedicine', wdNum:0 },
   // ── CRO / Services ──
-  // { name:'IQVIA',                   group:'CRO & Services',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
+  { name:'IQVIA',                   group:'CRO & Services',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
 ];
 
 export let all_jobs = []; 
