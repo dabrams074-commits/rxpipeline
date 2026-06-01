@@ -758,6 +758,101 @@ export function inferFunc(title, dept) {
 const TOPICS = ['Industry','Pipeline','Regulatory','M&A','Earnings'];
 const TOPIC_LABELS = { Industry:'Industry Headlines', Pipeline:'Pipeline & Approvals', Regulatory:'Regulatory & FDA', 'M&A':'M&A & Deals', Earnings:'Earnings & Finance' };
 let newsLoaded = false;
+let newsArticles = [];
+
+const NEWS_COMPANY_MAP = [
+  { label:'AbbVie',              terms:['abbvie'] },
+  { label:'Alnylam',             terms:['alnylam'] },
+  { label:'Amgen',               terms:['amgen'] },
+  { label:'Argenx',              terms:['argenx'] },
+  { label:'AstraZeneca',         terms:['astrazeneca','astra zeneca'] },
+  { label:'Bayer',               terms:['bayer'] },
+  { label:'Biogen',              terms:['biogen'] },
+  { label:'BioNTech',            terms:['biontech'] },
+  { label:'Bristol Myers Squibb',terms:['bristol myers squibb','bristol-myers','bms'] },
+  { label:'Daiichi Sankyo',      terms:['daiichi sankyo','daiichi-sankyo'] },
+  { label:'Eli Lilly',           terms:['eli lilly',' lilly ','lilly\'s'] },
+  { label:'Gilead',              terms:['gilead'] },
+  { label:'GSK',                 terms:[' gsk ','glaxosmithkline','gsk\'s'] },
+  { label:'J&J / Janssen',       terms:['johnson & johnson','johnson and johnson','janssen','j&j'] },
+  { label:'Merck',               terms:[' merck ',' msd ','merck\'s'] },
+  { label:'Moderna',             terms:['moderna'] },
+  { label:'Novo Nordisk',        terms:['novo nordisk','novonordisk'] },
+  { label:'Novartis',            terms:['novartis'] },
+  { label:'Pfizer',              terms:['pfizer'] },
+  { label:'Regeneron',           terms:['regeneron'] },
+  { label:'Roche / Genentech',   terms:['roche','genentech'] },
+  { label:'Sanofi',              terms:['sanofi'] },
+  { label:'Takeda',              terms:['takeda'] },
+  { label:'Vertex',              terms:['vertex pharmaceuticals','vertex pharma'] },
+];
+
+const NEWS_TA_MAP = [
+  { label:'Oncology',            terms:['oncol','cancer','tumor','tumour','leukemia','lymphoma','myeloma','carcinoma','solid tumor'] },
+  { label:'Immunology',          terms:['autoimmune','rheumatoid','lupus','psoriasis','inflammatory bowel','crohn','ulcerative colitis','il-','jak inhibitor','immunolog'] },
+  { label:'Rare Disease',        terms:['rare disease','orphan drug','cystic fibrosis',' sma ','duchenne','gaucher','hemophilia','rare genetic'] },
+  { label:'Neuroscience',        terms:['alzheimer','parkinson','multiple sclerosis',' ms ','epilepsy','depression','schizophrenia','migraine','neurolog','dementia','cognitive'] },
+  { label:'Cardiovascular',      terms:['cardiovascular','heart failure','atrial fibrill','hypertension','stroke','atheroscler','lipid-lowering','coronary'] },
+  { label:'Infectious Disease',  terms:['infectious',' hiv ','hepatitis','covid','sars-cov','influenza',' flu ','rsv vaccine','antiviral','antibiotic','antimicrobial','vaccine'] },
+  { label:'Metabolic / Obesity', terms:['diabetes','obesity','glp-1','weight loss','metabolic','nafld','nash','insulin','tirzepatide','semaglutide'] },
+  { label:'Gene & Cell Therapy', terms:['gene therapy','cell therapy','car-t','car t','aav vector','crispr','mrna therapy','rna therapy','base editing'] },
+  { label:'Respiratory',         terms:['respiratory','copd','asthma','pulmonary fibrosis','lung disease'] },
+];
+
+function tagArticle(a) {
+  const text = (' ' + (a.title || '') + ' ' + (a.summary || '') + ' ').toLowerCase();
+  a._cos = NEWS_COMPANY_MAP.filter(c => c.terms.some(t => text.includes(t))).map(c => c.label);
+  a._tas = NEWS_TA_MAP.filter(t => t.terms.some(k => text.includes(k))).map(t => t.label);
+  return a;
+}
+
+function renderNews() {
+  const container = document.getElementById('news-container');
+  if (!container) return;
+  const coFilter = document.getElementById('news-filter-co')?.value || '';
+  const taFilter = document.getElementById('news-filter-ta')?.value || '';
+
+  let filtered = newsArticles;
+  if (coFilter) filtered = filtered.filter(a => a._cos.includes(coFilter));
+  if (taFilter) filtered = filtered.filter(a => a._tas.includes(taFilter));
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="fetch-empty"><div class="fetch-empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="fetch-empty-title">No articles match your filters</div><div class="fetch-empty-sub">Try clearing the filters to see all headlines.</div></div>`;
+    return;
+  }
+
+  const byTopic = {};
+  TOPICS.forEach(t => byTopic[t] = []);
+  filtered.forEach(a => { if (byTopic[a.topic]) byTopic[a.topic].push(a); });
+  container.innerHTML = TOPICS.filter(t => byTopic[t].length).map(t => `
+    <div class="news-section">
+      <div class="news-section-title">${esc(TOPIC_LABELS[t])}</div>
+      <div class="news-cards">${byTopic[t].slice(0,8).map(a => `
+        <a class="news-card" href="${esc(a.url)}" target="_blank" rel="noopener">
+          <div class="news-card-meta"><span class="news-source">${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
+          <div class="news-card-title">${esc(a.title)}</div>
+          ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
+        </a>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function populateNewsFilters() {
+  const coSel = document.getElementById('news-filter-co');
+  const taSel = document.getElementById('news-filter-ta');
+  if (!coSel || !taSel) return;
+
+  // Only show companies/TAs that appear in at least one article
+  const activeCos = new Set(newsArticles.flatMap(a => a._cos));
+  const activeTas = new Set(newsArticles.flatMap(a => a._tas));
+
+  coSel.innerHTML = '<option value="">All Companies</option>' +
+    NEWS_COMPANY_MAP.filter(c => activeCos.has(c.label)).map(c => `<option value="${esc(c.label)}">${esc(c.label)}</option>`).join('');
+  taSel.innerHTML = '<option value="">All Therapeutic Areas</option>' +
+    NEWS_TA_MAP.filter(t => activeTas.has(t.label)).map(t => `<option value="${esc(t.label)}">${esc(t.label)}</option>`).join('');
+  coSel.disabled = false;
+  taSel.disabled = false;
+}
 
 export async function loadNews() {
   if (newsLoaded) return;
@@ -775,20 +870,9 @@ export async function loadNews() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const articles = await res.json();
     if (!articles.length) throw new Error('No articles returned');
-    const byTopic = {};
-    TOPICS.forEach(t => byTopic[t] = []);
-    articles.forEach(a => { if (byTopic[a.topic]) byTopic[a.topic].push(a); });
-    container.innerHTML = TOPICS.filter(t => byTopic[t].length).map(t => `
-      <div class="news-section">
-        <div class="news-section-title">${esc(TOPIC_LABELS[t])}</div>
-        <div class="news-cards">${byTopic[t].slice(0,8).map(a => `
-          <a class="news-card" href="${esc(a.url)}" target="_blank" rel="noopener">
-            <div class="news-card-meta"><span class="news-source">${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
-            <div class="news-card-title">${esc(a.title)}</div>
-            ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
-          </a>`).join('')}
-        </div>
-      </div>`).join('');
+    newsArticles = articles.map(tagArticle);
+    populateNewsFilters();
+    renderNews();
     statusEl.className = 'fetch-status success';
     statusEl.textContent = `✓ ${articles.length} articles loaded · ${new Date().toLocaleTimeString()}`;
     newsLoaded = true;
@@ -862,6 +946,7 @@ window.addRoleToTracker = addRoleToTracker;
 window.updateJobStage = updateJobStage;
 window.forceRefreshBaseline = forceRefreshBaseline;
 window.loadNews = () => { newsLoaded = false; loadNews(); };
+window.renderNews = renderNews;
 
 window.tFilters = tFilters;
 Object.defineProperty(window, 'panelJobId', { get: () => panelJobId });
