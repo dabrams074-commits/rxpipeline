@@ -514,20 +514,13 @@ export function buildFilters() {
   const funcOptgroups = FUNC_GROUPS
     .filter(g => g.items.some(i => presentFuncs.has(i)) || presentFuncs.has(g.group))
     .map(g => {
-      const presentItems = g.items.filter(i => presentFuncs.has(i));
-      return `<optgroup label="${esc(g.group)}"><option value="${esc(g.group)}">— All ${esc(g.group)} —</option>${presentItems.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('')}</optgroup>`;
+      const regularItems = g.items.filter(i => presentFuncs.has(i) && !i.startsWith('Other /'));
+      const otherItem    = g.items.find(i => i.startsWith('Other /') && presentFuncs.has(i));
+      const otherOption  = otherItem ? `<option value="${esc(otherItem)}">⋯ ${esc(otherItem.replace('Other / ', ''))}</option>` : '';
+      return `<optgroup label="${esc(g.group)}"><option value="${esc(g.group)}">— All ${esc(g.group)} —</option>${regularItems.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('')}${otherOption}</optgroup>`;
     }).join('');
   document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
-  document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups +
-    '<optgroup label="─ Other ─">' +
-    '<option value="Other / Commercial">Other / Commercial</option>' +
-    '<option value="Other / Medical &amp; Scientific">Other / Medical &amp; Scientific</option>' +
-    '<option value="Other / Manufacturing &amp; Quality">Other / Manufacturing &amp; Quality</option>' +
-    '<option value="Other / Corporate Support">Other / Corporate Support</option>' +
-    '<option value="Other / Admin &amp; Early Career">Other / Admin &amp; Early Career</option>' +
-    '<option value="Other / Leadership &amp; General Mgmt">Other / Leadership &amp; General Mgmt</option>' +
-    '<option value="Other / Uncategorized">Other / Uncategorized</option>' +
-    '</optgroup>';
+  document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups;
   document.getElementById('r-loc').innerHTML = '<option value="">All Countries</option>' + countries.map(c => `<option>${esc(c)}</option>`).join('');
   document.getElementById('roles-filters').style.display = 'flex';
 }
@@ -624,21 +617,21 @@ export function inferArea(title, dept) { const t = (title + ' ' + dept).toLowerC
 function inferLevel(title) { const t = title.toLowerCase(); if (t.includes('chief') || t.includes('cso') || t.includes('coo')) return 'C-Suite'; if (t.includes('executive vice') || t.includes('evp') || t.includes('senior vice') || t.includes('svp')) return 'SVP / EVP'; if (t.includes('vice president') || t.includes(' vp ') || t.startsWith('vp ')) return 'VP'; if (t.includes('senior director')) return 'Senior Director'; if (t.includes('director')) return 'Director'; if (t.includes('senior manager')) return 'Senior Manager'; if (t.includes('manager')) return 'Manager'; if (t.includes('associate director')) return 'Associate Director'; if (t.includes('associate')) return 'Associate'; return 'Other'; }
 
 export const FUNC_GROUPS = [
-  { group: 'Commercial Operations', items: ['Sales Force Effectiveness', 'Field Sales', 'Commercial Operations', 'CRM Administration (Veeva)', 'Incentive Compensation', 'Field Force Deployment', 'Call Planning', 'Targeting & Segmentation', 'Commercial Training'] },
-  { group: 'Marketing', items: ['Brand/Product Management', 'Omnichannel Marketing', 'Digital Marketing', 'Customer Experience', 'Marketing Operations', 'Campaign Management', 'Medical Education Marketing', 'HCP Marketing', 'Patient Marketing', 'Promotional Review (MLR)'] },
-  { group: 'Market Access & Pricing', items: ['Payer Strategy', 'Reimbursement', 'HEOR', 'Formulary Access', 'Government Affairs', 'Contracting & Pricing', 'GPO/IDN Strategy', '340B', 'Access & Reimbursement'] },
-  { group: 'Commercial Analytics & Insights', items: ['Forecasting', 'Commercial Analytics', 'Market Research', 'Competitive Intelligence', 'Integrated Insights & Strategy', 'Business Intelligence', 'Data Science', 'Real-World Evidence (RWE)', 'Performance Analytics'] },
-  { group: 'Medical Affairs', items: ['Medical Science Liaisons (MSLs)', 'Medical Communications', 'Medical Information', 'Publication Planning', 'Advisory Boards', 'Evidence Generation', 'Medical Education', 'Scientific Affairs'] },
-  { group: 'Clinical Development', items: ['Clinical Operations', 'Clinical Project Management', 'Clinical Data Management', 'Biostatistics', 'Clinical Pharmacology', 'Pharmacokinetics', 'Patient Recruitment'] },
-  { group: 'Regulatory Affairs', items: ['Regulatory Strategy', 'Submissions', 'Labeling', 'CMC Regulatory', 'Regulatory Operations', 'International Regulatory', 'Pharmacovigilance/Drug Safety'] },
-  { group: 'Research & Discovery', items: ['Biology', 'Chemistry', 'Medicinal Chemistry', 'Translational Medicine', 'Bioinformatics', 'Computational Biology', 'Drug Discovery'] },
-  { group: 'Manufacturing & Supply Chain', items: ['Manufacturing Sciences', 'Quality Assurance', 'Quality Control', 'Validation', 'Supply Chain Planning', 'Logistics', 'Procurement', 'Technical Operations', 'Process Development'] },
-  { group: 'Finance', items: ['FP&A', 'Commercial Finance', 'Business Development Finance', 'Accounting', 'Treasury', 'Tax', 'Internal Audit'] },
-  { group: 'Business Development & Strategy', items: ['Corporate Strategy', 'Licensing & Acquisitions', 'Alliance Management', 'Portfolio Strategy', 'Pipeline Valuation', 'Corporate Development'] },
-  { group: 'IT & Digital', items: ['Commercial IT', 'Data Engineering', 'Enterprise Architecture', 'Digital Health', 'CRM/Veeva Administration', 'AI/ML', 'Cybersecurity'] },
-  { group: 'HR & Talent', items: ['Talent Acquisition', 'HR Business Partners', 'Compensation & Benefits', 'Learning & Development', 'Organizational Effectiveness'] },
-  { group: 'Legal & Compliance', items: ['Legal Counsel', 'Privacy', 'Compliance', 'Contracts', 'IP/Patents', 'Healthcare Law'] },
-  { group: 'Patient Services & Access', items: ['Patient Support Programs', 'Hub Services', 'Specialty Pharmacy Relations', 'Patient Advocacy', 'Access & Reimbursement'] },
+  { group: 'Commercial Operations', items: ['Sales Force Effectiveness', 'Field Sales', 'Commercial Operations', 'CRM Administration (Veeva)', 'Incentive Compensation', 'Field Force Deployment', 'Call Planning', 'Targeting & Segmentation', 'Commercial Training', 'Other / Commercial Operations'] },
+  { group: 'Marketing', items: ['Brand/Product Management', 'Omnichannel Marketing', 'Digital Marketing', 'Customer Experience', 'Marketing Operations', 'Campaign Management', 'Medical Education Marketing', 'HCP Marketing', 'Patient Marketing', 'Promotional Review (MLR)', 'Other / Marketing'] },
+  { group: 'Market Access & Pricing', items: ['Payer Strategy', 'Reimbursement', 'HEOR', 'Formulary Access', 'Government Affairs', 'Contracting & Pricing', 'GPO/IDN Strategy', '340B', 'Access & Reimbursement', 'Other / Market Access & Pricing'] },
+  { group: 'Commercial Analytics & Insights', items: ['Forecasting', 'Commercial Analytics', 'Market Research', 'Competitive Intelligence', 'Integrated Insights & Strategy', 'Business Intelligence', 'Data Science', 'Real-World Evidence (RWE)', 'Performance Analytics', 'Other / Commercial Analytics & Insights'] },
+  { group: 'Medical Affairs', items: ['Medical Science Liaisons (MSLs)', 'Medical Communications', 'Medical Information', 'Publication Planning', 'Advisory Boards', 'Evidence Generation', 'Medical Education', 'Scientific Affairs', 'Medical Affairs', 'Other / Medical Affairs'] },
+  { group: 'Clinical Development', items: ['Clinical Operations', 'Clinical Project Management', 'Clinical Data Management', 'Biostatistics', 'Clinical Pharmacology', 'Pharmacokinetics', 'Patient Recruitment', 'Other / Clinical Development'] },
+  { group: 'Regulatory Affairs', items: ['Regulatory Strategy', 'Submissions', 'Labeling', 'CMC Regulatory', 'Regulatory Operations', 'International Regulatory', 'Pharmacovigilance/Drug Safety', 'Other / Regulatory Affairs'] },
+  { group: 'Research & Discovery', items: ['Biology', 'Chemistry', 'Medicinal Chemistry', 'Translational Medicine', 'Bioinformatics', 'Computational Biology', 'Drug Discovery', 'Other / Research & Discovery'] },
+  { group: 'Manufacturing & Supply Chain', items: ['Manufacturing Sciences', 'Quality Assurance', 'Quality Control', 'Validation', 'Supply Chain Planning', 'Logistics', 'Procurement', 'Technical Operations', 'Process Development', 'Other / Manufacturing & Supply Chain'] },
+  { group: 'Finance', items: ['FP&A', 'Commercial Finance', 'Business Development Finance', 'Accounting', 'Treasury', 'Tax', 'Internal Audit', 'Other / Finance'] },
+  { group: 'Business Development & Strategy', items: ['Corporate Strategy', 'Licensing & Acquisitions', 'Alliance Management', 'Portfolio Strategy', 'Pipeline Valuation', 'Corporate Development', 'Other / Business Development & Strategy'] },
+  { group: 'IT & Digital', items: ['Commercial IT', 'Data Engineering', 'Enterprise Architecture', 'Digital Health', 'CRM/Veeva Administration', 'AI/ML', 'Cybersecurity', 'Other / IT & Digital'] },
+  { group: 'HR & Talent', items: ['Talent Acquisition', 'HR Business Partners', 'Compensation & Benefits', 'Learning & Development', 'Organizational Effectiveness', 'Other / HR & Talent'] },
+  { group: 'Legal & Compliance', items: ['Legal Counsel', 'Privacy', 'Compliance', 'Contracts', 'IP/Patents', 'Healthcare Law', 'Other / Legal & Compliance'] },
+  { group: 'Patient Services & Access', items: ['Patient Support Programs', 'Hub Services', 'Specialty Pharmacy Relations', 'Patient Advocacy', 'Access & Reimbursement', 'Other / Patient Services & Access'] },
 ];
 
 export const FUNC_GROUP_MAP = {};
@@ -917,16 +910,24 @@ export function inferFunc(title, dept) {
   if ((t.includes('coordinator') || t.includes('manager') || t.includes('associate')) && (t.includes('supply') || t.includes('logistics') || t.includes('warehouse'))) return 'Supply Chain Planning';
   if (t.includes('nurse') || t.includes('health care') || t.includes('healthcare') && t.includes('professional')) return 'Medical Affairs';
 
-  // ── Tier 2 "Other / X" sub-buckets ───────────────────────────────────────
-  // These catch what's truly ambiguous but keep it grouped meaningfully
-  if (t.includes('sales') || t.includes('commercial') || t.includes('business') && (t.includes('director') || t.includes('manager') || t.includes('lead'))) return 'Other / Commercial';
-  if (t.includes('medical') || t.includes('clinical') || t.includes('science') || t.includes('pharma')) return 'Other / Medical & Scientific';
-  if (t.includes('quality') || t.includes('manufactur') || t.includes('production') || t.includes('plant') || t.includes('supply')) return 'Other / Manufacturing & Quality';
-  if (t.includes('finance') || t.includes('account') || t.includes('legal') || t.includes('hr') || t.includes('people') || t.includes('talent')) return 'Other / Corporate Support';
-  if (t.includes('admin') || t.includes('assistant') || t.includes('coordinator') || t.includes('support') || t.includes('intern') || t.includes('aprendiz') || t.includes('stagiair') || t.includes('pasante') || t.includes('trainee') || t.includes('co-op')) return 'Other / Admin & Early Career';
-  if (t.includes('director') || t.includes('manager') || t.includes('lead') || t.includes('head of') || t.includes('vice president') || /\bvp\b/.test(t)) return 'Other / Leadership & General Mgmt';
+  // ── Tier 2: "Other / [Group]" — sits inside each group's optgroup ────────
+  if (t.includes('sales') || t.includes('commercial') && (t.includes('director') || t.includes('manager') || t.includes('lead') || t.includes('associate'))) return 'Other / Commercial Operations';
+  if (t.includes('marketing') || t.includes('brand') || t.includes('campaign') || t.includes('content') || t.includes('communications')) return 'Other / Marketing';
+  if (t.includes('access') || t.includes('payer') || t.includes('reimburs') || t.includes('government') || t.includes('formulary')) return 'Other / Market Access & Pricing';
+  if (t.includes('analyt') || t.includes('insight') || t.includes('intelligence') || t.includes('data') || t.includes('forecast')) return 'Other / Commercial Analytics & Insights';
+  if (t.includes('medical') || t.includes('science') || t.includes('pharma') || t.includes('physician')) return 'Other / Medical Affairs';
+  if (t.includes('clinical') || t.includes('trial') || t.includes('study') || t.includes('site') || t.includes('patient') && t.includes('recruit')) return 'Other / Clinical Development';
+  if (t.includes('regulat') || t.includes('safety') || t.includes('pharmacovigil') || t.includes('submission')) return 'Other / Regulatory Affairs';
+  if (t.includes('research') || t.includes('biolog') || t.includes('lab') || t.includes('chemist') || t.includes('discover')) return 'Other / Research & Discovery';
+  if (t.includes('manufactur') || t.includes('quality') || t.includes('supply') || t.includes('logistics') || t.includes('production') || t.includes('plant') || t.includes('warehouse')) return 'Other / Manufacturing & Supply Chain';
+  if (t.includes('finance') || t.includes('accounting') || t.includes('treasury') || t.includes('budget') || t.includes('audit') || t.includes('tax')) return 'Other / Finance';
+  if (t.includes('strategy') || t.includes('business development') || t.includes('licensing') || t.includes('portfolio') || t.includes('alliance')) return 'Other / Business Development & Strategy';
+  if (t.includes('digital') || t.includes('technology') || t.includes('software') || t.includes('system') || t.includes('data') || t.includes('it ') || /\bit\b/.test(t)) return 'Other / IT & Digital';
+  if (t.includes('human resources') || t.includes('talent') || t.includes('people') || t.includes('recruit') || t.includes('hr') || t.includes('learning')) return 'Other / HR & Talent';
+  if (t.includes('legal') || t.includes('compliance') || t.includes('counsel') || t.includes('privacy') || t.includes('patent') || t.includes('contract')) return 'Other / Legal & Compliance';
+  if (t.includes('patient') || t.includes('hub') || t.includes('specialty pharmacy') || t.includes('advocacy')) return 'Other / Patient Services & Access';
 
-  return 'Other / Uncategorized';
+  return 'Other / Commercial Operations';  // true last resort — commercial is the biggest bucket
 }
 // ══════════════════════════════════════════
 // NEWS PAGE
