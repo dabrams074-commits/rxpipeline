@@ -113,12 +113,14 @@ export async function fetchAllCompanyJobs(){
   btn.disabled=true; btn.classList.add('spinning'); statusEl.className='fetch-status loading'; statusEl.textContent=`Fetching politely from ${selected.length} companies…`;
   container.innerHTML=skeletons(8); progressDiv.style.display='block'; all_jobs = [];
 
+  let filtersBuilt = false;
   const liveRefresh = setInterval(() => {
     const n = all_jobs.length;
     if (n > 0) {
       statusEl.textContent = `Loading… ${n} jobs so far`;
       const sbRoles = document.getElementById('sb-roles');
       if (sbRoles) sbRoles.textContent = n;
+      if (!filtersBuilt) { buildFilters(); renderRoles(); filtersBuilt = true; }
     }
   }, 1000);
 
