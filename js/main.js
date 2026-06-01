@@ -520,7 +520,7 @@ export function buildFilters() {
       return `<optgroup label="${esc(g.group)}"><option value="${esc(g.group)}">— All ${esc(g.group)} —</option>${regularItems.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('')}${otherOption}</optgroup>`;
     }).join('');
   document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
-  document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups;
+  document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups + (presentFuncs.has('Other') ? '<option value="Other">Other</option>' : '');
   document.getElementById('r-loc').innerHTML = '<option value="">All Countries</option>' + countries.map(c => `<option>${esc(c)}</option>`).join('');
   document.getElementById('roles-filters').style.display = 'flex';
 }
@@ -941,10 +941,10 @@ export function inferFunc(title, dept) {
   if (t.includes('analyt') || t.includes('insight') || t.includes('intelligence') || t.includes('forecast') || t.includes('reporting') || t.includes('data science') || t.includes('data analyst')) return 'Other / Commercial Analytics & Insights';
   // Marketing
   if (t.includes('marketing') || t.includes('brand') || t.includes('campaign') || t.includes('content') || t.includes('communications') || t.includes('media') || t.includes('advertising')) return 'Other / Marketing';
-  // Commercial Operations (broad sales/commercial catch — second to last)
+  // Commercial Operations (broad sales/commercial catch)
   if (t.includes('sales') || t.includes('commercial') || t.includes('revenue') || t.includes('customer') || t.includes('account')) return 'Other / Commercial Operations';
 
-  return 'Other / Commercial Operations';  // absolute last resort
+  return 'Other';  // true last resort — genuinely unclassifiable
 }
 // ══════════════════════════════════════════
 // NEWS PAGE
