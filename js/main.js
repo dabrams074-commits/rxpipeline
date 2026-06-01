@@ -632,6 +632,7 @@ export const FUNC_GROUPS = [
   { group: 'HR & Talent', items: ['Talent Acquisition', 'HR Business Partners', 'Compensation & Benefits', 'Learning & Development', 'Organizational Effectiveness', 'Other / HR & Talent'] },
   { group: 'Legal & Compliance', items: ['Legal Counsel', 'Privacy', 'Compliance', 'Contracts', 'IP/Patents', 'Healthcare Law', 'Other / Legal & Compliance'] },
   { group: 'Patient Services & Access', items: ['Patient Support Programs', 'Hub Services', 'Specialty Pharmacy Relations', 'Patient Advocacy', 'Access & Reimbursement', 'Other / Patient Services & Access'] },
+  { group: 'Corporate & General Management', items: ['Executive & Administrative Support', 'Real Estate & Facilities', 'Corporate Communications', 'Corporate Security', 'General Management', 'Health, Safety & Environment', 'Investor Relations', 'Other / Corporate & General Management'] },
 ];
 
 export const FUNC_GROUP_MAP = {};
@@ -889,6 +890,14 @@ export function inferFunc(title, dept) {
   if (t.includes('patient centricity') || t.includes('patient solutions') || t.includes('patient program') || t.includes('patient experience design') || t.includes('patient experience') || t.includes('market transformation') && t.includes('patient') || t.includes('psp coordinator') || t.includes('patient engagement partner') || t.includes('communications & patient') || t.includes('communications and patient')) return 'Patient Support Programs';
   if (t.includes('patient support') || t.includes('patient service')) return 'Patient Support Programs';
 
+  // ── Corporate & General Management ───────────────────────────────────────
+  if (t.includes('executive assistant') || t.includes('executive admin') || t.includes('administrative assistant') || t.includes('administrative coordinator') || t.includes('admin coordinator') || t.includes('office manager') || t.includes('office coordinator') || t.includes('secretar') || t.includes('shareholder services')) return 'Executive & Administrative Support';
+  if (t.includes('real estate') || t.includes('facilities manager') || t.includes('facilities director') || t.includes('workplace') || t.includes('space planning') || t.includes('site services') || t.includes('hard services')) return 'Real Estate & Facilities';
+  if (t.includes('corporate communications') || t.includes('internal communications') || t.includes('employee communications') || t.includes('public relations') || t.includes('corporate affairs') && !t.includes('government')) return 'Corporate Communications';
+  if (t.includes('corporate security') || t.includes('physical security') || t.includes('site security') || t.includes('global security')) return 'Corporate Security';
+  if (t.includes('health, safety') || t.includes('health and safety') || t.includes('environment, health') || t.includes('ehs manager') || t.includes('hse manager') || t.includes('hse director') || t.includes('hse lead')) return 'Health, Safety & Environment';
+  if (t.includes('general manager') || t.includes('general management') || t.includes('country manager') || t.includes('country director') || t.includes('site director') || t.includes('site head') || t.includes('managing director') || t.includes('chief of staff')) return 'General Management';
+
   // ── Tier 1 broad fallbacks → existing categories ─────────────────────────
   if (t.includes('engineer') || t.includes('automation') || t.includes('technician') || t.includes('maintenance')) return 'Technical Operations';
   if (t.includes('operations') || t.includes('operation ') || t.includes('operative') || t.includes('operator')) return 'Technical Operations';
@@ -943,6 +952,8 @@ export function inferFunc(title, dept) {
   if (t.includes('marketing') || t.includes('brand') || t.includes('campaign') || t.includes('content') || t.includes('communications') || t.includes('media') || t.includes('advertising')) return 'Other / Marketing';
   // Commercial Operations (broad sales/commercial catch)
   if (t.includes('sales') || t.includes('commercial') || t.includes('revenue') || t.includes('customer') || t.includes('account')) return 'Other / Commercial Operations';
+  // Corporate & General Management (admin, facilities, intern, coordinator without other context)
+  if (t.includes('admin') || t.includes('assistant') || t.includes('coordinator') || t.includes('facilities') || t.includes('real estate') || t.includes('intern') || t.includes('trainee') || t.includes('co-op') || t.includes('aprendiz') || t.includes('stagiair') || t.includes('pasante') || t.includes('jovem') || t.includes('junior') && !t.includes('portfolio')) return 'Other / Corporate & General Management';
 
   return 'Other';  // true last resort — genuinely unclassifiable
 }
