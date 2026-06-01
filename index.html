@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rx Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/main.css?v=6">
+<link rel="stylesheet" href="./css/main.css?v=7">
 </head>
 <body>
 
@@ -33,6 +33,7 @@
     </button>
   </nav>
   <div class="header-right">
+    <div id="user-pill" style="display:none;align-items:center;gap:8px;margin-right:8px;"></div>
     <span class="stat-pill s-applied" id="stat-applied">0 Applied</span>
     <span class="stat-pill s-int" id="stat-int">0 Interviewing</span>
     <span class="stat-pill s-offers" id="stat-offers">0 Offers</span>
@@ -742,6 +743,64 @@
 
 <div class="toast" id="toast"></div>
 
-<script type="module" src="./js/main.js?v=6"></script>
+<!-- ── Auth / Paywall Overlay ──────────────────────────────────────────── -->
+<div id="auth-overlay" style="display:flex;position:fixed;inset:0;z-index:9999;background:#0d0f14;align-items:center;justify-content:center;">
+
+  <!-- Loading state -->
+  <div id="auth-loading" style="display:flex;flex-direction:column;align-items:center;gap:20px;">
+    <div class="auth-spinner"></div>
+    <p class="auth-loading-text">Checking your account…</p>
+  </div>
+
+  <!-- Login state -->
+  <div id="auth-login" class="auth-card" style="display:none;">
+    <div class="auth-logo">
+      <div class="logo-dot"></div>Rx Pipeline
+    </div>
+    <h2 class="auth-headline">Your pharma career<br>intelligence platform</h2>
+    <p class="auth-sub">Track jobs, monitor pipelines, and stay ahead of the market — all in one place.</p>
+    <button id="btn-google-signin" class="btn-google-signin" onclick="window.rxSignInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      <span class="btn-google-label">Continue with Google</span>
+    </button>
+    <p class="auth-pricing-note">$10 / month &nbsp;·&nbsp; 10-day free trial &nbsp;·&nbsp; Cancel anytime</p>
+  </div>
+
+  <!-- Paywall state (signed in, no active subscription) -->
+  <div id="auth-paywall" class="auth-card" style="display:none;">
+    <div class="auth-logo">
+      <div class="logo-dot"></div>Rx Pipeline
+    </div>
+    <div class="paywall-signed-in">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Signed in as <strong id="paywall-email"></strong>
+    </div>
+    <h2 class="auth-headline" style="margin-top:16px;">Start your free trial</h2>
+    <p class="auth-sub">10 days free, then $10/month. Cancel anytime.</p>
+
+    <ul class="paywall-features">
+      <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Real-time job listings from 40+ pharma companies</li>
+      <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Kanban pipeline tracker with notes &amp; interviews</li>
+      <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Company intelligence library &amp; press releases</li>
+      <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Industry news from FiercePharma, STAT, Endpoints &amp; more</li>
+    </ul>
+
+    <button id="btn-start-trial" class="btn-start-trial" onclick="window.rxStartCheckout()">
+      Start 10-Day Free Trial &nbsp;→
+    </button>
+    <p class="auth-pricing-note">No charge today &nbsp;·&nbsp; Card required to start trial</p>
+    <button class="paywall-signout-btn" onclick="window.rxSignOut()">← Sign out &amp; use a different account</button>
+  </div>
+
+</div>
+<!-- ── End Auth Overlay ─────────────────────────────────────────────────── -->
+
+<script type="module" src="./js/main.js?v=7"></script>
 </body>
 </html>

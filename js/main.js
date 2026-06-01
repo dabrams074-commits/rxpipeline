@@ -3,6 +3,11 @@ import {
   saveJobs, loadJobs, setJobs, setEditId, setPanelJobId, resetTFilters
 } from './store.js';
 
+import { initAuth, signInWithGoogle, signOut, startCheckout } from './auth.js';
+window.rxSignInWithGoogle = signInWithGoogle;
+window.rxSignOut          = signOut;
+window.rxStartCheckout    = startCheckout;
+
 import {
   FETCH_COMPANIES, all_jobs, pfizer_filtered, addedRoleSet, selectedCompanies,
   saveAddedRoles, buildCompanyCheckboxes, toggleCoSelect, selectAllCompanies, selectNoneCompanies,
@@ -952,6 +957,7 @@ export function skeletons(n) { return Array(n).fill(0).map(() => `<div class="ro
 // INITIALIZE APP
 // ══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  // Sort companies by star before anything renders
   FETCH_COMPANIES.sort((a, b) => {
     const aStar = starredCos.has(a.name) ? 1 : 0;
     const bStar = starredCos.has(b.name) ? 1 : 0;
@@ -959,18 +965,27 @@ document.addEventListener('DOMContentLoaded', () => {
     return a.name.localeCompare(b.name);
   });
 
-  const cnt = document.getElementById('lib-count');
-  if (cnt) cnt.textContent = FETCH_COMPANIES.length;
-  const libBadge = document.getElementById('lib-badge');
-  if (libBadge) libBadge.textContent = FETCH_COMPANIES.length;
-  const liveBadge = document.getElementById('live-badge');
-  if (liveBadge) liveBadge.textContent = 'Live';
-  buildCompanyCheckboxes();
-  loadJobs();
-  renderTracker();
-  updateHomeCards();
-  initCachedLibrary();
+  // Gate everything behind auth + subscription check
+  initAuth(() => {
+    const cnt = document.getElementById('lib-count');
+    if (cnt) cnt.textContent = FETCH_COMPANIES.length;
+    const libBadge = document.getElementById('lib-badge');
+    if (libBadge) libBadge.textContent = FETCH_COMPANIES.length;
+    const liveBadge = document.getElementById('live-badge');
+    if (liveBadge) liveBadge.textContent = 'Live';
+    buildCompanyCheckboxes();
+    loadJobs();
+    renderTracker();
+    updateHomeCards();
+    initCachedLibrary();
 
+    // Show welcome toast after successful Stripe checkout redirect
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      setTimeout(() => showToast('🎉 Subscription active — welcome to Rx Pipeline!'), 600);
+      history.replaceState({}, '', window.location.pathname);
+    }
+  });
 });
 
 // ══════════════════════════════════════════

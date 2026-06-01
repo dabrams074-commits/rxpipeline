@@ -1099,3 +1099,113 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
 .sb-select:nth-child(odd) { border-right: none; }
 .sb-clear { width: 100%; border-bottom: none; text-align: center; }
 }
+/* ── Auth / Paywall Overlay ────────────────────────────────────────────── */
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+.auth-spinner {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: auth-spin 0.8s linear infinite;
+}
+.auth-loading-text {
+  font-family: 'DM Mono', monospace; font-size: 0.78rem;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+}
+
+/* Card shared by login + paywall states */
+.auth-card {
+  flex-direction: column; align-items: center;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 44px 40px; max-width: 460px; width: 90%;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+.auth-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700; font-size: 1.3rem; color: var(--text);
+  letter-spacing: -0.3px; margin-bottom: 24px;
+}
+.auth-logo .logo-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 10px var(--accent);
+}
+.auth-headline {
+  font-family: 'DM Serif Display', serif; font-size: 1.7rem;
+  color: var(--text); text-align: center; line-height: 1.25;
+  margin-bottom: 12px;
+}
+.auth-sub {
+  font-size: 0.82rem; color: var(--muted); text-align: center;
+  line-height: 1.6; margin-bottom: 28px; max-width: 340px;
+}
+
+/* Google sign-in button */
+.btn-google-signin {
+  display: flex; align-items: center; gap: 12px;
+  background: #fff; color: #1a1a1a; border: none; border-radius: 8px;
+  padding: 12px 24px; font-size: 0.92rem; font-weight: 600;
+  cursor: pointer; width: 100%; justify-content: center;
+  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.35);
+}
+.btn-google-signin:hover { background: #f5f5f5; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+.btn-google-signin:disabled { opacity: 0.6; cursor: not-allowed; }
+.auth-pricing-note {
+  font-family: 'DM Mono', monospace; font-size: 0.65rem;
+  color: var(--muted); text-align: center; margin-top: 16px;
+  letter-spacing: 0.3px;
+}
+
+/* Paywall-specific */
+.paywall-signed-in {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(79,255,176,0.08); border: 1px solid rgba(79,255,176,0.2);
+  border-radius: 6px; padding: 6px 12px;
+  font-size: 0.78rem; color: var(--accent);
+  font-family: 'DM Mono', monospace;
+}
+.paywall-signed-in strong { color: var(--text); }
+.paywall-features {
+  list-style: none; width: 100%; margin: 20px 0 28px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.paywall-features li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.85rem; color: var(--soft); line-height: 1.4;
+}
+.paywall-features li svg { flex-shrink: 0; }
+.btn-start-trial {
+  width: 100%; padding: 14px 24px;
+  background: var(--accent); color: #0d0f14;
+  border: none; border-radius: 8px;
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: opacity 0.15s, transform 0.12s;
+}
+.btn-start-trial:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-start-trial:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.paywall-signout-btn {
+  margin-top: 20px; background: none; border: none;
+  color: var(--muted); font-size: 0.75rem; cursor: pointer;
+  font-family: 'DM Mono', monospace; letter-spacing: 0.2px;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.paywall-signout-btn:hover { color: var(--soft); }
+
+/* User pill in header */
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+.user-avatar-initial {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent2); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 600;
+}
+.user-name {
+  font-size: 0.78rem; color: var(--soft);
+  max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.user-signout-btn {
+  background: none; border: 1px solid var(--border); border-radius: 5px;
+  color: var(--muted); font-size: 0.68rem; padding: 3px 8px;
+  cursor: pointer; font-family: 'DM Mono', monospace; letter-spacing: 0.2px;
+  transition: border-color 0.13s, color 0.13s;
+}
+.user-signout-btn:hover { border-color: var(--soft); color: var(--soft); }
