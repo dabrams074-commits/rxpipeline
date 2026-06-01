@@ -24,10 +24,10 @@ export function showToast(msg) { const t = document.getElementById('toast'); t.t
 let currentView = 'home';
 function switchView(v) {
   currentView = v;
-  ['home', 'tracker', 'library', 'liveroles'].forEach(id => {
+  ['home', 'tracker', 'library', 'liveroles', 'news'].forEach(id => {
     document.getElementById('view-' + id).classList.toggle('active', v === id);
   });
-  ['tracker', 'library', 'liveroles'].forEach(id => {
+  ['tracker', 'library', 'liveroles', 'news'].forEach(id => {
     const el = document.getElementById('tab-' + id);
     if (el) el.classList.toggle('active', v === id);
   });
@@ -37,6 +37,7 @@ function switchView(v) {
   if (v === 'library') renderLibrary();
   if (v === 'tracker') renderTracker();
   if (v === 'home') updateHomeCards();
+  if (v === 'news') loadNews();
 }
 
 function updateHomeCards() {
@@ -751,6 +752,55 @@ export function inferFunc(title, dept) {
   if (t.includes('operations')) return 'Technical Operations';
   return 'Other';
 }
+// ══════════════════════════════════════════
+// NEWS PAGE
+// ══════════════════════════════════════════
+const TOPICS = ['Industry','Pipeline','Regulatory','M&A','Earnings'];
+const TOPIC_LABELS = { Industry:'Industry Headlines', Pipeline:'Pipeline & Approvals', Regulatory:'Regulatory & FDA', 'M&A':'M&A & Deals', Earnings:'Earnings & Finance' };
+let newsLoaded = false;
+
+export async function loadNews() {
+  if (newsLoaded) return;
+  const container = document.getElementById('news-container');
+  const statusEl = document.getElementById('news-status');
+  const btn = document.getElementById('btn-news-refresh');
+  if (!container) return;
+  btn.disabled = true;
+  btn.classList.add('spinning');
+  statusEl.className = 'fetch-status loading';
+  statusEl.textContent = 'Loading latest headlines…';
+  container.innerHTML = skeletons(6);
+  try {
+    const res = await fetch('/.netlify/functions/news');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const articles = await res.json();
+    if (!articles.length) throw new Error('No articles returned');
+    const byTopic = {};
+    TOPICS.forEach(t => byTopic[t] = []);
+    articles.forEach(a => { if (byTopic[a.topic]) byTopic[a.topic].push(a); });
+    container.innerHTML = TOPICS.filter(t => byTopic[t].length).map(t => `
+      <div class="news-section">
+        <div class="news-section-title">${esc(TOPIC_LABELS[t])}</div>
+        <div class="news-cards">${byTopic[t].slice(0,8).map(a => `
+          <a class="news-card" href="${esc(a.url)}" target="_blank" rel="noopener">
+            <div class="news-card-meta"><span class="news-source">${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
+            <div class="news-card-title">${esc(a.title)}</div>
+            ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
+          </a>`).join('')}
+        </div>
+      </div>`).join('');
+    statusEl.className = 'fetch-status success';
+    statusEl.textContent = `✓ ${articles.length} articles loaded · ${new Date().toLocaleTimeString()}`;
+    newsLoaded = true;
+  } catch(e) {
+    statusEl.className = 'fetch-status error';
+    statusEl.textContent = `✗ Failed to load news: ${e.message}`;
+    container.innerHTML = '<div class="fetch-empty"><div class="fetch-empty-title">Could not load news</div><div class="fetch-empty-sub">Check your connection and try again.</div></div>';
+  }
+  btn.disabled = false;
+  btn.classList.remove('spinning');
+}
+
 function exportRolesCSV() { const list = pfizer_filtered.length ? pfizer_filtered : all_jobs; if (!list.length) { showToast('No roles loaded — fetch first'); return; } const headers = ['Company', 'Title', 'Department', 'Location', 'Posted', 'URL']; const rows = list.map(r => [r.company, r.title, r.dept, r.location, r.posted, r.url].map(v => '"' + (String(v || '').replace(/"/g, '""')) + '"')); const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n'); const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `pharma-jobs-${todayStr()}.csv`; a.click(); URL.revokeObjectURL(a.href); showToast(`Exported ${list.length} roles to CSV`); }
 export function skeletons(n) { return Array(n).fill(0).map(() => `<div class="role-skeleton"><div class="skel-line" style="width:25%;height:10px;margin-bottom:6px"></div><div class="skel-line" style="width:60%;height:16px"></div><div class="skel-line" style="width:35%;height:11px;margin-top:10px"></div><div class="skel-line" style="width:45%;height:11px"></div></div>`).join(''); }
 
@@ -811,6 +861,7 @@ window.exportRolesCSV = exportRolesCSV;
 window.addRoleToTracker = addRoleToTracker;
 window.updateJobStage = updateJobStage;
 window.forceRefreshBaseline = forceRefreshBaseline;
+window.loadNews = () => { newsLoaded = false; loadNews(); };
 
 window.tFilters = tFilters;
 Object.defineProperty(window, 'panelJobId', { get: () => panelJobId });

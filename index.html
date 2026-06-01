@@ -27,6 +27,10 @@
       Live Roles
       <span class="tab-badge live" id="live-badge">0</span>
     </button>
+    <button class="nav-tab" id="tab-news" onclick="switchView('news')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg>
+      News
+    </button>
   </nav>
   <div class="header-right">
     <span class="stat-pill s-applied" id="stat-applied">0 Applied</span>
@@ -435,6 +439,29 @@
     <div class="roles-footer" id="roles-footer" style="display:none">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <span id="footer-text">Live data pulled directly from company career sites via API Proxies · Click any role to view · + Tracker adds to your pipeline</span>
+    </div>
+  </div>
+</div>
+
+<div class="view" id="view-news">
+  <div class="news-page">
+    <div class="news-header">
+      <div>
+        <h2 class="news-title">Industry News</h2>
+        <p class="news-sub">Pharma &amp; biotech headlines from leading publications</p>
+      </div>
+      <button class="btn-fetch" id="btn-news-refresh" onclick="loadNews()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="news-fetch-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+    <div id="news-status" class="fetch-status" style="margin-bottom:16px"></div>
+    <div id="news-container">
+      <div class="fetch-empty">
+        <div class="fetch-empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg></div>
+        <div class="fetch-empty-title">No news loaded</div>
+        <div class="fetch-empty-sub">Click Refresh to load the latest pharma &amp; biotech headlines</div>
+      </div>
     </div>
   </div>
 </div>
