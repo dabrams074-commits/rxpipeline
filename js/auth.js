@@ -99,6 +99,29 @@ export async function signOut() {
   window.location.reload();
 }
 
+export async function manageSubscription() {
+  if (!_currentUser) return;
+  const btn = document.getElementById('btn-manage-sub');
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
+
+  try {
+    const res = await fetch('/.netlify/functions/create-portal-session', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email: _currentUser.email }),
+    });
+    const { url, error } = await res.json();
+    if (url) {
+      window.location.href = url;
+    } else {
+      throw new Error(error || 'Could not open billing portal');
+    }
+  } catch (e) {
+    alert('Could not open billing portal: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Manage subscription'; }
+  }
+}
+
 export async function startCheckout() {
   if (!_currentUser) return;
   const btn = document.getElementById('btn-start-trial');
@@ -153,6 +176,7 @@ function _updateUserPill() {
   pill.innerHTML = `
     ${avatar ? `<img src="${avatar}" class="user-avatar" alt="">` : `<div class="user-avatar-initial">${name[0].toUpperCase()}</div>`}
     <span class="user-name">${name}</span>
+    <button id="btn-manage-sub" class="user-manage-btn" onclick="window.rxManageSubscription()">Manage subscription</button>
     <button class="user-signout-btn" onclick="window.rxSignOut()">Sign out</button>
   `;
   pill.style.display = 'flex';

@@ -1209,3 +1209,13 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
   transition: border-color 0.13s, color 0.13s;
 }
 .user-signout-btn:hover { border-color: var(--soft); color: var(--soft); }
+
+/* Manage subscription button in header */
+.user-manage-btn {
+  background: none; border: 1px solid rgba(79,255,176,0.25); border-radius: 5px;
+  color: var(--accent); font-size: 0.68rem; padding: 3px 8px;
+  cursor: pointer; font-family: 'DM Mono', monospace; letter-spacing: 0.2px;
+  transition: border-color 0.13s, background 0.13s;
+}
+.user-manage-btn:hover { background: rgba(79,255,176,0.08); border-color: var(--accent); }
+.user-manage-btn:disabled { opacity: 0.5; cursor: not-allowed; }
