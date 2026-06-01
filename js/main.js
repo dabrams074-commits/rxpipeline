@@ -525,14 +525,16 @@ function getFilteredRoles() {
   const co = document.getElementById('r-company')?.value || '';
   const country = document.getElementById('r-loc')?.value || '';
   return all_jobs.filter(r => {
-    const area = r._area || inferArea(r.title, r.dept || '');
-    const func = r._func || inferFunc(r.title, r.dept || '');
-    const mQ = !q || r.title.toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || r.company.toLowerCase().includes(q) || area.toLowerCase().includes(q);
-    const mArea = !areaFilter || area === areaFilter;
-    const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
-    const mCountry = !country || (r.location || '').split(',').pop().trim() === country;
-    return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
-  }).sort((a, b) => (b._dateMs||0) - (a._dateMs||0));
+    try {
+      const area = r._area || inferArea(r.title || '', r.dept || '');
+      const func = r._func || inferFunc(r.title || '', r.dept || '');
+      const mQ = !q || (r.title||'').toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || (r.company||'').toLowerCase().includes(q) || area.toLowerCase().includes(q);
+      const mArea = !areaFilter || area === areaFilter;
+      const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
+      const mCountry = !country || (r.location || '').split(',').pop().trim() === country;
+      return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
+    } catch(e) { return false; }
+  }).sort((a, b) => { try { return (b._dateMs||0) - (a._dateMs||0); } catch(e) { return 0; } });
 }
 
 function clearRoleFilters() { ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('r-clear-btn').style.display = 'none'; renderRoles(); }
