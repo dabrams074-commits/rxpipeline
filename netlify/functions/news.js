@@ -1,54 +1,53 @@
-// Using FeedFetcher-Google UA — many pharma IR platforms whitelist Google's feed crawler
-const UA  = 'Mozilla/5.0 (compatible; FeedFetcher-Google/1.0)';
-const GN  = q => `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en&gl=US&ceid=US:en`;
+const UA = 'Mozilla/5.0 (compatible; FeedFetcher-Google/1.0)';
+const GN = q => `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en&gl=US&ceid=US:en`;
 
-// ── Direct company investor-relations / press-release RSS feeds ───────────────
-// Q4-hosted IR pages (most reliable — standard /rss/news-releases.xml path)
-const COMPANY_IR_FEEDS = [
-  { company:'Eli Lilly',          url:'https://investor.lilly.com/rss/news-releases.xml' },
-  { company:'Amgen',              url:'https://investors.amgen.com/rss/news-releases.xml' },
-  { company:'Gilead',             url:'https://investors.gilead.com/rss/news-releases.xml' },
-  { company:'AbbVie',             url:'https://investors.abbvie.com/rss/news-releases.xml' },
-  { company:'Regeneron',          url:'https://investor.regeneron.com/rss/news-releases.xml' },
-  { company:'Biogen',             url:'https://investors.biogen.com/rss/news-releases.xml' },
-  { company:'Vertex',             url:'https://investors.vrtx.com/rss/news-releases.xml' },
-  { company:'Moderna',            url:'https://investors.modernatx.com/rss/news-releases.xml' },
-  { company:'Alnylam',            url:'https://investors.alnylam.com/rss/news-releases.xml' },
-  { company:'Ascendis',           url:'https://ir.ascendispharma.com/rss/news-releases.xml' },
-  { company:'Sarepta',            url:'https://investorrelations.sarepta.com/rss/news-releases.xml' },
-  { company:'Incyte',             url:'https://investor.incyte.com/rss/news-releases.xml' },
-  { company:'Neurocrine',         url:'https://ir.neurocrine.com/rss/news-releases.xml' },
-  { company:'Halozyme',           url:'https://ir.halozyme.com/rss/news-releases.xml' },
-  { company:'Insmed',             url:'https://ir.insmed.com/rss/news-releases.xml' },
-  { company:'Ultragenyx',         url:'https://ir.ultragenyx.com/rss/news-releases.xml' },
-  { company:'Ionis',              url:'https://ir.ionispharma.com/rss/news-releases.xml' },
-  { company:'BMS',                url:'https://news.bms.com/rss/news-releases.xml' },
-  { company:'Jazz Pharmaceuticals',url:'https://investors.jazzpharma.com/rss/news-releases.xml' },
-  { company:'United Therapeutics',url:'https://ir.unitedtherapeutics.com/rss/news-releases.xml' },
-  { company:'Argenx',             url:'https://investors.argenx.com/rss/news-releases.xml' },
-  { company:'Blueprint Medicines',url:'https://ir.blueprintmedicines.com/rss/news-releases.xml' },
-  { company:'Cytokinetics',       url:'https://ir.cytokinetics.com/rss/news-releases.xml' },
-  { company:'Madrigal',           url:'https://ir.madrigalpharma.com/rss/news-releases.xml' },
-  { company:'Natera',             url:'https://investors.natera.com/rss/news-releases.xml' },
-  { company:'Nuvalent',           url:'https://ir.nuvalent.com/rss/news-releases.xml' },
-  { company:'Protagonist',        url:'https://ir.protagonist-inc.com/rss/news-releases.xml' },
-  // Large pharma own newsrooms
-  { company:'Pfizer',             url:'https://www.pfizer.com/news/press-releases/rss' },
-  { company:'J&J',                url:'https://www.investor.jnj.com/rss/news-releases.xml' },
-  { company:'Merck',              url:'https://www.merck.com/rss/feed/news/' },
-  { company:'Novo Nordisk',       url:'https://www.novonordisk.com/rss.xml' },
-  { company:'Roche',              url:'https://www.roche.com/media/releases.rss' },
-  { company:'Novartis',           url:'https://www.novartis.com/newsroom/news-releases.rss' },
-  { company:'AstraZeneca',        url:'https://www.astrazeneca.com/media-centre/press-releases/rss.xml' },
-  { company:'GSK',                url:'https://www.gsk.com/en-gb/media/press-releases/feed/' },
-  { company:'Sanofi',             url:'https://www.sanofi.com/en/media-room/press-releases.rss' },
-  { company:'Takeda',             url:'https://www.takeda.com/newsroom/press-releases/rss.xml' },
-];
-
-// ── GlobeNewswire industry feeds (actual company PRs submitted to the wire) ───
-const WIRE_FEEDS = [
-  { url:'https://www.globenewswire.com/RssFeed/industry/Biotechnology',    source:'GlobeNewswire', topic:'Company News' },
-  { url:'https://www.globenewswire.com/RssFeed/industry/Pharmaceuticals',  source:'GlobeNewswire', topic:'Company News' },
+// ── Company press releases via wire-service site: searches ───────────────────
+// Searches Google News for each company's releases on the actual wire services
+// where pharma companies publish official press releases
+const COMPANY_PR_FEEDS = [
+  { company:'Pfizer',             url: GN('"Pfizer" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Merck',              url: GN('"Merck" pharmaceutical (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Eli Lilly',          url: GN('"Eli Lilly" OR "Lilly" pharmaceutical (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'AstraZeneca',        url: GN('"AstraZeneca" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Novartis',           url: GN('"Novartis" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'GSK',                url: GN('"GSK" OR "GlaxoSmithKline" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Amgen',              url: GN('"Amgen" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Sanofi',             url: GN('"Sanofi" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'BMS',                url: GN('"Bristol Myers Squibb" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Takeda',             url: GN('"Takeda" pharmaceutical (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'AbbVie',             url: GN('"AbbVie" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'J&J',                url: GN('"Johnson & Johnson" OR "Janssen" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Novo Nordisk',       url: GN('"Novo Nordisk" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Roche',              url: GN('"Roche" OR "Genentech" pharmaceutical (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Regeneron',          url: GN('"Regeneron" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Biogen',             url: GN('"Biogen" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Gilead',             url: GN('"Gilead Sciences" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Vertex',             url: GN('"Vertex Pharmaceuticals" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Moderna',            url: GN('"Moderna" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'BioNTech',           url: GN('"BioNTech" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Alnylam',            url: GN('"Alnylam" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Argenx',             url: GN('"Argenx" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Daiichi Sankyo',     url: GN('"Daiichi Sankyo" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Incyte',             url: GN('"Incyte" pharmaceutical (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Neurocrine',         url: GN('"Neurocrine Biosciences" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Sarepta',            url: GN('"Sarepta Therapeutics" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Alnylam',            url: GN('"Alnylam Pharmaceuticals" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Ionis',              url: GN('"Ionis Pharmaceuticals" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Halozyme',           url: GN('"Halozyme" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Blueprint Medicines',url: GN('"Blueprint Medicines" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Exelixis',           url: GN('"Exelixis" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Ultragenyx',         url: GN('"Ultragenyx" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Insmed',             url: GN('"Insmed" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Genmab',             url: GN('"Genmab" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Natera',             url: GN('"Natera" genetics (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Madrigal',           url: GN('"Madrigal Pharmaceuticals" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Jazz Pharmaceuticals',url:GN('"Jazz Pharmaceuticals" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Acadia',             url: GN('"Acadia Pharmaceuticals" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Ascendis',           url: GN('"Ascendis Pharma" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Cytokinetics',       url: GN('"Cytokinetics" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'IQVIA',              url: GN('"IQVIA" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Thermo Fisher',      url: GN('"Thermo Fisher Scientific" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
+  { company:'Zoetis',             url: GN('"Zoetis" (site:businesswire.com OR site:globenewswire.com OR site:prnewswire.com)') },
 ];
 
 // ── General topic feeds ────────────────────────────────────────────────────────
@@ -67,39 +66,30 @@ const TOPIC_FEEDS = [
 exports.handler = async () => {
   const fetchFeed = async (url, max) => {
     try {
-      const res = await fetch(url, { headers:{ 'User-Agent': UA }, signal: AbortSignal.timeout(7000) });
+      const res = await fetch(url, { headers:{ 'User-Agent': UA }, signal: AbortSignal.timeout(8000) });
       if (!res.ok) return [];
       return parseRSS(await res.text(), max);
     } catch { return []; }
   };
 
-  const [irResults, wireResults, topicResults] = await Promise.all([
-    // Direct company IR feeds — up to 6 releases each, fail silently if blocked
-    Promise.allSettled(COMPANY_IR_FEEDS.map(async f => {
-      const items = await fetchFeed(f.url, 6);
+  const [prResults, topicResults] = await Promise.all([
+    Promise.allSettled(COMPANY_PR_FEEDS.map(async f => {
+      const items = await fetchFeed(f.url, 5);
       return items.map(a => ({ ...a, source: f.company, topic: 'Company News', company: f.company }));
     })),
-    // Wire-service feeds — up to 20 articles each (broad company coverage)
-    Promise.allSettled(WIRE_FEEDS.map(async f => {
-      const items = await fetchFeed(f.url, 20);
-      return items.map(a => ({ ...a, source: f.source, topic: f.topic }));
-    })),
-    // General topic feeds
     Promise.allSettled(TOPIC_FEEDS.map(async f => {
       const items = await fetchFeed(f.url, 10);
       return items.map(a => ({ ...a, source: f.source, topic: f.topic }));
     }))
   ]);
 
-  const irArticles    = irResults.flatMap(r    => r.status === 'fulfilled' ? r.value : []);
-  const wireArticles  = wireResults.flatMap(r  => r.status === 'fulfilled' ? r.value : []);
+  const prArticles    = prResults.flatMap(r    => r.status === 'fulfilled' ? r.value : []);
   const topicArticles = topicResults.flatMap(r => r.status === 'fulfilled' ? r.value : []);
 
-  // Deduplicate across all sets — IR feeds take priority over wire, wire over topic
   const seen = new Set();
   const dedup = arr => arr.filter(a => { if (!a.url || seen.has(a.url)) return false; seen.add(a.url); return true; });
 
-  const all = [...dedup(irArticles), ...dedup(wireArticles), ...dedup(topicArticles)];
+  const all = [...dedup(prArticles), ...dedup(topicArticles)];
   all.sort((a, b) => b.dateMs - a.dateMs);
 
   return {
@@ -117,8 +107,6 @@ function parseRSS(xml, max = 10) {
   while ((m = re.exec(xml)) !== null) {
     const chunk = m[1];
     const title = clean(get(chunk, 'title'));
-
-    // Atom uses <link rel="alternate" href="…"/> (self-closing); RSS uses <link>…</link> or <guid>
     let url = '';
     if (isAtom) {
       const hrefM = chunk.match(/<link[^>]+href="([^"]+)"/);
@@ -126,12 +114,8 @@ function parseRSS(xml, max = 10) {
     } else {
       url = (get(chunk, 'link') || get(chunk, 'guid')).trim();
     }
-
-    // Atom: <published> or <updated>; RSS: <pubDate>
     const date = get(chunk, 'pubDate') || get(chunk, 'published') || get(chunk, 'updated');
-    // Atom: <summary> or <content>; RSS: <description>
     const desc = clean(get(chunk, 'description') || get(chunk, 'summary') || get(chunk, 'content')).slice(0, 220);
-
     if (!title || !url) continue;
     const dateMs = date ? new Date(date).getTime() : 0;
     items.push({ title, url, date: dateMs ? new Date(dateMs).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', dateMs, summary: desc });
