@@ -1,4 +1,4 @@
-import { esc, showToast, skeletons, buildFilters, renderRoles } from './main.js';
+import { esc, showToast, skeletons, buildFilters, renderRoles, inferArea, inferFunc, parsePostedDate } from './main.js';
 import { saveCachedJobs, loadCachedJobs, cachedLiveJobs, lastFetchTime } from './store.js';
 
 export function sanitizeData(array) {
@@ -15,6 +15,13 @@ export function sanitizeData(array) {
 }
 
 export const delay = ms => new Promise(res => setTimeout(res, ms));
+
+function stamp(job) {
+  job._area = inferArea(job.title, job.dept || '');
+  job._func = inferFunc(job.title, job.dept || '');
+  job._dateMs = parsePostedDate(job.posted);
+  return job;
+}
 
 export const FETCH_COMPANIES = [
   // ── Large Pharma ──
@@ -187,7 +194,7 @@ export async function fetchAllCompanyJobs(){
             if (id) q.seenIds.add(id);
             const posted = d.posted_date ? new Date(d.posted_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
             const loc = [d.city, d.state, d.country].filter(Boolean).join(', ');
-            jobs.push({ id: `GSK_${id||Math.random()}`, company: q.company.name, title: d.title||'', dept: (d.categories||[])[0]?.name||'', location: loc, posted, url: d.apply_url||d.canonical_url||'https://jobs.gsk.com/en-gb/jobs' });
+            jobs.push(stamp({ id: `GSK_${id||Math.random()}`, company: q.company.name, title: d.title||'', dept: (d.categories||[])[0]?.name||'', location: loc, posted, url: d.apply_url||d.canonical_url||'https://jobs.gsk.com/en-gb/jobs' }));
           }
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
@@ -200,7 +207,7 @@ export async function fetchAllCompanyJobs(){
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           if(q.total === null) q.total = data.totalFound || 0;
-          const jobs = (data.content||[]).map(j=>({ id: j.id||String(Math.random()), company: q.company.name, title: j.name||'', dept: j.department?.label||'', location: [j.location?.city, j.location?.country].filter(Boolean).join(', '), posted: j.releasedDate ? new Date(j.releasedDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: j.ref||`https://careers.smartrecruiters.com/${q.company.tenant}/` }));
+          const jobs = (data.content||[]).map(j=>stamp({ id: j.id||String(Math.random()), company: q.company.name, title: j.name||'', dept: j.department?.label||'', location: [j.location?.city, j.location?.country].filter(Boolean).join(', '), posted: j.releasedDate ? new Date(j.releasedDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: j.ref||`https://careers.smartrecruiters.com/${q.company.tenant}/` }));
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
           q.offset += LIMIT;
@@ -211,11 +218,11 @@ export async function fetchAllCompanyJobs(){
           if (q.company.ats === 'Greenhouse') {
             const res = await fetch(`/api/greenhouse/${q.company.tenant}`); if(!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
-            jobs = (data.jobs||[]).map(j=>({ id: String(j.id), company: q.company.name, title: j.title||'', dept: j.departments?.[0]?.name||'', location: j.location?.name||'', posted: j.updated_at ? new Date(j.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: j.absolute_url||`https://boards.greenhouse.io/${q.company.tenant}` }));
+            jobs = (data.jobs||[]).map(j=>stamp({ id: String(j.id), company: q.company.name, title: j.title||'', dept: j.departments?.[0]?.name||'', location: j.location?.name||'', posted: j.updated_at ? new Date(j.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: j.absolute_url||`https://boards.greenhouse.io/${q.company.tenant}` }));
           } else if (q.company.ats === 'Workable') {
             const res = await fetch(`/api/workable/${q.company.tenant}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ query: '' }) }); if(!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
-            jobs = (data.results||[]).map(j=>({ id: j.shortcode||String(Math.random()), company: q.company.name, title: j.title||'', dept: j.department||'', location: [j.city, j.state, j.country].filter(Boolean).join(', '), posted: j.published_on ? new Date(j.published_on).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: `https://apply.workable.com/${q.company.tenant}/j/${j.shortcode}/` }));
+            jobs = (data.results||[]).map(j=>stamp({ id: j.shortcode||String(Math.random()), company: q.company.name, title: j.title||'', dept: j.department||'', location: [j.city, j.state, j.country].filter(Boolean).join(', '), posted: j.published_on ? new Date(j.published_on).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: `https://apply.workable.com/${q.company.tenant}/j/${j.shortcode}/` }));
           }
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
@@ -280,7 +287,7 @@ export function normalizeJob(j, c){
   } else {
     url = j.absolute_url || path || `https://careers.${c.name.toLowerCase().replace(/\s/g,'')}.com`;
   }
-  return { id:`${c.name}_${id}`, company: c.name, title, dept, location:loc, posted, url };
+  return stamp({ id:`${c.name}_${id}`, company: c.name, title, dept, location:loc, posted, url });
 }
 
 export async function forceRefreshBaseline() {

@@ -504,7 +504,7 @@ export function buildFilters() {
   document.getElementById('roles-filters').style.display = 'flex';
 }
 
-function parsePostedDate(posted) {
+export function parsePostedDate(posted) {
   if (!posted) return 0;
   const p = posted.toLowerCase().trim();
   if (p === 'today' || p === 'just posted') return Date.now();
@@ -525,16 +525,14 @@ function getFilteredRoles() {
   const co = document.getElementById('r-company')?.value || '';
   const country = document.getElementById('r-loc')?.value || '';
   return all_jobs.filter(r => {
-    if (!r._area) r._area = inferArea(r.title, r.dept || '');
-    if (!r._func) r._func = inferFunc(r.title, r.dept || '');
-    if (r._dateMs === undefined) r._dateMs = parsePostedDate(r.posted);
-    const area = r._area, func = r._func;
+    const area = r._area || inferArea(r.title, r.dept || '');
+    const func = r._func || inferFunc(r.title, r.dept || '');
     const mQ = !q || r.title.toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || r.company.toLowerCase().includes(q) || area.toLowerCase().includes(q);
     const mArea = !areaFilter || area === areaFilter;
     const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
     const mCountry = !country || (r.location || '').split(',').pop().trim() === country;
     return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
-  }).sort((a, b) => b._dateMs - a._dateMs);
+  }).sort((a, b) => (b._dateMs||0) - (a._dateMs||0));
 }
 
 function clearRoleFilters() { ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('r-clear-btn').style.display = 'none'; renderRoles(); }
@@ -592,7 +590,7 @@ function addRoleToTracker(r, btn, stage = 'Sourced') {
   document.getElementById('tracker-badge').textContent = jobs.length; updateTrackerStats(); showToast(`${r.company} role added`);
 }
 
-function inferArea(title, dept) { const t = (title + ' ' + dept).toLowerCase(); if (t.includes('oncol')) return 'Oncology'; if (t.includes('rare')) return 'Rare Disease'; if (t.includes('immun') || t.includes('autoimmun')) return 'Immunology'; if (t.includes('neuro') || t.includes('cns')) return 'Neuroscience'; if (t.includes('cardio') || t.includes('heart')) return 'Cardiovascular'; if (t.includes('vaccin')) return 'Vaccines'; if (t.includes('metabol') || t.includes('endocrin')) return 'Metabolic / Endocrine'; if (t.includes('infectious')) return 'Infectious Disease'; if (t.includes('ophthal')) return 'Ophthalmology'; return 'Diversified'; }
+export function inferArea(title, dept) { const t = (title + ' ' + dept).toLowerCase(); if (t.includes('oncol')) return 'Oncology'; if (t.includes('rare')) return 'Rare Disease'; if (t.includes('immun') || t.includes('autoimmun')) return 'Immunology'; if (t.includes('neuro') || t.includes('cns')) return 'Neuroscience'; if (t.includes('cardio') || t.includes('heart')) return 'Cardiovascular'; if (t.includes('vaccin')) return 'Vaccines'; if (t.includes('metabol') || t.includes('endocrin')) return 'Metabolic / Endocrine'; if (t.includes('infectious')) return 'Infectious Disease'; if (t.includes('ophthal')) return 'Ophthalmology'; return 'Diversified'; }
 function inferLevel(title) { const t = title.toLowerCase(); if (t.includes('chief') || t.includes('cso') || t.includes('coo')) return 'C-Suite'; if (t.includes('executive vice') || t.includes('evp') || t.includes('senior vice') || t.includes('svp')) return 'SVP / EVP'; if (t.includes('vice president') || t.includes(' vp ') || t.startsWith('vp ')) return 'VP'; if (t.includes('senior director')) return 'Senior Director'; if (t.includes('director')) return 'Director'; if (t.includes('senior manager')) return 'Senior Manager'; if (t.includes('manager')) return 'Manager'; if (t.includes('associate director')) return 'Associate Director'; if (t.includes('associate')) return 'Associate'; return 'Other'; }
 
 export const FUNC_GROUPS = [
@@ -616,7 +614,7 @@ export const FUNC_GROUPS = [
 export const FUNC_GROUP_MAP = {};
 FUNC_GROUPS.forEach(g => { FUNC_GROUP_MAP[g.group] = g.group; g.items.forEach(item => { FUNC_GROUP_MAP[item] = g.group; }); });
 
-function inferFunc(title, dept) {
+export function inferFunc(title, dept) {
   const t = (title + ' ' + dept).toLowerCase();
   // Commercial Analytics & Insights
   if (t.includes('forecast')) return 'Forecasting';
