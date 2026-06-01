@@ -766,8 +766,8 @@ export function inferFunc(title, dept) {
 // ══════════════════════════════════════════
 // NEWS PAGE
 // ══════════════════════════════════════════
-const TOPICS = ['Industry','Pipeline','Regulatory','M&A','Earnings','Company News'];
-const TOPIC_LABELS = { Industry:'Industry Headlines', Pipeline:'Pipeline & Approvals', Regulatory:'Regulatory & FDA', 'M&A':'M&A & Deals', Earnings:'Earnings & Finance', 'Company News':'Company News' };
+const TOPICS = ['Company News','Industry','Pipeline','Regulatory','M&A','Earnings'];
+const TOPIC_LABELS = { 'Company News':'Company Press Releases', Industry:'Industry Headlines', Pipeline:'Pipeline & Approvals', Regulatory:'Regulatory & FDA', 'M&A':'M&A & Deals', Earnings:'Earnings & Finance' };
 let newsLoaded = false;
 let newsArticles = [];
 
@@ -840,17 +840,43 @@ function renderNews() {
   const byTopic = {};
   TOPICS.forEach(t => byTopic[t] = []);
   filtered.forEach(a => { if (byTopic[a.topic]) byTopic[a.topic].push(a); });
-  container.innerHTML = TOPICS.filter(t => byTopic[t].length).map(t => `
-    <div class="news-section">
-      <div class="news-section-title">${esc(TOPIC_LABELS[t])}</div>
-      <div class="news-cards">${byTopic[t].slice(0,8).map(a => `
-        <a class="news-card" href="${esc(a.url)}" target="_blank" rel="noopener">
-          <div class="news-card-meta"><span class="news-source">${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
-          <div class="news-card-title">${esc(a.title)}</div>
-          ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
-        </a>`).join('')}
-      </div>
-    </div>`).join('');
+
+  const newsCardHTML = a => `
+    <a class="news-card" href="${esc(a.url)}" target="_blank" rel="noopener">
+      <div class="news-card-meta"><span class="news-source">${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
+      <div class="news-card-title">${esc(a.title)}</div>
+      ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
+    </a>`;
+
+  container.innerHTML = TOPICS.filter(t => byTopic[t].length).map(t => {
+    if (t === 'Company News') {
+      // Group by company, show each company's releases as a named sub-section
+      const byCompany = {};
+      byTopic[t].forEach(a => {
+        const co = a.company || (a._cos && a._cos[0]) || a.source || 'Other';
+        if (!byCompany[co]) byCompany[co] = [];
+        byCompany[co].push(a);
+      });
+      const companySections = Object.entries(byCompany)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([co, articles]) => `
+          <div class="news-co-group">
+            <div class="news-co-group-label">${esc(co)}</div>
+            <div class="news-cards">${articles.slice(0, 4).map(newsCardHTML).join('')}</div>
+          </div>`).join('');
+      return `
+        <div class="news-section">
+          <div class="news-section-title">${esc(TOPIC_LABELS[t])}</div>
+          ${companySections}
+        </div>`;
+    }
+    return `
+      <div class="news-section">
+        <div class="news-section-title">${esc(TOPIC_LABELS[t])}</div>
+        <div class="news-cards">${byTopic[t].slice(0, 8).map(newsCardHTML).join('')}
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function populateNewsFilters() {

@@ -886,6 +886,8 @@ padding: 14px 0; border-top: 1px solid var(--border); letter-spacing: 0.3px;
 .news-sub { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); margin-top: 4px; letter-spacing: 0.3px; }
 .news-section { margin-bottom: 40px; }
 .news-section-title { font-family: 'DM Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 16px; }
+.news-co-group { margin-bottom: 24px; }
+.news-co-group-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--accent2); margin-bottom: 10px; padding-left: 2px; }
 .news-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 .news-card { display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-decoration: none; transition: border-color 0.15s, transform 0.15s; }
 .news-card:hover { border-color: var(--accent); transform: translateY(-1px); }
