@@ -910,24 +910,41 @@ export function inferFunc(title, dept) {
   if ((t.includes('coordinator') || t.includes('manager') || t.includes('associate')) && (t.includes('supply') || t.includes('logistics') || t.includes('warehouse'))) return 'Supply Chain Planning';
   if (t.includes('nurse') || t.includes('health care') || t.includes('healthcare') && t.includes('professional')) return 'Medical Affairs';
 
-  // ── Tier 2: "Other / [Group]" — sits inside each group's optgroup ────────
-  if (t.includes('sales') || t.includes('commercial') && (t.includes('director') || t.includes('manager') || t.includes('lead') || t.includes('associate'))) return 'Other / Commercial Operations';
-  if (t.includes('marketing') || t.includes('brand') || t.includes('campaign') || t.includes('content') || t.includes('communications')) return 'Other / Marketing';
-  if (t.includes('access') || t.includes('payer') || t.includes('reimburs') || t.includes('government') || t.includes('formulary')) return 'Other / Market Access & Pricing';
-  if (t.includes('analyt') || t.includes('insight') || t.includes('intelligence') || t.includes('data') || t.includes('forecast')) return 'Other / Commercial Analytics & Insights';
-  if (t.includes('medical') || t.includes('science') || t.includes('pharma') || t.includes('physician')) return 'Other / Medical Affairs';
-  if (t.includes('clinical') || t.includes('trial') || t.includes('study') || t.includes('site') || t.includes('patient') && t.includes('recruit')) return 'Other / Clinical Development';
-  if (t.includes('regulat') || t.includes('safety') || t.includes('pharmacovigil') || t.includes('submission')) return 'Other / Regulatory Affairs';
-  if (t.includes('research') || t.includes('biolog') || t.includes('lab') || t.includes('chemist') || t.includes('discover')) return 'Other / Research & Discovery';
-  if (t.includes('manufactur') || t.includes('quality') || t.includes('supply') || t.includes('logistics') || t.includes('production') || t.includes('plant') || t.includes('warehouse')) return 'Other / Manufacturing & Supply Chain';
-  if (t.includes('finance') || t.includes('accounting') || t.includes('treasury') || t.includes('budget') || t.includes('audit') || t.includes('tax')) return 'Other / Finance';
-  if (t.includes('strategy') || t.includes('business development') || t.includes('licensing') || t.includes('portfolio') || t.includes('alliance')) return 'Other / Business Development & Strategy';
-  if (t.includes('digital') || t.includes('technology') || t.includes('software') || t.includes('system') || t.includes('data') || t.includes('it ') || /\bit\b/.test(t)) return 'Other / IT & Digital';
-  if (t.includes('human resources') || t.includes('talent') || t.includes('people') || t.includes('recruit') || t.includes('hr') || t.includes('learning')) return 'Other / HR & Talent';
-  if (t.includes('legal') || t.includes('compliance') || t.includes('counsel') || t.includes('privacy') || t.includes('patent') || t.includes('contract')) return 'Other / Legal & Compliance';
-  if (t.includes('patient') || t.includes('hub') || t.includes('specialty pharmacy') || t.includes('advocacy')) return 'Other / Patient Services & Access';
+  // ── Tier 2: "Other / [Group]" — ordered most-specific first ─────────────
+  // Legal (lawyer/attorney/counsel before any broad commercial catch)
+  if (t.includes('legal') || t.includes('lawyer') || t.includes('attorney') || t.includes('counsel') || t.includes('litigation') || t.includes('patent') || t.includes('intellectual property') || t.includes('contract') || t.includes('governance') || t.includes('privacy') || t.includes('compliance')) return 'Other / Legal & Compliance';
+  // Finance (specific finance terms before broad business)
+  if (t.includes('finance') || t.includes('financ') || t.includes('accounting') || t.includes('accountant') || t.includes('treasury') || t.includes('budget') || t.includes('audit') || t.includes('tax') || t.includes('fiscal') || t.includes('payroll') || t.includes('payment') || t.includes('invoice')) return 'Other / Finance';
+  // HR (people/employee terms before commercial)
+  if (/\bhr\b/.test(t) || t.includes('human resources') || t.includes('talent') || t.includes('recruit') || t.includes('employee') || t.includes('workforce') || t.includes('people ops') || t.includes('wellbeing') || t.includes('benefits') || t.includes('compensation') || t.includes('payroll')) return 'Other / HR & Talent';
+  // IT & Digital (tech terms before data which could be analytics)
+  if (t.includes('software') || t.includes('technology') || t.includes('infrastructure') || t.includes('cybersec') || t.includes('network') || /\bit\b/.test(t) || t.includes('system admin') || t.includes('helpdesk') || t.includes('erp') || t.includes('sap') && !t.includes('sap transportation')) return 'Other / IT & Digital';
+  // Patient Services (patient before medical/clinical)
+  if (t.includes('patient support') || t.includes('patient service') || t.includes('hub service') || t.includes('specialty pharmacy') || t.includes('patient advocacy') || t.includes('patient access')) return 'Other / Patient Services & Access';
+  // Pharmacovigilance / Drug Safety (safety before regulatory)
+  if (t.includes('safety') && (t.includes('drug') || t.includes('adverse') || t.includes('pharmacovigil') || t.includes('signal')) || t.includes('pharmacovigil')) return 'Other / Regulatory Affairs';
+  // Regulatory Affairs
+  if (t.includes('regulat') || t.includes('submission') || t.includes('labeling') || t.includes('dossier') || t.includes('cmc') || t.includes('réglementaire')) return 'Other / Regulatory Affairs';
+  // Clinical Development
+  if (t.includes('clinical') || t.includes('trial') || t.includes('protocol') || t.includes('investigator') || t.includes('site management') || t.includes('study start')) return 'Other / Clinical Development';
+  // Medical Affairs
+  if (t.includes('medical') || t.includes('physician') || t.includes('msl') || t.includes('medical science') || t.includes('medical affairs')) return 'Other / Medical Affairs';
+  // Research & Discovery
+  if (t.includes('research') || t.includes('biolog') || t.includes('chemistry') || t.includes('chemist') || t.includes('discover') || t.includes('lab ') || t.includes('laboratory') || t.includes('scientist') || t.includes('in vivo') || t.includes('in vitro')) return 'Other / Research & Discovery';
+  // Manufacturing & Supply Chain
+  if (t.includes('manufactur') || t.includes('quality') || t.includes('supply chain') || t.includes('logistics') || t.includes('production') || t.includes('plant') || t.includes('warehouse') || t.includes('materials') || t.includes('procurement') || t.includes('gmp')) return 'Other / Manufacturing & Supply Chain';
+  // Market Access
+  if (t.includes('market access') || t.includes('payer') || t.includes('reimburs') || t.includes('government affairs') || t.includes('formulary') || t.includes('health economics')) return 'Other / Market Access & Pricing';
+  // Business Development & Strategy (strategy/corporate before general commercial)
+  if (t.includes('strategy') || t.includes('business development') || t.includes('licensing') || t.includes('portfolio') || t.includes('alliance') || t.includes('mergers') || t.includes('acquisition') || t.includes('corporate development')) return 'Other / Business Development & Strategy';
+  // Analytics & Insights
+  if (t.includes('analyt') || t.includes('insight') || t.includes('intelligence') || t.includes('forecast') || t.includes('reporting') || t.includes('data science') || t.includes('data analyst')) return 'Other / Commercial Analytics & Insights';
+  // Marketing
+  if (t.includes('marketing') || t.includes('brand') || t.includes('campaign') || t.includes('content') || t.includes('communications') || t.includes('media') || t.includes('advertising')) return 'Other / Marketing';
+  // Commercial Operations (broad sales/commercial catch — second to last)
+  if (t.includes('sales') || t.includes('commercial') || t.includes('revenue') || t.includes('customer') || t.includes('account')) return 'Other / Commercial Operations';
 
-  return 'Other / Commercial Operations';  // true last resort — commercial is the biggest bucket
+  return 'Other / Commercial Operations';  // absolute last resort
 }
 // ══════════════════════════════════════════
 // NEWS PAGE
