@@ -111,14 +111,27 @@ exports.handler = async () => {
 
 function parseRSS(xml, max = 10) {
   const items = [];
-  const re = /<item>([\s\S]*?)<\/item>/g;
+  const isAtom = /<entry[\s>]/.test(xml);
+  const re = isAtom ? /<entry[\s>]([\s\S]*?)<\/entry>/g : /<item>([\s\S]*?)<\/item>/g;
   let m;
   while ((m = re.exec(xml)) !== null) {
     const chunk = m[1];
     const title = clean(get(chunk, 'title'));
-    const url   = (get(chunk, 'link') || get(chunk, 'guid')).trim();
-    const date  = get(chunk, 'pubDate');
-    const desc  = clean(get(chunk, 'description')).slice(0, 220);
+
+    // Atom uses <link rel="alternate" href="…"/> (self-closing); RSS uses <link>…</link> or <guid>
+    let url = '';
+    if (isAtom) {
+      const hrefM = chunk.match(/<link[^>]+href="([^"]+)"/);
+      url = hrefM ? hrefM[1] : get(chunk, 'id');
+    } else {
+      url = (get(chunk, 'link') || get(chunk, 'guid')).trim();
+    }
+
+    // Atom: <published> or <updated>; RSS: <pubDate>
+    const date = get(chunk, 'pubDate') || get(chunk, 'published') || get(chunk, 'updated');
+    // Atom: <summary> or <content>; RSS: <description>
+    const desc = clean(get(chunk, 'description') || get(chunk, 'summary') || get(chunk, 'content')).slice(0, 220);
+
     if (!title || !url) continue;
     const dateMs = date ? new Date(date).getTime() : 0;
     items.push({ title, url, date: dateMs ? new Date(dateMs).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', dateMs, summary: desc });
