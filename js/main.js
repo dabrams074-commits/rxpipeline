@@ -766,10 +766,12 @@ export function inferFunc(title, dept) {
 // ══════════════════════════════════════════
 // NEWS PAGE
 // ══════════════════════════════════════════
-const TOPICS = ['Industry','Pipeline','Regulatory','M&A','Earnings','Company News'];
-const TOPIC_LABELS = { Industry:'Industry Headlines', Pipeline:'Pipeline & Approvals', Regulatory:'Regulatory & FDA', 'M&A':'M&A & Deals', Earnings:'Earnings & Finance', 'Company News':'Company News' };
+const TOPICS = ['Company News','Industry','Pipeline','Regulatory','M&A','Earnings'];
+const TOPIC_LABELS = { 'Company News':'Company Press Releases', Industry:'Industry Headlines', Pipeline:'Pipeline & Approvals', Regulatory:'Regulatory & FDA', 'M&A':'M&A & Deals', Earnings:'Earnings & Finance' };
 let newsLoaded = false;
 let newsArticles = [];
+let newsMode = 'company';   // 'company' | 'industry'
+let newsView = 'grid';      // 'grid' | 'list'
 
 const NEWS_COMPANY_MAP = [
   { label:'AbbVie',              terms:['abbvie'] },
@@ -824,50 +826,121 @@ function tagArticle(a) {
 
 function renderNews() {
   const container = document.getElementById('news-container');
-  if (!container) return;
+  if (!container || !newsArticles.length) return;
+
+  const q        = (document.getElementById('news-search')?.value || '').toLowerCase().trim();
   const coFilter = document.getElementById('news-filter-co')?.value || '';
+  const srcFilter= document.getElementById('news-filter-src')?.value || '';
   const taFilter = document.getElementById('news-filter-ta')?.value || '';
 
-  let filtered = newsArticles;
-  if (coFilter) filtered = filtered.filter(a => a._cos.includes(coFilter));
-  if (taFilter) filtered = filtered.filter(a => a._tas.includes(taFilter));
+  // Mode: company or industry
+  let filtered = newsArticles.filter(a => a.mode === newsMode);
+
+  // Keyword search
+  if (q) filtered = filtered.filter(a =>
+    (a.title||'').toLowerCase().includes(q) ||
+    (a.summary||'').toLowerCase().includes(q) ||
+    (a.source||'').toLowerCase().includes(q)
+  );
+  // Filters
+  if (coFilter)  filtered = filtered.filter(a => a._cos && a._cos.includes(coFilter));
+  if (taFilter)  filtered = filtered.filter(a => a._tas && a._tas.includes(taFilter));
+  if (srcFilter) filtered = filtered.filter(a => a.source === srcFilter);
 
   if (!filtered.length) {
     container.innerHTML = `<div class="fetch-empty"><div class="fetch-empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="fetch-empty-title">No articles match your filters</div><div class="fetch-empty-sub">Try clearing the filters to see all headlines.</div></div>`;
     return;
   }
 
-  const byTopic = {};
-  TOPICS.forEach(t => byTopic[t] = []);
-  filtered.forEach(a => { if (byTopic[a.topic]) byTopic[a.topic].push(a); });
-  container.innerHTML = TOPICS.filter(t => byTopic[t].length).map(t => `
-    <div class="news-section">
-      <div class="news-section-title">${esc(TOPIC_LABELS[t])}</div>
-      <div class="news-cards">${byTopic[t].slice(0,8).map(a => `
-        <a class="news-card" href="${esc(a.url)}" target="_blank" rel="noopener">
-          <div class="news-card-meta"><span class="news-source">${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
-          <div class="news-card-title">${esc(a.title)}</div>
-          ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
-        </a>`).join('')}
-      </div>
-    </div>`).join('');
+  const isList = newsView === 'list';
+
+  if (newsMode === 'company') {
+    // Group by company — show each company's press releases
+    const byCo = {};
+    filtered.forEach(a => { (byCo[a.company] = byCo[a.company] || []).push(a); });
+    container.innerHTML = Object.entries(byCo).map(([co, arts]) => `
+      <div class="news-section">
+        <div class="news-section-title" style="color:${esc(arts[0].color||'var(--accent)')}">${esc(co)}</div>
+        <div class="${isList ? 'news-list' : 'news-cards'}">${arts.slice(0,6).map(a => newsCardHTML(a, isList)).join('')}
+        </div>
+      </div>`).join('');
+  } else {
+    // Group by topic for industry view
+    const byTopic = {};
+    TOPICS.filter(t => t !== 'Company News').forEach(t => byTopic[t] = []);
+    filtered.forEach(a => { if (byTopic[a.topic]) byTopic[a.topic].push(a); });
+    container.innerHTML = TOPICS.filter(t => t !== 'Company News' && byTopic[t]?.length).map(t => `
+      <div class="news-section">
+        <div class="news-section-title">${esc(TOPIC_LABELS[t])}</div>
+        <div class="${isList ? 'news-list' : 'news-cards'}">${byTopic[t].slice(0,8).map(a => newsCardHTML(a, isList)).join('')}
+        </div>
+      </div>`).join('');
+  }
+}
+
+function newsCardHTML(a, isList) {
+  if (isList) {
+    return `<a class="news-list-item" href="${esc(a.url)}" target="_blank" rel="noopener">
+      <div class="news-list-meta"><span class="news-source" style="${a.color?`color:${esc(a.color)}`:''}">
+        ${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
+      <div class="news-card-title">${esc(a.title)}</div>
+    </a>`;
+  }
+  return `<a class="news-card" href="${esc(a.url)}" target="_blank" rel="noopener">
+    <div class="news-card-meta">
+      <span class="news-source" style="${a.color?`color:${esc(a.color)}`:''}"> ${esc(a.source)}</span>
+      <span class="news-date">${esc(a.date)}</span>
+    </div>
+    <div class="news-card-title">${esc(a.title)}</div>
+    ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
+  </a>`;
+}
+
+function setNewsMode(mode) {
+  newsMode = mode;
+  document.getElementById('news-mode-company')?.classList.toggle('active', mode === 'company');
+  document.getElementById('news-mode-industry')?.classList.toggle('active', mode === 'industry');
+  // Show/hide company-specific filters
+  const coRow = document.getElementById('news-filter-co-wrap');
+  const srcRow = document.getElementById('news-filter-src-wrap');
+  if (coRow)  coRow.style.display  = mode === 'industry' ? '' : 'none';
+  if (srcRow) srcRow.style.display = mode === 'industry' ? '' : 'none';
+  populateNewsFilters();
+  renderNews();
+}
+
+function setNewsView(v) {
+  newsView = v;
+  document.getElementById('news-view-grid')?.classList.toggle('active', v === 'grid');
+  document.getElementById('news-view-list')?.classList.toggle('active', v === 'list');
+  renderNews();
 }
 
 function populateNewsFilters() {
-  const coSel = document.getElementById('news-filter-co');
-  const taSel = document.getElementById('news-filter-ta');
-  if (!coSel || !taSel) return;
+  const coSel  = document.getElementById('news-filter-co');
+  const taSel  = document.getElementById('news-filter-ta');
+  const srcSel = document.getElementById('news-filter-src');
 
-  // Only show companies/TAs that appear in at least one article
-  const activeCos = new Set(newsArticles.flatMap(a => a._cos));
-  const activeTas = new Set(newsArticles.flatMap(a => a._tas));
+  const pool = newsArticles.filter(a => a.mode === newsMode);
+  const activeCos  = new Set(pool.flatMap(a => a._cos || []));
+  const activeTas  = new Set(pool.flatMap(a => a._tas || []));
+  const activeSrcs = [...new Set(pool.map(a => a.source))].sort();
 
-  coSel.innerHTML = '<option value="">All Companies</option>' +
-    NEWS_COMPANY_MAP.filter(c => activeCos.has(c.label)).map(c => `<option value="${esc(c.label)}">${esc(c.label)}</option>`).join('');
-  taSel.innerHTML = '<option value="">All Therapeutic Areas</option>' +
-    NEWS_TA_MAP.filter(t => activeTas.has(t.label)).map(t => `<option value="${esc(t.label)}">${esc(t.label)}</option>`).join('');
-  coSel.disabled = false;
-  taSel.disabled = false;
+  if (coSel) {
+    coSel.innerHTML = '<option value="">All Companies</option>' +
+      NEWS_COMPANY_MAP.filter(c => activeCos.has(c.label)).map(c => `<option value="${esc(c.label)}">${esc(c.label)}</option>`).join('');
+    coSel.disabled = false;
+  }
+  if (taSel) {
+    taSel.innerHTML = '<option value="">All Therapeutic Areas</option>' +
+      NEWS_TA_MAP.filter(t => activeTas.has(t.label)).map(t => `<option value="${esc(t.label)}">${esc(t.label)}</option>`).join('');
+    taSel.disabled = false;
+  }
+  if (srcSel) {
+    srcSel.innerHTML = '<option value="">All Sources</option>' +
+      activeSrcs.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+    srcSel.disabled = false;
+  }
 }
 
 async function preloadNews() {
@@ -980,8 +1053,10 @@ window.exportRolesCSV = exportRolesCSV;
 window.addRoleToTracker = addRoleToTracker;
 window.updateJobStage = updateJobStage;
 window.forceRefreshBaseline = forceRefreshBaseline;
-window.loadNews = () => { newsLoaded = false; loadNews(); };
+window.loadNews = () => { newsLoaded = false; newsArticles = []; loadNews(); };
 window.renderNews = renderNews;
+window.setNewsMode = setNewsMode;
+window.setNewsView = setNewsView;
 
 window.tFilters = tFilters;
 Object.defineProperty(window, 'panelJobId', { get: () => panelJobId });
