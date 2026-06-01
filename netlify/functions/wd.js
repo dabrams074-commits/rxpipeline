@@ -10,12 +10,12 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
-  const { subdomain, wdNum, tenant, limit, offset, searchText, appliedFacets } = body;
+  const { subdomain, wdNum, tenant, cxsId, limit, offset, searchText, appliedFacets } = body;
   if (!subdomain || !wdNum || !tenant) {
     return { statusCode: 400, body: 'Missing required fields' };
   }
 
-  const url = `https://${subdomain}.wd${wdNum}.myworkdayjobs.com/wday/cxs/${subdomain}/${tenant}/jobs`;
+  const url = `https://${subdomain}.wd${wdNum}.myworkdayjobs.com/wday/cxs/${cxsId || subdomain}/${tenant}/jobs`;
 
   try {
     const response = await fetch(url, {

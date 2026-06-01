@@ -36,11 +36,8 @@ export const FETCH_COMPANIES = [
   { name:'BMS',                     group:'Large Pharma',    ats:'Workday',   subdomain:'bristolmyerssquibb',     tenant:'BMS',                     wdNum:5 },
   { name:'Takeda',                  group:'Large Pharma',    ats:'Workday',   subdomain:'takeda',                 tenant:'External',                wdNum:1 },
   { name:'AbbVie',                  group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'AbbVie',               wdNum:0 },
-  { name:'Bayer',                   group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'Bayer',                wdNum:0 },
-  { name:'Boehringer Ingelheim',    group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'BoehringerIngelheim',  wdNum:0 },
-  { name:'Ipsen',                   group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'Ipsen',                wdNum:0 },
-  { name:'Otsuka',                  group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'OtsukaPharmaceutical', wdNum:0 },
-  { name:'Daiichi Sankyo',          group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'DaiichiSankyo',        wdNum:0 },
+  { name:'Ipsen',                   group:'Large Pharma',    ats:'Workday',         subdomain:'ipsen',      tenant:'Ipsen_Careers', wdNum:103 },
+  { name:'Otsuka',                  group:'Large Pharma',    ats:'Workday',         subdomain:'vhr-otsuka', tenant:'External',      wdNum:1, cxsId:'vhr_otsuka' },
   { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
   { name:'Novo Nordisk',            group:'Large Pharma',    ats:'Workday',   subdomain:'novonordisk',            tenant:'NovoNordisk',             wdNum:3 },
   { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'Roche',                   wdNum:1 },
@@ -164,7 +161,7 @@ export async function fetchAllCompanyJobs(){
       try {
         if (q.company.ats === 'Workday') {
           const LIMIT = 20;
-          const res = await fetch('/.netlify/functions/wd', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ subdomain: q.company.subdomain, wdNum: q.company.wdNum, tenant: q.company.tenant, limit: LIMIT, offset: q.offset, searchText:'', appliedFacets: {} }) });
+          const res = await fetch('/.netlify/functions/wd', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ subdomain: q.company.subdomain, wdNum: q.company.wdNum, tenant: q.company.tenant, cxsId: q.company.cxsId || null, limit: LIMIT, offset: q.offset, searchText:'', appliedFacets: {} }) });
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           if(!data.jobPostings) throw new Error('No jobPostings');
