@@ -518,7 +518,7 @@ export function buildFilters() {
       return `<optgroup label="${esc(g.group)}"><option value="${esc(g.group)}">— All ${esc(g.group)} —</option>${presentItems.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('')}</optgroup>`;
     }).join('');
   document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
-  document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups;
+  document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups + '<option value="Other">Other / Unclassified</option>';
   document.getElementById('r-loc').innerHTML = '<option value="">All Countries</option>' + countries.map(c => `<option>${esc(c)}</option>`).join('');
   document.getElementById('roles-filters').style.display = 'flex';
 }
