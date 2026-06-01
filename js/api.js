@@ -40,7 +40,7 @@ export const FETCH_COMPANIES = [
   { name:'Otsuka',                  group:'Large Pharma',    ats:'Workday',         subdomain:'vhr-otsuka', tenant:'External',      wdNum:1, cxsId:'vhr_otsuka' },
   { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
   { name:'Novo Nordisk',            group:'Large Pharma',    ats:'Workday',   subdomain:'novonordisk',            tenant:'NovoNordisk',             wdNum:3 },
-  { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'Roche',                   wdNum:1 },
+  { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'roche-ext',               wdNum:3 },
   { name:'Thermo Fisher',           group:'Large Pharma',    ats:'Workday',   subdomain:'thermofisher',           tenant:'ThermoFisherScientific',  wdNum:1 },
   { name:'Becton Dickinson',        group:'Large Pharma',    ats:'Workday',   subdomain:'bdx',                    tenant:'BD',                      wdNum:1 },
   { name:'Zoetis',                  group:'Large Pharma',    ats:'Workday',   subdomain:'zoetis',                 tenant:'Zoetis',                  wdNum:1 },
