@@ -875,8 +875,7 @@ async function preloadNews() {
   try {
     const res = await fetch('/.netlify/functions/news');
     if (!res.ok) return;
-    const payload = await res.json();
-    const articles = Array.isArray(payload) ? payload : (payload.articles || []);
+    const articles = await res.json();
     if (!articles.length) return;
     newsArticles = articles.map(tagArticle);
     // Re-render library cards now that news is available
@@ -902,10 +901,7 @@ export async function loadNews() {
     } else {
       const res = await fetch('/.netlify/functions/news');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const payload = await res.json();
-      // Support both old flat array and new {articles, debug} shape
-      articles = Array.isArray(payload) ? payload : (payload.articles || []);
-      if (payload.debug) console.table(payload.debug);
+      articles = await res.json();
       if (!articles.length) throw new Error('No articles returned');
       newsArticles = articles.map(tagArticle);
     }

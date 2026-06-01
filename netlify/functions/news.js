@@ -1,72 +1,103 @@
 const UA = 'Mozilla/5.0 (compatible; FeedFetcher-Google/1.0)';
 const GN = q => `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en&gl=US&ceid=US:en`;
 
-const ALL_FEEDS = [
-  // ── Wire services (actual company press releases) ──
-  { url:'https://www.globenewswire.com/RssFeed/industry/Biotechnology',                                  source:'GlobeNewswire',  topic:'Company News' },
-  { url:'https://www.globenewswire.com/RssFeed/industry/Pharmaceuticals',                                source:'GlobeNewswire',  topic:'Company News' },
-  { url:'https://www.prnewswire.com/rss/news-releases-list.rss',                                         source:'PR Newswire',    topic:'Company News' },
-  { url:'https://www.businesswire.com/rss/home/?rss=G22',                                                source:'Business Wire',  topic:'Company News' },
-  { url:'https://www.biospace.com/rss/',                                                                  source:'BioSpace',       topic:'Company News' },
-  // ── Industry aggregators ──
-  { url:'https://www.fiercepharma.com/rss/xml',                                                          source:'FiercePharma',   topic:'Industry' },
-  { url:'https://www.biopharmadive.com/feeds/news/',                                                     source:'BioPharma Dive', topic:'Industry' },
-  { url:'https://www.statnews.com/feed/',                                                                 source:'STAT News',      topic:'Industry' },
-  { url:'https://endpts.com/feed/',                                                                       source:'Endpoints News', topic:'Industry' },
-  // ── Regulatory ──
-  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml',     source:'FDA',            topic:'Regulatory' },
-  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/drug-approvals-and-databases/rss.xml', source:'FDA Approvals', topic:'Regulatory' },
-  // ── Google News topic feeds ──
-  { url:GN('pharma biotech drug pipeline clinical trial'),                                                source:'Google News',    topic:'Pipeline' },
-  { url:GN('pharma biotech merger acquisition deal'),                                                     source:'Google News',    topic:'M&A' },
-  { url:GN('pharma biotech earnings revenue quarterly results'),                                          source:'Google News',    topic:'Earnings' },
+// ── Per-company Google News feeds (confirmed working) ─────────────────────────
+const COMPANY_FEEDS = [
+  { company:'Pfizer',              url: GN('"Pfizer" pharmaceutical press release') },
+  { company:'Merck',               url: GN('"Merck" pharmaceutical press release') },
+  { company:'Eli Lilly',           url: GN('"Eli Lilly" OR "Lilly" pharmaceutical press release') },
+  { company:'AstraZeneca',         url: GN('"AstraZeneca" press release') },
+  { company:'Novartis',            url: GN('"Novartis" press release') },
+  { company:'GSK',                 url: GN('"GSK" OR "GlaxoSmithKline" press release') },
+  { company:'Amgen',               url: GN('"Amgen" press release') },
+  { company:'Sanofi',              url: GN('"Sanofi" press release') },
+  { company:'BMS',                 url: GN('"Bristol Myers Squibb" press release') },
+  { company:'Takeda',              url: GN('"Takeda" pharmaceutical press release') },
+  { company:'AbbVie',              url: GN('"AbbVie" press release') },
+  { company:'J&J',                 url: GN('"Johnson & Johnson" OR "Janssen" press release') },
+  { company:'Novo Nordisk',        url: GN('"Novo Nordisk" press release') },
+  { company:'Roche',               url: GN('"Roche" OR "Genentech" press release') },
+  { company:'Regeneron',           url: GN('"Regeneron" press release') },
+  { company:'Biogen',              url: GN('"Biogen" press release') },
+  { company:'Gilead',              url: GN('"Gilead Sciences" press release') },
+  { company:'Vertex',              url: GN('"Vertex Pharmaceuticals" press release') },
+  { company:'Moderna',             url: GN('"Moderna" press release') },
+  { company:'BioNTech',            url: GN('"BioNTech" press release') },
+  { company:'Alnylam',             url: GN('"Alnylam" press release') },
+  { company:'Argenx',              url: GN('"Argenx" press release') },
+  { company:'Daiichi Sankyo',      url: GN('"Daiichi Sankyo" press release') },
+  { company:'Incyte',              url: GN('"Incyte" pharmaceutical press release') },
+  { company:'Neurocrine',          url: GN('"Neurocrine Biosciences" press release') },
+  { company:'Sarepta',             url: GN('"Sarepta Therapeutics" press release') },
+  { company:'Ionis',               url: GN('"Ionis Pharmaceuticals" press release') },
+  { company:'Halozyme',            url: GN('"Halozyme" press release') },
+  { company:'Blueprint Medicines', url: GN('"Blueprint Medicines" press release') },
+  { company:'Exelixis',            url: GN('"Exelixis" press release') },
+  { company:'Ultragenyx',          url: GN('"Ultragenyx" press release') },
+  { company:'Insmed',              url: GN('"Insmed" press release') },
+  { company:'Genmab',              url: GN('"Genmab" press release') },
+  { company:'Madrigal',            url: GN('"Madrigal Pharmaceuticals" press release') },
+  { company:'Jazz Pharmaceuticals',url: GN('"Jazz Pharmaceuticals" press release') },
+  { company:'Acadia',              url: GN('"Acadia Pharmaceuticals" press release') },
+  { company:'Ascendis',            url: GN('"Ascendis Pharma" press release') },
+  { company:'Cytokinetics',        url: GN('"Cytokinetics" press release') },
+  { company:'IQVIA',               url: GN('"IQVIA" press release') },
+  { company:'Thermo Fisher',       url: GN('"Thermo Fisher Scientific" press release') },
+  { company:'Zoetis',              url: GN('"Zoetis" press release') },
+  { company:'Natera',              url: GN('"Natera" press release') },
+];
+
+// ── Industry / topic feeds ────────────────────────────────────────────────────
+const TOPIC_FEEDS = [
+  { url:'https://www.prnewswire.com/rss/news-releases-list.rss',        source:'PR Newswire',    topic:'Company News' },
+  { url:'https://www.fiercepharma.com/rss/xml',                         source:'FiercePharma',   topic:'Industry' },
+  { url:'https://www.biopharmadive.com/feeds/news/',                    source:'BioPharma Dive', topic:'Industry' },
+  { url:'https://www.statnews.com/feed/',                               source:'STAT News',      topic:'Industry' },
+  { url:'https://endpts.com/feed/',                                     source:'Endpoints News', topic:'Industry' },
+  { url:GN('FDA drug approval announcement'),                           source:'FDA',            topic:'Regulatory' },
+  { url:GN('FDA press release pharmaceutical'),                         source:'FDA News',       topic:'Regulatory' },
+  { url:GN('pharma biotech drug pipeline clinical trial'),              source:'Google News',    topic:'Pipeline' },
+  { url:GN('pharma biotech merger acquisition deal'),                   source:'Google News',    topic:'M&A' },
+  { url:GN('pharma biotech earnings revenue quarterly results'),        source:'Google News',    topic:'Earnings' },
 ];
 
 exports.handler = async () => {
-  const debug = [];
+  const fetchFeed = async (url, max) => {
+    try {
+      const res = await fetch(url, { headers:{ 'User-Agent': UA }, signal: AbortSignal.timeout(7000) });
+      if (!res.ok) return [];
+      return parseRSS(await res.text(), max);
+    } catch { return []; }
+  };
 
-  const results = await Promise.allSettled(
-    ALL_FEEDS.map(async f => {
-      const start = Date.now();
-      try {
-        const res = await fetch(f.url, {
-          headers: { 'User-Agent': UA },
-          signal: AbortSignal.timeout(7000)
-        });
-        const status = res.status;
-        if (!res.ok) {
-          debug.push({ source: f.source, url: f.url, status, count: 0, ms: Date.now() - start });
-          return [];
-        }
-        const xml = await res.text();
-        const items = parseRSS(xml, 15);
-        debug.push({ source: f.source, url: f.url, status, count: items.length, ms: Date.now() - start });
-        return items.map(a => ({ ...a, source: f.source, topic: f.topic }));
-      } catch(e) {
-        debug.push({ source: f.source, url: f.url, error: e.message, count: 0, ms: Date.now() - start });
-        return [];
-      }
-    })
-  );
+  const [coResults, topicResults] = await Promise.all([
+    Promise.allSettled(COMPANY_FEEDS.map(async f => {
+      const items = await fetchFeed(f.url, 4);
+      return items.map(a => ({ ...a, source: f.company, topic: 'Company News', company: f.company }));
+    })),
+    Promise.allSettled(TOPIC_FEEDS.map(async f => {
+      const items = await fetchFeed(f.url, 12);
+      return items.map(a => ({ ...a, source: f.source, topic: f.topic }));
+    }))
+  ]);
 
-  const articles = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+  const coArticles    = coResults.flatMap(r    => r.status === 'fulfilled' ? r.value : []);
+  const topicArticles = topicResults.flatMap(r => r.status === 'fulfilled' ? r.value : []);
 
   const seen = new Set();
-  const deduped = articles.filter(a => {
-    if (!a.url || seen.has(a.url)) return false;
-    seen.add(a.url);
-    return true;
-  });
-  deduped.sort((a, b) => b.dateMs - a.dateMs);
+  const dedup = arr => arr.filter(a => { if (!a.url || seen.has(a.url)) return false; seen.add(a.url); return true; });
+
+  const all = [...dedup(coArticles), ...dedup(topicArticles)];
+  all.sort((a, b) => b.dateMs - a.dateMs);
 
   return {
     statusCode: 200,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' },
-    body: JSON.stringify({ articles: deduped, debug })
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=900' },
+    body: JSON.stringify(all)
   };
 };
 
-function parseRSS(xml, max = 15) {
+function parseRSS(xml, max = 12) {
   const items = [];
   const isAtom = /<entry[\s>]/.test(xml);
   const re = isAtom ? /<entry[\s>]([\s\S]*?)<\/entry>/g : /<item>([\s\S]*?)<\/item>/g;
