@@ -987,4 +987,4 @@ window.loadNews = () => { newsLoaded = false; loadNews(); };
 window.renderNews = renderNews;
 
 window.tFilters = tFilters;
-Object.defineProperty(window, 'panelJobId', { get: () => panelJobId });
+try { Object.defineProperty(window, 'panelJobId', { get: () => panelJobId, configurable: true }); } catch(e) {}
