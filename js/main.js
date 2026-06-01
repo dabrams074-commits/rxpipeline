@@ -34,7 +34,7 @@ function switchView(v) {
   const btn = document.getElementById('header-action');
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Role';
   btn.onclick = openModal;
-  if (v === 'library') renderLibrary();
+  if (v === 'library') { renderLibrary(); preloadNews(); }
   if (v === 'tracker') renderTracker();
   if (v === 'home') updateHomeCards();
   if (v === 'news') loadNews();
@@ -429,6 +429,17 @@ export function renderCompanyIntelligence() {
       <div class="co-desc" style="font-size:0.75rem; color:var(--muted); margin-top:16px; border-top:1px solid var(--border); padding-top:12px;">
         Last Fetched: ${fetchStr}
       </div>
+      ${(() => {
+        const coNews = newsArticles.filter(a => a._cos && a._cos.includes(c.name)).slice(0, 3);
+        if (!coNews.length) return '';
+        return `<div class="co-news">
+          <div class="co-news-label">Recent News</div>
+          ${coNews.map(a => `<a class="co-news-item" href="${esc(a.url)}" target="_blank" rel="noopener">
+            <span class="co-news-src">${esc(a.source)}</span>
+            <span class="co-news-title">${esc(a.title)}</span>
+          </a>`).join('')}
+        </div>`;
+      })()}
       <div class="co-actions" style="margin-top:12px;">
         <a class="btn-visit" href="https://careers.${c.name.toLowerCase().replace(/[\s&]/g, '')}.com" target="_blank" rel="noopener" style="width:100%;justify-content:center;padding:8px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text);text-decoration:none;font-weight:500;font-size:0.8rem;display:flex;align-items:center;gap:6px;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -859,6 +870,19 @@ function populateNewsFilters() {
   taSel.disabled = false;
 }
 
+async function preloadNews() {
+  if (newsLoaded || newsArticles.length) return; // already loaded
+  try {
+    const res = await fetch('/.netlify/functions/news');
+    if (!res.ok) return;
+    const articles = await res.json();
+    if (!articles.length) return;
+    newsArticles = articles.map(tagArticle);
+    // Re-render library cards now that news is available
+    if (currentView === 'library') renderCompanyIntelligence();
+  } catch { /* silent fail */ }
+}
+
 export async function loadNews() {
   if (newsLoaded) return;
   const container = document.getElementById('news-container');
@@ -871,11 +895,17 @@ export async function loadNews() {
   statusEl.textContent = 'Loading latest headlines…';
   container.innerHTML = skeletons(6);
   try {
-    const res = await fetch('/.netlify/functions/news');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const articles = await res.json();
-    if (!articles.length) throw new Error('No articles returned');
-    newsArticles = articles.map(tagArticle);
+    let articles;
+    if (newsArticles.length) {
+      // Already preloaded (e.g. from visiting Library) — skip re-fetch
+      articles = newsArticles;
+    } else {
+      const res = await fetch('/.netlify/functions/news');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      articles = await res.json();
+      if (!articles.length) throw new Error('No articles returned');
+      newsArticles = articles.map(tagArticle);
+    }
     populateNewsFilters();
     renderNews();
     statusEl.className = 'fetch-status success';
