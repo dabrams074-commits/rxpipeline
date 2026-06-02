@@ -771,7 +771,7 @@
 <div class="toast" id="toast"></div>
 
 <!-- ── Auth / Paywall Overlay ──────────────────────────────────────────── -->
-<div id="auth-overlay" style="display:flex;position:fixed;inset:0;z-index:9999;background:#0d0f14;align-items:center;justify-content:center;">
+<div id="auth-overlay" style="display:flex;position:fixed;inset:0;z-index:9999;background:#0d0f14;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 20px;">
 
   <!-- Loading state -->
   <div id="auth-loading" style="display:flex;flex-direction:column;align-items:center;gap:20px;">
@@ -780,7 +780,41 @@
   </div>
 
   <!-- Login state -->
-  <div id="auth-login" class="auth-card" style="display:none;">
+  <div id="auth-login" class="auth-login-wrap" style="display:none;">
+
+    <!-- Why bioboard section -->
+    <div class="why-bioboard">
+      <p class="why-eyebrow">Why bioboard?</p>
+      <h2 class="why-headline">The smartest way to land your next pharma role</h2>
+      <p class="why-body">bioboard.io pulls live job listings from 40+ of the world's leading pharmaceutical and biotech companies — in one place, updated in real time. No more checking a dozen career pages. No more missing the right opening. And once you find the roles you want, our built-in pipeline tracker keeps your applications, interviews, and follow-ups organized from first click to offer.</p>
+
+      <div class="why-pillars">
+        <div class="why-pillar">
+          <div class="why-pillar-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+          <h3>Find</h3>
+          <p>Search and filter thousands of live roles across Pfizer, Roche, AstraZeneca, Regeneron, and 40+ more — all in a single, clean interface.</p>
+        </div>
+        <div class="why-pillar">
+          <div class="why-pillar-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3>Track</h3>
+          <p>Move roles through your personal Kanban pipeline — Interested, Applied, Interviewing, Offer — with notes and timestamps at every stage.</p>
+        </div>
+        <div class="why-pillar">
+          <div class="why-pillar-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+          <h3>Win</h3>
+          <p>Stay ahead of the market with industry news, pipeline intelligence, and a complete view of where the hiring is happening right now.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login card -->
+    <div class="auth-card">
     <div class="auth-logo">
       <img src="/bioboard-logo-dark.svg" alt="bioboard.io" height="44">
     </div>
@@ -816,7 +850,8 @@
     </form>
 
     <p class="auth-pricing-note">$10 / month &nbsp;·&nbsp; 10-day free trial &nbsp;·&nbsp; Cancel anytime</p>
-  </div>
+    </div><!-- end .auth-card -->
+  </div><!-- end .auth-login-wrap -->
 
   <!-- Paywall state (signed in, no active subscription) -->
   <div id="auth-paywall" class="auth-card" style="display:none;">
