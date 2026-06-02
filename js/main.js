@@ -506,6 +506,156 @@ function switchLibTab(tab) {
 
 // ══════════════════════════════════════════
 // LIVE ROLES UI HELPERS
+
+// City → State lookup for major US pharma hubs
+const CITY_STATE = {
+  // ── Massachusetts ──
+  'Boston':'Massachusetts','Cambridge':'Massachusetts','Waltham':'Massachusetts',
+  'Lexington':'Massachusetts','Watertown':'Massachusetts','Needham':'Massachusetts',
+  'Norwood':'Massachusetts','Andover':'Massachusetts','North Andover':'Massachusetts',
+  'Woburn':'Massachusetts','Wilmington':'Massachusetts','Burlington':'Massachusetts',
+  'Bedford':'Massachusetts','Billerica':'Massachusetts','Chelmsford':'Massachusetts',
+  'Lowell':'Massachusetts','Framingham':'Massachusetts','Marlborough':'Massachusetts',
+  'Westborough':'Massachusetts','Shrewsbury':'Massachusetts','Worcester':'Massachusetts',
+  'Southborough':'Massachusetts','Natick':'Massachusetts','Wellesley':'Massachusetts',
+  'Newton':'Massachusetts','Quincy':'Massachusetts','Braintree':'Massachusetts',
+  // ── New Jersey ──
+  'Kenilworth':'New Jersey','Rahway':'New Jersey','Whitehouse Station':'New Jersey',
+  'West Point':'New Jersey','Titusville':'New Jersey','Raritan':'New Jersey',
+  'New Brunswick':'New Jersey','Princeton':'New Jersey','Hopewell':'New Jersey',
+  'Bridgewater':'New Jersey','Parsippany':'New Jersey','Whippany':'New Jersey',
+  'Madison':'New Jersey','Morristown':'New Jersey','Florham Park':'New Jersey',
+  'Bedminster':'New Jersey','Basking Ridge':'New Jersey','Warren':'New Jersey',
+  'Murray Hill':'New Jersey','Summit':'New Jersey','South Plainfield':'New Jersey',
+  'Franklin Lakes':'New Jersey','Rockaway':'New Jersey','Plainsboro':'New Jersey',
+  'East Hanover':'New Jersey','South Brunswick':'New Jersey','Piscataway':'New Jersey',
+  'Cranbury':'New Jersey','Pennington':'New Jersey','Trenton':'New Jersey',
+  'Cherry Hill':'New Jersey','Mount Laurel':'New Jersey','Marlton':'New Jersey',
+  // ── New York ──
+  'Tarrytown':'New York','Pearl River':'New York','Sleepy Hollow':'New York',
+  'New York':'New York','New York City':'New York','NYC':'New York',
+  'Peekskill':'New York','Yonkers':'New York','White Plains':'New York',
+  'Rye':'New York','Armonk':'New York','Hawthorne':'New York',
+  'Suffern':'New York','Orangeburg':'New York','Mineola':'New York',
+  'Melville':'New York','Hauppauge':'New York','Stony Brook':'New York',
+  'Brooklyn':'New York','Queens':'New York','Manhattan':'New York','Bronx':'New York',
+  'Buffalo':'New York','Rochester':'New York','Albany':'New York','Syracuse':'New York',
+  // ── Pennsylvania ──
+  'Horsham':'Pennsylvania','Spring House':'Pennsylvania','Upper Gwynedd':'Pennsylvania',
+  'North Wales':'Pennsylvania','Lansdale':'Pennsylvania','Philadelphia':'Pennsylvania',
+  'Collegeville':'Pennsylvania','King of Prussia':'Pennsylvania','Radnor':'Pennsylvania',
+  'Wayne':'Pennsylvania','Malvern':'Pennsylvania','West Chester':'Pennsylvania',
+  'Conshohocken':'Pennsylvania','Upper Merion':'Pennsylvania','Fort Washington':'Pennsylvania',
+  'Blue Bell':'Pennsylvania','Audubon':'Pennsylvania','Ambler':'Pennsylvania',
+  'Frazer':'Pennsylvania','Exton':'Pennsylvania','Berwyn':'Pennsylvania',
+  'Phoenixville':'Pennsylvania','Pottstown':'Pennsylvania','Norristown':'Pennsylvania',
+  'Pittsburgh':'Pennsylvania','Allentown':'Pennsylvania','Bethlehem':'Pennsylvania',
+  // ── Illinois ──
+  'North Chicago':'Illinois','Lake County':'Illinois','Abbott Park':'Illinois',
+  'Deerfield':'Illinois','Mettawa':'Illinois','Libertyville':'Illinois',
+  'Mundelein':'Illinois','Waukegan':'Illinois','Gurnee':'Illinois',
+  'Bannockburn':'Illinois','Lincolnshire':'Illinois','Buffalo Grove':'Illinois',
+  'Northbrook':'Illinois','Glenview':'Illinois','Skokie':'Illinois',
+  'Evanston':'Illinois','Schaumburg':'Illinois','Rosemont':'Illinois',
+  'Oak Brook':'Illinois','Lombard':'Illinois','Naperville':'Illinois',
+  'Bolingbrook':'Illinois','Chicago':'Illinois','Romeoville':'Illinois',
+  // ── California ──
+  'South San Francisco':'California','San Francisco':'California','Brisbane':'California',
+  'San Carlos':'California','Redwood City':'California','Menlo Park':'California',
+  'Palo Alto':'California','Mountain View':'California','Sunnyvale':'California',
+  'Santa Clara':'California','San Jose':'California','Pleasanton':'California',
+  'Dublin':'California','Emeryville':'California','Oakland':'California',
+  'Berkeley':'California','Foster City':'California','Burlingame':'California',
+  'San Mateo':'California','Hayward':'California','Fremont':'California',
+  'Thousand Oaks':'California','Newbury Park':'California','Camarillo':'California',
+  'Simi Valley':'California','Westlake Village':'California','Irvine':'California',
+  'San Diego':'California','La Jolla':'California','Carlsbad':'California',
+  'Oceanside':'California','Escondido':'California','Vista':'California',
+  'San Marcos':'California','Solana Beach':'California','Del Mar':'California',
+  'Los Angeles':'California','Santa Monica':'California','El Segundo':'California',
+  'Torrance':'California','Long Beach':'California','Anaheim':'California',
+  'Sacramento':'California','Davis':'California','Vacaville':'California',
+  // ── Maryland ──
+  'Gaithersburg':'Maryland','Rockville':'Maryland','Bethesda':'Maryland',
+  'Silver Spring':'Maryland','Germantown':'Maryland','Hanover':'Maryland',
+  'Hunt Valley':'Maryland','Owings Mills':'Maryland','Baltimore':'Maryland',
+  'Beltsville':'Maryland','Laurel':'Maryland','Columbia':'Maryland',
+  // ── North Carolina ──
+  'Research Triangle Park':'North Carolina','Durham':'North Carolina',
+  'Morrisville':'North Carolina','Cary':'North Carolina','Raleigh':'North Carolina',
+  'Chapel Hill':'North Carolina','Mebane':'North Carolina','Pittsboro':'North Carolina',
+  'Sanford':'North Carolina','Wilson':'North Carolina','Greensboro':'North Carolina',
+  // ── Connecticut ──
+  'Groton':'Connecticut','New Haven':'Connecticut','Stamford':'Connecticut',
+  'Shelton':'Connecticut','Branford':'Connecticut','Guilford':'Connecticut',
+  'Wallingford':'Connecticut','Meriden':'Connecticut','Hartford':'Connecticut',
+  'Mystic':'Connecticut','New London':'Connecticut','Waterford':'Connecticut',
+  // ── Delaware ──
+  'Wilmington':'Delaware','Newark':'Delaware','Middletown':'Delaware',
+  // ── Indiana ──
+  'Indianapolis':'Indiana','Carmel':'Indiana','Fishers':'Indiana',
+  'Bloomington':'Indiana','West Lafayette':'Indiana',
+  // ── Washington ──
+  'Seattle':'Washington','Bothell':'Washington','Redmond':'Washington',
+  'Bellevue':'Washington','Kirkland':'Washington','Tacoma':'Washington',
+  'Spokane':'Washington','Olympia':'Washington',
+  // ── Georgia ──
+  'Atlanta':'Georgia','Alpharetta':'Georgia','Tucker':'Georgia',
+  'Smyrna':'Georgia','Marietta':'Georgia','Kennesaw':'Georgia',
+  'Peachtree City':'Georgia','Augusta':'Georgia',
+  // ── Minnesota ──
+  'Minneapolis':'Minnesota','St. Paul':'Minnesota','Saint Paul':'Minnesota',
+  'Bloomington':'Minnesota','Plymouth':'Minnesota','Minnetonka':'Minnesota',
+  'Maple Grove':'Minnesota','Eden Prairie':'Minnesota','Eagan':'Minnesota',
+  // ── Texas ──
+  'Houston':'Texas','Dallas':'Texas','Austin':'Texas','San Antonio':'Texas',
+  'Plano':'Texas','Irving':'Texas','Fort Worth':'Texas','Arlington':'Texas',
+  'Sugar Land':'Texas','The Woodlands':'Texas','Round Rock':'Texas',
+  // ── Florida ──
+  'Miami':'Florida','Miramar':'Florida','Weston':'Florida','Boca Raton':'Florida',
+  'Orlando':'Florida','Tampa':'Florida','Jacksonville':'Florida','Gainesville':'Florida',
+  'Sunrise':'Florida','Pembroke Pines':'Florida','Hollywood':'Florida',
+  // ── Colorado ──
+  'Denver':'Colorado','Boulder':'Colorado','Longmont':'Colorado',
+  'Englewood':'Colorado','Greenwood Village':'Colorado','Aurora':'Colorado',
+  'Westminster':'Colorado','Broomfield':'Colorado','Loveland':'Colorado',
+  // ── Ohio ──
+  'Cincinnati':'Ohio','Columbus':'Ohio','Cleveland':'Ohio',
+  'Beachwood':'Ohio','Brecksville':'Ohio','Dublin':'Ohio',
+  'Maumee':'Ohio','Toledo':'Ohio','Akron':'Ohio','Dayton':'Ohio',
+  // ── Wisconsin ──
+  'Middleton':'Wisconsin','Madison':'Wisconsin','Milwaukee':'Wisconsin',
+  'Waukesha':'Wisconsin','Racine':'Wisconsin','Kenosha':'Wisconsin',
+  // ── Tennessee ──
+  'Nashville':'Tennessee','Memphis':'Tennessee','Brentwood':'Tennessee',
+  'Franklin':'Tennessee','Knoxville':'Tennessee',
+  // ── Missouri ──
+  'St. Louis':'Missouri','Saint Louis':'Missouri','Kansas City':'Missouri',
+  'Chesterfield':'Missouri','Creve Coeur':'Missouri',
+  // ── Michigan ──
+  'Ann Arbor':'Michigan','Detroit':'Michigan','Kalamazoo':'Michigan',
+  'Grand Rapids':'Michigan','Midland':'Michigan','Portage':'Michigan',
+  // ── Arizona ──
+  'Phoenix':'Arizona','Scottsdale':'Arizona','Tempe':'Arizona',
+  'Tucson':'Arizona','Chandler':'Arizona','Gilbert':'Arizona','Mesa':'Arizona',
+  // ── Oregon ──
+  'Portland':'Oregon','Hillsboro':'Oregon','Beaverton':'Oregon',
+  'Lake Oswego':'Oregon','Tigard':'Oregon',
+  // ── Utah ──
+  'Salt Lake City':'Utah','South Jordan':'Utah','Sandy':'Utah','Provo':'Utah',
+  // ── Virginia ──
+  'McLean':'Virginia','Tysons':'Virginia','Reston':'Virginia',
+  'Herndon':'Virginia','Arlington':'Virginia','Alexandria':'Virginia',
+  'Richmond':'Virginia','Charlottesville':'Virginia',
+  // ── Kansas ──
+  'Overland Park':'Kansas','Lenexa':'Kansas','Kansas City':'Kansas',
+  // ── Kentucky ──
+  'Louisville':'Kentucky','Lexington':'Kentucky','Covington':'Kentucky',
+};
+
+// Build lowercase version for case-insensitive lookup
+const CITY_STATE_LC = Object.fromEntries(Object.entries(CITY_STATE).map(([k,v]) => [k.toLowerCase(), v]));
+
 // Abbr → full state name map
 const STATE_ABBR_TO_NAME = {
   AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',
@@ -556,6 +706,18 @@ export function inferState(location) {
   for (const w of words) {
     const up = w.toUpperCase().replace(/[^A-Z]/g, '');
     if (up.length === 2 && STATE_ABBR_TO_NAME[up]) return STATE_ABBR_TO_NAME[up];
+  }
+
+  // 4. City lookup — "Boston", "Tarrytown", "Cambridge" etc.
+  // Try full location string, then first comma part, then first word
+  const cityKey = parts[0] || l;
+  if (CITY_STATE[cityKey]) return CITY_STATE[cityKey];
+  if (CITY_STATE_LC[cityKey.toLowerCase()]) return CITY_STATE_LC[cityKey.toLowerCase()];
+  // Try multi-word city from first two comma parts joined
+  if (parts.length >= 2) {
+    const twoWord = parts[0];
+    if (CITY_STATE[twoWord]) return CITY_STATE[twoWord];
+    if (CITY_STATE_LC[twoWord.toLowerCase()]) return CITY_STATE_LC[twoWord.toLowerCase()];
   }
 
   return '';
