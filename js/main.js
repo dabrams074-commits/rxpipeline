@@ -842,6 +842,12 @@ const CITY_COUNTRY = {
   'Moscow':'Russia','Saint Petersburg':'Russia',
 };
 
+// Case-insensitive city lookup map (built once at load time)
+const CITY_COUNTRY_LC = Object.fromEntries(
+  Object.entries(CITY_COUNTRY).map(([k, v]) => [k.toLowerCase(), v])
+);
+function cityLookup(s) { return CITY_COUNTRY[s] || CITY_COUNTRY_LC[s.toLowerCase()] || ''; }
+
 function resolveCountryToken(token) {
   if (!token) return '';
   if (COUNTRY_ALIASES[token]) return COUNTRY_ALIASES[token];
@@ -916,17 +922,17 @@ export function inferCountry(location) {
     if (r) return r;
   }
 
-  // City lookup — try full string, first comma segment, then stripped parentheticals
+  // City lookup — case-insensitive, try full string, first comma segment, then stripped parentheticals
   const cityKey = parts.length ? parts[0] : l;
-  if (CITY_COUNTRY[l]) return CITY_COUNTRY[l];
-  if (CITY_COUNTRY[cityKey]) return CITY_COUNTRY[cityKey];
+  if (cityLookup(l)) return cityLookup(l);
+  if (cityLookup(cityKey)) return cityLookup(cityKey);
   // Strip trailing parenthetical: "Hyderabad (Office)" → "Hyderabad", "Paris Headquarter (PHARMA)" → "Paris Headquarter"
   const stripped = l.replace(/\s*\([^)]*\)\s*$/, '').trim();
   if (stripped !== l) {
-    if (CITY_COUNTRY[stripped]) return CITY_COUNTRY[stripped];
+    if (cityLookup(stripped)) return cityLookup(stripped);
     // Also try first word of stripped: "Paris Headquarter" → "Paris"
     const firstWord = stripped.split(/\s+/)[0];
-    if (CITY_COUNTRY[firstWord]) return CITY_COUNTRY[firstWord];
+    if (cityLookup(firstWord)) return cityLookup(firstWord);
   }
 
   // Last resort: scan individual words for a state/province abbreviation
