@@ -651,6 +651,21 @@ const CITY_STATE = {
   'Overland Park':'Kansas','Lenexa':'Kansas','Kansas City':'Kansas',
   // ── Kentucky ──
   'Louisville':'Kentucky','Lexington':'Kentucky','Covington':'Kentucky',
+  // ── New Jersey (additional) ──
+  'Morris Plains':'New Jersey','Parsippany-Troy Hills':'New Jersey',
+  'Hanover':'New Jersey','Cedar Knolls':'New Jersey','Mine Hill':'New Jersey',
+  // ── Florida (additional) ──
+  'Winter Park':'Florida','Deerfield Beach':'Florida','Ponte Vedra':'Florida',
+  'Lake Mary':'Florida','Altamonte Springs':'Florida','Sanford':'Florida',
+  // ── Texas (additional) ──
+  'Denton':'Texas','Frisco':'Texas','McKinney':'Texas','Allen':'Texas',
+  'Lewisville':'Texas','Flower Mound':'Texas','Southlake':'Texas',
+  'Grapevine':'Texas','Coppell':'Texas','Mansfield':'Texas',
+  // ── California (additional) ──
+  'Pleasanton':'California','Petaluma':'California','Novato':'California',
+  'San Rafael':'California','Larkspur':'California','Mill Valley':'California',
+  // ── Pennsylvania (additional) ──
+  'Lansdale':'Pennsylvania','Gwynedd':'Pennsylvania','Kulpsville':'Pennsylvania',
 };
 
 // Build lowercase version for case-insensitive lookup
@@ -673,6 +688,24 @@ const STATE_ABBR_TO_NAME = {
 export function inferState(location) {
   if (!location) return '';
   const l = location.trim().replace(/\s*[–—]\s*/g, ' - ');
+
+  // 0. Parenthetical format: "Cambridge (USA)", "East Hanover (New Jersey)", "Watertown (Massachusetts)"
+  //    → check content in parens for state name, and city before parens via city lookup
+  const parenMatch = l.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+  if (parenMatch) {
+    const cityPart  = parenMatch[1].trim();
+    const parenPart = parenMatch[2].trim();
+    // Check if paren content is a state name
+    if (US_STATE_NAMES.has(parenPart)) return parenPart;
+    if (STATE_NAMES_LC.has(parenPart.toLowerCase())) {
+      for (const s of US_STATE_NAMES) { if (s.toLowerCase() === parenPart.toLowerCase()) return s; }
+    }
+    const parenUp = parenPart.toUpperCase().replace(/[^A-Z]/g, '');
+    if (STATE_ABBR_TO_NAME[parenUp]) return STATE_ABBR_TO_NAME[parenUp];
+    // Otherwise look up the city part
+    const cityResult = CITY_STATE_LC[cityPart.toLowerCase()];
+    if (cityResult) return cityResult;
+  }
 
   // Helper: check a single token against abbr map and full state names
   function checkToken(t) {
@@ -1107,8 +1140,9 @@ export function inferCountry(location) {
   // Remote
   if (/\bremote\b/i.test(l)) return 'Remote';
 
-  // Field Based
-  if (/field[- ]?based|field force|field medical|field sales|field rep|home[- ]?based/i.test(l)) return 'Field Based';
+  // Field Based — catch "Field Non-Sales", "United States - Field", "Field - United States", etc.
+  if (/field[- ]?based|field force|field medical|field sales|field rep|field non-?sales|home[- ]?based/i.test(l)) return 'Field Based';
+  if (l.split(' - ').map(s => s.trim().toLowerCase()).some(s => s === 'field')) return 'Field Based';
 
   // Multiple / global
   if (/multiple|various|global|worldwide|all locations/i.test(l)) return 'Multiple';
