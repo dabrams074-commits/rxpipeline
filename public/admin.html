@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rx Pipeline — Admin</title>
+<style>
+  :root {
+    --bg:       #0d0f14;
+    --surface:  #161820;
+    --surface2: #1e2029;
+    --border:   #2a2d3a;
+    --text:     #e8eaf0;
+    --muted:    #6b7280;
+    --accent:   #7c6af7;
+    --accent2:  #5eead4;
+    --green:    #22c55e;
+    --yellow:   #eab308;
+    --red:      #ef4444;
+    --orange:   #f97316;
+    --radius:   8px;
+    --font:     'Inter', system-ui, sans-serif;
+    --mono:     'DM Mono', 'Fira Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
+
+  /* ── Layout ── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: var(--surface); position: sticky; top: 0; z-index: 10;
+  }
+  .top-bar-left { display: flex; align-items: center; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; color: var(--text); }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .admin-badge { background: var(--accent); color: #fff; font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .top-bar-right { display: flex; align-items: center; gap: 12px; }
+  .user-email { font-size: 13px; color: var(--muted); }
+  .btn-sm { background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 6px 14px; border-radius: var(--radius); font-size: 12px; cursor: pointer;
+    transition: border-color 0.15s; }
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+  .main { padding: 28px; max-width: 1300px; margin: 0 auto; width: 100%; }
+
+  /* ── KPI Cards ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .kpi-value { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.yellow { color: var(--yellow); }
+  .kpi-value.accent { color: var(--accent); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab { padding: 9px 18px; border: none; background: none; color: var(--muted); font-size: 13px;
+    cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s; margin-bottom: -1px; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--surface); }
+  th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 500;
+       color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
+       border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  /* ── Status badges ── */
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .badge-active   { background: #16a34a22; color: var(--green); border: 1px solid #16a34a44; }
+  .badge-trialing { background: #ca8a0422; color: var(--yellow); border: 1px solid #ca8a0444; }
+  .badge-canceled { background: #ef444422; color: var(--red); border: 1px solid #ef444444; }
+  .badge-past_due { background: #f9731622; color: var(--orange); border: 1px solid #f9731644; }
+  .badge-no_sub   { background: #6b728022; color: var(--muted); border: 1px solid #6b728044; }
+  .badge-ok       { background: #16a34a22; color: var(--green); border: 1px solid #16a34a44; }
+  .badge-checking { background: #6b728022; color: var(--muted); border: 1px solid #6b728044; }
+  .badge-error    { background: #ef444422; color: var(--red);   border: 1px solid #ef444444; }
+
+  /* ── Feed health ── */
+  .feed-actions { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .btn-refresh { background: var(--accent); color: #fff; border: none; padding: 8px 18px;
+    border-radius: var(--radius); font-size: 12px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+  .btn-refresh:hover { opacity: 0.85; }
+  .btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+  .feed-note { font-size: 12px; color: var(--muted); }
+  .job-count { font-family: var(--mono); font-size: 12px; }
+
+  /* ── Search / filter ── */
+  .table-toolbar { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; }
+  .search-input { background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 12px; border-radius: var(--radius); font-size: 13px; width: 260px; outline: none; }
+  .search-input:focus { border-color: var(--accent); }
+  .filter-select { background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 7px 10px; border-radius: var(--radius); font-size: 13px; outline: none; cursor: pointer; }
+
+  /* ── Revenue ── */
+  .revenue-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .rev-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; display: flex; flex-direction: column; gap: 6px; }
+  .rev-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .rev-value { font-size: 24px; font-weight: 700; color: var(--text); }
+  .rev-value.accent { color: var(--accent); }
+  .rev-value.green { color: var(--green); }
+
+  /* ── Activity timeline ── */
+  .activity-list { display: flex; flex-direction: column; gap: 1px; }
+  .activity-row { display: flex; align-items: center; gap: 12px; padding: 9px 14px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 0; font-size: 13px; }
+  .activity-row:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+  .activity-row:last-child  { border-radius: 0 0 var(--radius) var(--radius); border-radius: 0 0 var(--radius) var(--radius); }
+  .activity-row:only-child  { border-radius: var(--radius); }
+  .activity-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .activity-email { flex: 1; color: var(--text); }
+  .activity-time { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .activity-provider { font-size: 11px; color: var(--muted); padding: 2px 8px;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; }
+
+  /* ── Loading / auth ── */
+  #gate { display: flex; align-items: center; justify-content: center; min-height: 100vh;
+    flex-direction: column; gap: 16px; }
+  .spinner { width: 28px; height: 28px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .gate-msg { color: var(--muted); font-size: 14px; }
+  .gate-error { color: var(--red); font-size: 14px; }
+  .gate-logo { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+
+  /* ── Misc ── */
+  .mono { font-family: var(--mono); }
+  .text-muted { color: var(--muted); }
+  .empty { padding: 40px; text-align: center; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- Auth gate -->
+<div id="gate">
+  <div class="gate-logo"><div class="logo-dot"></div>Rx Pipeline</div>
+  <div class="spinner"></div>
+  <div class="gate-msg" id="gate-msg">Verifying access…</div>
+</div>
+
+<!-- Admin app (hidden until auth passes) -->
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="logo"><div class="logo-dot"></div>Rx Pipeline</div>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="user-email" id="admin-email"></span>
+      <button class="btn-sm" onclick="window.location.href='/'">← Back to app</button>
+      <button class="btn-sm" id="btn-signout">Sign out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- KPI cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Users</div>
+        <div class="kpi-value accent" id="kpi-total">—</div>
+        <div class="kpi-sub">signed up</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Active Subs</div>
+        <div class="kpi-value green" id="kpi-active">—</div>
+        <div class="kpi-sub">paying</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Trialing</div>
+        <div class="kpi-value yellow" id="kpi-trialing">—</div>
+        <div class="kpi-sub">free trial</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Cancelled</div>
+        <div class="kpi-value" id="kpi-cancelled">—</div>
+        <div class="kpi-sub">churned</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">MRR</div>
+        <div class="kpi-value green" id="kpi-mrr">—</div>
+        <div class="kpi-sub">monthly recurring</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="users">Users</button>
+      <button class="tab" data-tab="revenue">Revenue</button>
+      <button class="tab" data-tab="feeds">Feed Health</button>
+      <button class="tab" data-tab="activity">Activity</button>
+    </div>
+
+    <!-- Users tab -->
+    <div id="tab-users" class="tab-panel active">
+      <div class="table-toolbar">
+        <input class="search-input" id="user-search" type="text" placeholder="Search by email…">
+        <select class="filter-select" id="user-status-filter">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="trialing">Trialing</option>
+          <option value="canceled">Cancelled</option>
+          <option value="past_due">Past due</option>
+          <option value="no_sub">No subscription</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="users-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Plan $</th>
+              <th>Subscribed</th>
+              <th>Trial ends</th>
+              <th>Last sign-in</th>
+              <th>Provider</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Revenue tab -->
+    <div id="tab-revenue" class="tab-panel">
+      <div class="revenue-grid">
+        <div class="rev-card">
+          <div class="rev-label">MRR</div>
+          <div class="rev-value accent" id="rev-mrr">—</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-label">ARR (projected)</div>
+          <div class="rev-value" id="rev-arr">—</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-label">Trial → Paid rate</div>
+          <div class="rev-value green" id="rev-conv">—</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-label">Avg revenue / user</div>
+          <div class="rev-value" id="rev-arpu">—</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-label">Churn count</div>
+          <div class="rev-value" id="rev-churn">—</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-label">Past due</div>
+          <div class="rev-value" id="rev-pastdue">—</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Email</th><th>Status</th><th>$/mo</th><th>Subscribed</th><th>Cancels at</th></tr>
+          </thead>
+          <tbody id="rev-tbody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Feed Health tab -->
+    <div id="tab-feeds" class="tab-panel">
+      <div class="feed-actions">
+        <div class="feed-note">Click "Check all feeds" to run a live ping of every company endpoint.</div>
+        <button class="btn-refresh" id="btn-check-feeds">Check all feeds</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Company</th><th>Group</th><th>ATS</th><th>Endpoint</th><th>Status</th><th>Jobs</th></tr>
+          </thead>
+          <tbody id="feeds-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity tab -->
+    <div id="tab-activity" class="tab-panel">
+      <div class="table-toolbar">
+        <input class="search-input" id="activity-search" type="text" placeholder="Search by email…">
+      </div>
+      <div class="activity-list" id="activity-list">
+        <div class="empty">Loading…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL      = 'https://ubfysqhdvqognxqjdhov.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_53-ljxm_GVeTzE3UdgjaIg_7d_StFV2';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── Feed config (mirrors api.js FETCH_COMPANIES) ────────────────────────────
+const COMPANIES = [
+  { name:'Pfizer',               group:'Large Pharma',    ats:'Workday',        endpoint:'/api/pfizer' },
+  { name:'Merck',                group:'Large Pharma',    ats:'Workday',        endpoint:'/api/msd' },
+  { name:'Eli Lilly',            group:'Large Pharma',    ats:'Workday',        endpoint:'/api/lilly' },
+  { name:'AstraZeneca',          group:'Large Pharma',    ats:'Workday',        endpoint:'/api/astrazeneca' },
+  { name:'Novartis',             group:'Large Pharma',    ats:'Workday',        endpoint:'/api/novartis' },
+  { name:'GSK',                  group:'Large Pharma',    ats:'Jibe',           endpoint:'/api/jibe/gsk' },
+  { name:'Amgen',                group:'Large Pharma',    ats:'Workday',        endpoint:'/api/amgen' },
+  { name:'Sanofi',               group:'Large Pharma',    ats:'Workday',        endpoint:'/api/sanofi' },
+  { name:'BMS',                  group:'Large Pharma',    ats:'Workday',        endpoint:'/api/bristolmyerssquibb' },
+  { name:'Takeda',               group:'Large Pharma',    ats:'Workday',        endpoint:'/api/takeda' },
+  { name:'AbbVie',               group:'Large Pharma',    ats:'SmartRecruiters',endpoint:'/api/smartrecruiters/AbbVie' },
+  { name:'J&J',                  group:'Large Pharma',    ats:'Workday',        endpoint:'/api/jj' },
+  { name:'Roche',                group:'Large Pharma',    ats:'Workday',        endpoint:'/api/roche' },
+  { name:'Becton Dickinson',     group:'Large Pharma',    ats:'Workday',        endpoint:'/api/bdx' },
+  { name:'Zoetis',               group:'Large Pharma',    ats:'Workday',        endpoint:'/api/zoetis' },
+  { name:'Ipsen',                group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/ipsen' },
+  { name:'Otsuka',               group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/vhr-otsuka' },
+  { name:'Regeneron',            group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/regeneron' },
+  { name:'Biogen',               group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/biibhr' },
+  { name:'Gilead',               group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/gilead' },
+  { name:'Vertex',               group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/vrtx' },
+  { name:'Moderna',              group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/modernatx' },
+  { name:'United Therapeutics',  group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/vhr-unither' },
+  { name:'Jazz Pharmaceuticals', group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/vhr-jazz' },
+  { name:'Incyte',               group:'Specialty Pharma',ats:'Jibe',           endpoint:'/api/jibe/incyte' },
+  { name:'Argenx',               group:'Biotech',         ats:'Workday',        endpoint:'/api/argenx' },
+  { name:'Ascendis',             group:'Biotech',         ats:'Workable',       endpoint:'/api/workable/ascendis-pharma' },
+  { name:'Sarepta',              group:'Biotech',         ats:'Workday',        endpoint:'/api/sarepta' },
+  { name:'Ultragenyx',           group:'Biotech',         ats:'Workday',        endpoint:'/api/ultra' },
+  { name:'Insmed',               group:'Biotech',         ats:'Workday',        endpoint:'/api/insmed' },
+  { name:'Blueprint Medicines',  group:'Biotech',         ats:'Greenhouse',     endpoint:'/api/greenhouse/blueprintmedicines' },
+  { name:'Cytokinetics',         group:'Biotech',         ats:'Workday',        endpoint:'/api/cytokinetics' },
+  { name:'Genmab',               group:'Biotech',         ats:'Workday',        endpoint:'/api/genmab' },
+  { name:'Illumina',             group:'Biotech',         ats:'Workday',        endpoint:'/api/illumina' },
+  { name:'Madrigal',             group:'Biotech',         ats:'Workday',        endpoint:'/api/madrigalpharma' },
+  { name:'Neurocrine',           group:'Biotech',         ats:'Workday',        endpoint:'/api/neurocrine' },
+  { name:'Natera',               group:'Biotech',         ats:'Greenhouse',     endpoint:'/api/greenhouse/natera' },
+  { name:'Protagonist',          group:'Biotech',         ats:'Greenhouse',     endpoint:'/api/greenhouse/protagonist' },
+  { name:'Nuvalent',             group:'Biotech',         ats:'Greenhouse',     endpoint:'/api/greenhouse/nuvalent' },
+  { name:'Disc Medicine',        group:'Biotech',         ats:'Greenhouse',     endpoint:'/api/greenhouse/discmedicine' },
+  { name:'Viatris',              group:'Specialty Pharma',ats:'Workday',        endpoint:'/api/viatris' },
+  { name:'IQVIA',                group:'CRO & Services',  ats:'Workday',        endpoint:'/api/iqvia' },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let adminData = null;
+let filteredUsers = [];
+let filteredActivity = [];
+
+// ── Auth gate ──────────────────────────────────────────────────────────────
+async function init() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) {
+    showGateError('Access denied. Please <a href="/" style="color:var(--accent)">sign in</a> first.');
+    return;
+  }
+
+  document.getElementById('admin-email').textContent = session.user.email;
+  document.getElementById('btn-signout').onclick = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  };
+
+  setGateMsg('Loading dashboard…');
+
+  try {
+    const res = await fetch('/.netlify/functions/admin-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: '{}',
+    });
+    if (res.status === 403) { showGateError('Access denied — not an admin account.'); return; }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    adminData = await res.json();
+  } catch (e) {
+    showGateError('Failed to load data: ' + e.message);
+    return;
+  }
+
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  renderKPIs();
+  renderUsers();
+  renderRevenue();
+  renderFeeds();
+  renderActivity();
+  bindTabs();
+  bindSearch();
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────
+function renderKPIs() {
+  const { total, active, trialing, cancelled, mrr } = adminData.metrics;
+  document.getElementById('kpi-total').textContent    = total;
+  document.getElementById('kpi-active').textContent   = active;
+  document.getElementById('kpi-trialing').textContent = trialing;
+  document.getElementById('kpi-cancelled').textContent= cancelled;
+  document.getElementById('kpi-mrr').textContent      = '$' + mrr.toFixed(0);
+}
+
+// ── Users tab ─────────────────────────────────────────────────────────────
+function renderUsers(filterText = '', filterStatus = '') {
+  filteredUsers = adminData.subscribers.filter(u => {
+    const matchText   = !filterText   || u.email?.toLowerCase().includes(filterText.toLowerCase());
+    const matchStatus = !filterStatus || u.status === filterStatus;
+    return matchText && matchStatus;
+  });
+
+  const tbody = document.getElementById('users-tbody');
+  if (!filteredUsers.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No users found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filteredUsers.map(u => `
+    <tr>
+      <td class="mono">${esc(u.email || '—')}</td>
+      <td><span class="badge badge-${u.status}">${u.status}</span></td>
+      <td>${u.amount ? '$' + u.amount.toFixed(0) : '—'}</td>
+      <td class="text-muted">${u.created ? fmtDate(u.created * 1000) : '—'}</td>
+      <td class="text-muted">${u.trialEnd ? fmtDate(u.trialEnd * 1000) : '—'}</td>
+      <td class="text-muted">${u.lastSignIn ? fmtDate(u.lastSignIn) : '—'}</td>
+      <td class="text-muted">${esc(u.authProvider || '—')}</td>
+    </tr>
+  `).join('');
+}
+
+// ── Revenue tab ───────────────────────────────────────────────────────────
+function renderRevenue() {
+  const { active, trialing, cancelled, pastDue, mrr } = adminData.metrics;
+  const arr      = mrr * 12;
+  const total_paid = active + (adminData.subscribers.filter(s => s.status === 'canceled').length);
+  const convRate = total_paid > 0 ? Math.round((active / (active + trialing + cancelled)) * 100) : 0;
+  const arpu     = active > 0 ? (mrr / active).toFixed(2) : 0;
+
+  document.getElementById('rev-mrr').textContent     = '$' + mrr.toFixed(2);
+  document.getElementById('rev-arr').textContent     = '$' + arr.toFixed(0);
+  document.getElementById('rev-conv').textContent    = convRate + '%';
+  document.getElementById('rev-arpu').textContent    = '$' + arpu;
+  document.getElementById('rev-churn').textContent   = cancelled;
+  document.getElementById('rev-pastdue').textContent = pastDue;
+
+  const subs = adminData.subscribers.filter(s => s.status !== 'no_sub');
+  document.getElementById('rev-tbody').innerHTML = subs.length
+    ? subs.map(s => `
+      <tr>
+        <td class="mono">${esc(s.email || '—')}</td>
+        <td><span class="badge badge-${s.status}">${s.status}</span></td>
+        <td>${s.amount ? '$' + s.amount.toFixed(0) : '—'}</td>
+        <td class="text-muted">${s.created ? fmtDate(s.created * 1000) : '—'}</td>
+        <td class="text-muted">${s.cancelAt ? fmtDate(s.cancelAt * 1000) : '—'}</td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="5" class="empty">No subscription records yet</td></tr>';
+}
+
+// ── Feed health tab ────────────────────────────────────────────────────────
+function renderFeeds(results = {}) {
+  document.getElementById('feeds-tbody').innerHTML = COMPANIES.map(c => {
+    const r = results[c.name];
+    const statusBadge = r == null
+      ? '<span class="badge badge-checking">—</span>'
+      : r.ok
+        ? `<span class="badge badge-ok">OK</span>`
+        : `<span class="badge badge-error">Error</span>`;
+    const jobCount = r?.count != null ? `<span class="job-count">${r.count.toLocaleString()}</span>` : '—';
+    return `
+      <tr>
+        <td>${esc(c.name)}</td>
+        <td class="text-muted">${esc(c.group)}</td>
+        <td><span class="badge badge-checking">${esc(c.ats)}</span></td>
+        <td class="mono text-muted" style="font-size:11px">${esc(c.endpoint)}</td>
+        <td>${statusBadge}</td>
+        <td>${jobCount}</td>
+      </tr>`;
+  }).join('');
+}
+
+async function checkAllFeeds() {
+  const btn = document.getElementById('btn-check-feeds');
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+
+  // Reset to "checking" state
+  renderFeeds({});
+
+  const results = {};
+  const checks = COMPANIES.map(async (c) => {
+    try {
+      let res, count;
+      if (c.ats === 'Workday') {
+        res = await fetch(c.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ limit: 1, offset: 0 }),
+        });
+        const json = await res.json();
+        count = json.total || json.totalJobPostings || 0;
+      } else if (c.ats === 'Jibe') {
+        res = await fetch(`${c.endpoint}?keywords=&lang=en-us&from=0&num=1`);
+        const json = await res.json();
+        count = json.totalCount || json.count || 0;
+      } else if (c.ats === 'Greenhouse') {
+        res = await fetch(c.endpoint);
+        const json = await res.json();
+        count = json.jobs?.length || 0;
+      } else if (c.ats === 'Workable') {
+        res = await fetch(c.endpoint);
+        const json = await res.json();
+        count = json.results?.length || json.jobs?.length || 0;
+      } else if (c.ats === 'SmartRecruiters') {
+        res = await fetch(`${c.endpoint}?limit=1`);
+        const json = await res.json();
+        count = json.totalFound || json.total || 0;
+      }
+      results[c.name] = { ok: res?.ok, count };
+    } catch (e) {
+      results[c.name] = { ok: false, count: null };
+    }
+    renderFeeds(results);
+  });
+
+  await Promise.allSettled(checks);
+  btn.disabled = false;
+  btn.textContent = 'Check all feeds';
+}
+
+// ── Activity tab ──────────────────────────────────────────────────────────
+function renderActivity(filterText = '') {
+  filteredActivity = adminData.activity.filter(u =>
+    !filterText || u.email?.toLowerCase().includes(filterText.toLowerCase())
+  );
+  const list = document.getElementById('activity-list');
+  if (!filteredActivity.length) {
+    list.innerHTML = '<div class="empty">No activity yet</div>';
+    return;
+  }
+  list.innerHTML = filteredActivity.map(u => `
+    <div class="activity-row">
+      <div class="activity-dot"></div>
+      <div class="activity-email mono">${esc(u.email || '—')}</div>
+      <span class="activity-provider">${esc(u.provider)}</span>
+      <div class="activity-time">${fmtRelative(u.lastSignIn)}</div>
+    </div>
+  `).join('');
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+function bindTabs() {
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+function bindSearch() {
+  document.getElementById('user-search').addEventListener('input', e => {
+    renderUsers(e.target.value, document.getElementById('user-status-filter').value);
+  });
+  document.getElementById('user-status-filter').addEventListener('change', e => {
+    renderUsers(document.getElementById('user-search').value, e.target.value);
+  });
+  document.getElementById('activity-search').addEventListener('input', e => {
+    renderActivity(e.target.value);
+  });
+  document.getElementById('btn-check-feeds').addEventListener('click', checkAllFeeds);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function fmtDate(ts) {
+  return new Date(ts).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function fmtRelative(ts) {
+  const diff = Date.now() - new Date(ts);
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days  = Math.floor(diff / 86400000);
+  if (mins  < 1)   return 'just now';
+  if (mins  < 60)  return `${mins}m ago`;
+  if (hours < 24)  return `${hours}h ago`;
+  if (days  < 30)  return `${days}d ago`;
+  return fmtDate(ts);
+}
+
+function setGateMsg(msg)   { document.getElementById('gate-msg').textContent = msg; }
+function showGateError(html) {
+  document.querySelector('#gate .spinner').style.display = 'none';
+  const el = document.getElementById('gate-msg');
+  el.innerHTML = html;
+  el.className = 'gate-error';
+}
+
+init();
+</script>
+</body>
+</html>
