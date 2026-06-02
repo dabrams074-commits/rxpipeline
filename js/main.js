@@ -508,8 +508,10 @@ export function buildFilters() {
   const rawCountries = all_jobs.map(j => j._country || inferCountry(j.location || '')).filter(Boolean);
   const countrySet = [...new Set(rawCountries)];
   const hasMultiple = countrySet.includes('Multiple');
+  const hasRemote = countrySet.includes('Remote');
   const hasOther = all_jobs.some(j => !(j._country || inferCountry(j.location || '')));
-  const countries = countrySet.filter(c => c !== 'Multiple').sort();
+  const countries = countrySet.filter(c => c !== 'Multiple' && c !== 'Remote').sort();
+  if (hasRemote) countries.push('Remote');
   if (hasMultiple) countries.push('Multiple');
   if (hasOther) countries.push('Other (unclassified)');
   const presentFuncs = new Set(all_jobs.map(j => inferFunc(j.title, j.dept || '')).filter(Boolean));
@@ -855,6 +857,9 @@ export function inferCountry(location) {
   // Normalize em-dash / en-dash to spaced hyphen
   let l = location.trim().replace(/\s*[–—]\s*/g, ' - ');
   if (!l) return '';
+
+  // Remote
+  if (/\bremote\b/i.test(l)) return 'Remote';
 
   // Multiple / global
   if (/multiple|various|global|worldwide|all locations/i.test(l)) return 'Multiple';
