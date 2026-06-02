@@ -542,6 +542,7 @@ export function parsePostedDate(posted) {
 // ── Country inference ────────────────────────────────────────────────────────
 
 const COUNTRY_ALIASES = {
+  // Common uppercase aliases / abbreviations
   'US':'United States','USA':'United States','U.S.A.':'United States','U.S.':'United States',
   'UK':'United Kingdom','U.K.':'United Kingdom','GB':'United Kingdom','Great Britain':'United Kingdom',
   'England':'United Kingdom','Scotland':'United Kingdom','Wales':'United Kingdom','Northern Ireland':'United Kingdom',
@@ -550,6 +551,35 @@ const COUNTRY_ALIASES = {
   'Republic of Ireland':'Ireland','Eire':'Ireland',
   'Czechia':'Czech Republic','Türkiye':'Turkey',
   'United States of America':'United States',
+  // Lowercase ISO-2 codes returned by SmartRecruiters
+  'us':'United States','gb':'United Kingdom','uk':'United Kingdom',
+  'de':'Germany','fr':'France','ch':'Switzerland','jp':'Japan',
+  'cn':'China','in':'India','ca':'Canada','au':'Australia',
+  'nl':'Netherlands','be':'Belgium','se':'Sweden','dk':'Denmark',
+  'no':'Norway','fi':'Finland','es':'Spain','it':'Italy',
+  'ie':'Ireland','at':'Austria','pl':'Poland','hu':'Hungary',
+  'cz':'Czech Republic','sk':'Slovakia','ro':'Romania','bg':'Bulgaria',
+  'gr':'Greece','pt':'Portugal','hr':'Croatia','rs':'Serbia',
+  'si':'Slovenia','sg':'Singapore','kr':'South Korea','tw':'Taiwan',
+  'hk':'Hong Kong','il':'Israel','tr':'Turkey','za':'South Africa',
+  'br':'Brazil','mx':'Mexico','ar':'Argentina','co':'Colombia',
+  'cl':'Chile','pe':'Peru','ru':'Russia','ua':'Ukraine',
+  'pk':'Pakistan','bd':'Bangladesh','ph':'Philippines','my':'Malaysia',
+  'id':'Indonesia','th':'Thailand','vn':'Vietnam',
+  'sa':'Saudi Arabia','ae':'United Arab Emirates','eg':'Egypt',
+  'ke':'Kenya','ng':'Nigeria','ma':'Morocco',
+  'nz':'New Zealand','lu':'Luxembourg','is':'Iceland',
+  'ee':'Estonia','lv':'Latvia','lt':'Lithuania','mt':'Malta',
+  'cy':'Cyprus','jo':'Jordan','lb':'Lebanon','kw':'Kuwait',
+  'qa':'Qatar','bh':'Bahrain','om':'Oman','iq':'Iraq',
+  'pr':'Puerto Rico','cr':'Costa Rica','pa':'Panama',
+  'gt':'Guatemala','do':'Dominican Republic','ec':'Ecuador',
+  'uy':'Uruguay','py':'Paraguay','bo':'Bolivia','ve':'Venezuela',
+  'lk':'Sri Lanka','np':'Nepal','mm':'Myanmar','kh':'Cambodia',
+  'az':'Azerbaijan','ge':'Georgia','am':'Armenia','kz':'Kazakhstan',
+  'uz':'Uzbekistan','by':'Belarus','md':'Moldova','al':'Albania',
+  'ba':'Bosnia and Herzegovina','mk':'North Macedonia','me':'Montenegro',
+  'xk':'Kosovo',
 };
 
 // All 50 US states + DC + territories as full names → United States
