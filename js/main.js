@@ -569,7 +569,8 @@ const CITY_STATE = {
   'San Mateo':'California','Hayward':'California','Fremont':'California',
   'Thousand Oaks':'California','Newbury Park':'California','Camarillo':'California',
   'Simi Valley':'California','Westlake Village':'California','Irvine':'California',
-  'San Diego':'California','La Jolla':'California','Carlsbad':'California',
+  'San Diego':'California','San Diego County':'California','San Diego, CA':'California',
+  'La Jolla':'California','Carlsbad':'California',
   'Oceanside':'California','Escondido':'California','Vista':'California',
   'San Marcos':'California','Solana Beach':'California','Del Mar':'California',
   'Los Angeles':'California','Santa Monica':'California','El Segundo':'California',
@@ -689,6 +690,9 @@ export function inferState(location) {
   if (!location) return '';
   const l = location.trim().replace(/\s*[–—]\s*/g, ' - ');
 
+  // Bare US designations → "Nationwide"
+  if (/^(us|usa|united states|u\.s\.a?\.?)$/i.test(l.replace(/[,.\s]+$/, ''))) return 'Nationwide';
+
   // 0. Parenthetical format: "Cambridge (USA)", "East Hanover (New Jersey)", "Watertown (Massachusetts)"
   //    → check content in parens for state name, and city before parens via city lookup
   const parenMatch = l.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
@@ -741,15 +745,23 @@ export function inferState(location) {
     if (up.length === 2 && STATE_ABBR_TO_NAME[up]) return STATE_ABBR_TO_NAME[up];
   }
 
-  // 4. City lookup — case-insensitive, tries each comma part and bare location
+  // 4. City lookup — case-insensitive, tries each comma part, dash segment, and bare location
   const cityLookup = (s) => CITY_STATE_LC[s.toLowerCase().trim()] || '';
   for (const p of parts) {
     const r = cityLookup(p);
     if (r) return r;
   }
-  // Try full string in case there are no commas
+  for (const s of segs) {
+    const r = cityLookup(s);
+    if (r) return r;
+  }
+  // Try full string in case there are no commas or dashes
   const r = cityLookup(l);
   if (r) return r;
+
+  // All segments are just US/country designations with no state → Nationwide
+  const nonUsSegs = segs.filter(s => !/^(us|usa|united states|u\.s\.a?\.?|american?)$/i.test(s));
+  if (segs.length > 1 && nonUsSegs.length === 0) return 'Nationwide';
 
   return '';
 }
