@@ -506,6 +506,43 @@ function switchLibTab(tab) {
 
 // ══════════════════════════════════════════
 // LIVE ROLES UI HELPERS
+// Abbr → full state name map
+const STATE_ABBR_TO_NAME = {
+  AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',
+  CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',
+  IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',
+  ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',
+  MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',
+  NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',
+  ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',
+  RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',
+  UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',
+  WI:'Wisconsin',WY:'Wyoming',DC:'District of Columbia',PR:'Puerto Rico',
+};
+
+export function inferState(location) {
+  if (!location) return '';
+  const l = location.trim().replace(/\s*[–—]\s*/g, ' - ');
+  // "City, ST, Country" or "City, ST" — check comma parts
+  const parts = l.split(',').map(p => p.trim());
+  for (const p of parts) {
+    const up = p.toUpperCase();
+    if (STATE_ABBR_TO_NAME[up]) return STATE_ABBR_TO_NAME[up];
+    if (US_STATE_NAMES.has(p) || STATE_NAMES_LC.has(p.toLowerCase())) {
+      // Normalize to title case from our set
+      for (const s of US_STATE_NAMES) { if (s.toLowerCase() === p.toLowerCase()) return s; }
+    }
+  }
+  // "City - ST - US" dash format
+  const segs = l.split(' - ').map(s => s.trim());
+  for (const s of segs) {
+    const up = s.toUpperCase();
+    if (STATE_ABBR_TO_NAME[up]) return STATE_ABBR_TO_NAME[up];
+    if (US_STATE_NAMES.has(s)) return s;
+  }
+  return '';
+}
+
 // ══════════════════════════════════════════
 export function buildFilters() {
   const companies = [...new Set(all_jobs.map(j => j.company).filter(Boolean))].sort();
@@ -527,9 +564,14 @@ export function buildFilters() {
       const otherOption  = otherItem ? `<option value="${esc(otherItem)}">Other</option>` : '';
       return `<optgroup label="${esc(g.group)}"><option value="${esc(g.group)}">— All ${esc(g.group)} —</option>${regularItems.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('')}${otherOption}</optgroup>`;
     }).join('');
+  // Build state list from US jobs
+  const usJobs = all_jobs.filter(j => (j._country || inferCountry(j.location || '')) === 'United States');
+  const stateSet = [...new Set(usJobs.map(j => inferState(j.location || '')).filter(Boolean))].sort();
+
   document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
   document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups + (presentFuncs.has('Other') ? '<option value="Other">Other</option>' : '');
   document.getElementById('r-loc').innerHTML = '<option value="">All Countries</option>' + countries.map(c => `<option>${esc(c)}</option>`).join('');
+  document.getElementById('r-state').innerHTML = '<option value="">All States</option>' + stateSet.map(s => `<option>${esc(s)}</option>`).join('');
   document.getElementById('roles-filters').style.display = 'flex';
 }
 
@@ -967,6 +1009,7 @@ function getFilteredRoles() {
   const funcFilter = document.getElementById('r-func')?.value || '';
   const co = document.getElementById('r-company')?.value || '';
   const country = document.getElementById('r-loc')?.value || '';
+  const state   = document.getElementById('r-state')?.value || '';
   return all_jobs.filter(r => {
     try {
       const area = r._area || inferArea(r.title || '', r.dept || '');
@@ -976,12 +1019,28 @@ function getFilteredRoles() {
       const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
       const rc = r._country || inferCountry(r.location || '');
       const mCountry = !country || (country === 'Other (unclassified)' ? !rc : rc === country);
-      return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
+      const mState   = !state || inferState(r.location || '') === state;
+      return mQ && mArea && mFunc && (!co || r.company === co) && mCountry && mState;
     } catch(e) { return false; }
   }).sort((a, b) => { try { return (b._dateMs||0) - (a._dateMs||0); } catch(e) { return 0; } });
 }
 
-function clearRoleFilters() { ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('r-clear-btn').style.display = 'none'; renderRoles(); }
+function clearRoleFilters() {
+  ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc', 'r-state'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const stateEl = document.getElementById('r-state'); if (stateEl) stateEl.style.display = 'none';
+  document.getElementById('r-clear-btn').style.display = 'none';
+  renderRoles();
+}
+
+window.onCountryChange = function() {
+  const country = document.getElementById('r-loc')?.value || '';
+  const stateEl = document.getElementById('r-state');
+  if (stateEl) {
+    stateEl.style.display = country === 'United States' ? '' : 'none';
+    stateEl.value = '';
+  }
+  renderRoles();
+};
 
 export function renderRoles() {
   const list = getFilteredRoles(); setPfizerFiltered(list); const container = document.getElementById('roles-container'); if (!container) return;

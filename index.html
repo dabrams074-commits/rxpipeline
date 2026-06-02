@@ -456,8 +456,11 @@
       <select class="filter-select" id="r-func" onchange="renderRoles()">
         <option value="">All Functions</option>
       </select>
-      <select class="filter-select" id="r-loc" onchange="renderRoles()">
+      <select class="filter-select" id="r-loc" onchange="window.onCountryChange()">
         <option value="">All Countries</option>
+      </select>
+      <select class="filter-select" id="r-state" onchange="renderRoles()" style="display:none">
+        <option value="">All States</option>
       </select>
       <button class="filter-clear-btn" id="r-clear-btn" onclick="clearRoleFilters()" style="display:none">✕ Clear</button>
       <button class="btn-export-roles" onclick="exportRolesCSV()">
