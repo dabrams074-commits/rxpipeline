@@ -462,6 +462,21 @@
       <select class="filter-select" id="r-state" onchange="renderRoles()" style="display:none">
         <option value="">All States</option>
       </select>
+      <select class="filter-select" id="r-level" onchange="renderRoles()">
+        <option value="">All Levels</option>
+        <option>Associate</option>
+        <option>Manager</option>
+        <option>Senior Manager</option>
+        <option>Associate Director</option>
+        <option>Director</option>
+        <option>Senior Director</option>
+        <option>VP</option>
+        <option>Head Of</option>
+        <option>SVP / EVP</option>
+        <option>C-Suite</option>
+        <option>Senior</option>
+        <option>Individual Contributor</option>
+      </select>
       <button class="filter-clear-btn" id="r-clear-btn" onclick="clearRoleFilters()" style="display:none">✕ Clear</button>
       <button class="btn-export-roles" onclick="exportRolesCSV()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -885,6 +900,6 @@
 </div>
 <!-- ── End Auth Overlay ─────────────────────────────────────────────────── -->
 
-<script type="module" src="./js/main.js?v=30"></script>
+<script type="module" src="./js/main.js?v=31"></script>
 </body>
 </html>

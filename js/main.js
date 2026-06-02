@@ -1242,6 +1242,7 @@ function getFilteredRoles() {
   const co = document.getElementById('r-company')?.value || '';
   const country = document.getElementById('r-loc')?.value || '';
   const state   = document.getElementById('r-state')?.value || '';
+  const level   = document.getElementById('r-level')?.value || '';
   return all_jobs.filter(r => {
     try {
       const area = r._area || inferArea(r.title || '', r.dept || '');
@@ -1253,13 +1254,14 @@ function getFilteredRoles() {
       const mCountry = !country || (country === 'Other (unclassified)' ? !rc : rc === country);
       const rs = inferState(r.location || '');
       const mState = !state || (state === '__nostate__' ? (rc === 'United States' && !rs) : rs === state);
-      return mQ && mArea && mFunc && (!co || r.company === co) && mCountry && mState;
+      const mLevel = !level || inferLevel(r.title || '') === level;
+      return mQ && mArea && mFunc && (!co || r.company === co) && mCountry && mState && mLevel;
     } catch(e) { return false; }
   }).sort((a, b) => { try { return (b._dateMs||0) - (a._dateMs||0); } catch(e) { return 0; } });
 }
 
 function clearRoleFilters() {
-  ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc', 'r-state'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc', 'r-state', 'r-level'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const stateEl = document.getElementById('r-state'); if (stateEl) stateEl.style.display = 'none';
   document.getElementById('r-clear-btn').style.display = 'none';
   renderRoles();
@@ -1280,7 +1282,7 @@ export function renderRoles() {
   const countEl = document.getElementById('r-count');
   const limit = 100;
   if (countEl) countEl.textContent = list.length > limit ? `Showing ${limit} of ${list.length} roles` : list.length + ' roles';
-  const cb = document.getElementById('r-clear-btn'); if (cb) cb.style.display = (document.getElementById('r-search')?.value || document.getElementById('r-area')?.value || document.getElementById('r-func')?.value || document.getElementById('r-company')?.value || document.getElementById('r-dept')?.value || document.getElementById('r-loc')?.value) ? 'inline-flex' : 'none';
+  const cb = document.getElementById('r-clear-btn'); if (cb) cb.style.display = (document.getElementById('r-search')?.value || document.getElementById('r-area')?.value || document.getElementById('r-func')?.value || document.getElementById('r-company')?.value || document.getElementById('r-dept')?.value || document.getElementById('r-loc')?.value || document.getElementById('r-level')?.value) ? 'inline-flex' : 'none';
   if (!list.length && all_jobs.length > 0) { container.innerHTML = '<div class="roles-empty">No roles match your filters</div>'; return; }
   if (!list.length) return;
   const cardArr = list.slice(0, limit).map(r => { try { return roleCardHTML(r); } catch(e) { return ''; } });
@@ -1338,7 +1340,21 @@ function addRoleToTracker(r, btn, stage = 'Sourced') {
 }
 
 export function inferArea(title, dept) { const t = (title + ' ' + dept).toLowerCase(); if (t.includes('oncol')) return 'Oncology'; if (t.includes('rare')) return 'Rare Disease'; if (t.includes('immun') || t.includes('autoimmun')) return 'Immunology'; if (t.includes('neuro') || t.includes('cns')) return 'Neuroscience'; if (t.includes('cardio') || t.includes('heart')) return 'Cardiovascular'; if (t.includes('vaccin')) return 'Vaccines'; if (t.includes('metabol') || t.includes('endocrin')) return 'Metabolic / Endocrine'; if (t.includes('infectious')) return 'Infectious Disease'; if (t.includes('ophthal')) return 'Ophthalmology'; return 'Diversified'; }
-function inferLevel(title) { const t = title.toLowerCase(); if (t.includes('chief') || t.includes('cso') || t.includes('coo')) return 'C-Suite'; if (t.includes('executive vice') || t.includes('evp') || t.includes('senior vice') || t.includes('svp')) return 'SVP / EVP'; if (t.includes('vice president') || t.includes(' vp ') || t.startsWith('vp ')) return 'VP'; if (t.includes('senior director')) return 'Senior Director'; if (t.includes('director')) return 'Director'; if (t.includes('senior manager')) return 'Senior Manager'; if (t.includes('manager')) return 'Manager'; if (t.includes('associate director')) return 'Associate Director'; if (t.includes('associate')) return 'Associate'; return 'Other'; }
+function inferLevel(title) {
+  const t = (title || '').toLowerCase();
+  if (t.includes('chief') || t.includes('cso') || t.includes('coo') || t.includes('ceo') || t.includes('cmo')) return 'C-Suite';
+  if (t.includes('executive vice') || t.includes('evp') || t.includes('senior vice') || t.includes('svp')) return 'SVP / EVP';
+  if (/\bhead of\b|\bhead,/.test(t)) return 'Head Of';
+  if (t.includes('vice president') || /\bvp\b/.test(t)) return 'VP';
+  if (t.includes('senior director')) return 'Senior Director';
+  if (t.includes('associate director')) return 'Associate Director';
+  if (t.includes('director')) return 'Director';
+  if (t.includes('senior manager')) return 'Senior Manager';
+  if (t.includes('manager')) return 'Manager';
+  if (t.includes('associate')) return 'Associate';
+  if (/\bsenior\b|\bsr\.?\b/.test(t)) return 'Senior';
+  return 'Individual Contributor';
+}
 
 export const FUNC_GROUPS = [
   { group: 'Commercial Operations', items: ['Sales Force Effectiveness', 'Field Sales', 'Commercial Operations', 'CRM Administration (Veeva)', 'Incentive Compensation', 'Field Force Deployment', 'Call Planning', 'Targeting & Segmentation', 'Commercial Training', 'Other / Commercial Operations'] },
