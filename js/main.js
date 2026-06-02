@@ -539,27 +539,83 @@ export function parsePostedDate(posted) {
   return isNaN(d) ? 0 : d.getTime();
 }
 
-// US state abbreviations — if the last comma-part is one of these, the country is United States
-const US_STATES = new Set(['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC','PR','GU']);
+// ── Country inference ────────────────────────────────────────────────────────
+
+const COUNTRY_ALIASES = {
+  'US':'United States','USA':'United States','U.S.A.':'United States','U.S.':'United States',
+  'UK':'United Kingdom','U.K.':'United Kingdom','GB':'United Kingdom','Great Britain':'United Kingdom',
+  'England':'United Kingdom','Scotland':'United Kingdom','Wales':'United Kingdom','Northern Ireland':'United Kingdom',
+  'UAE':'United Arab Emirates','KSA':'Saudi Arabia',
+  'Holland':'Netherlands','The Netherlands':'Netherlands',
+  'Republic of Ireland':'Ireland','Eire':'Ireland',
+  'Czechia':'Czech Republic','Türkiye':'Turkey',
+  'United States of America':'United States',
+};
+
+// All 50 US states + DC + territories as full names → United States
+const US_STATE_NAMES = new Set([
+  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
+  'Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky',
+  'Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi',
+  'Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico',
+  'New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania',
+  'Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
+  'Virginia','Washington','West Virginia','Wisconsin','Wyoming',
+  'District of Columbia','Puerto Rico','Guam','American Samoa','Virgin Islands',
+  // Canadian provinces (Workday often lumps Canada similar to US)
+  'Ontario','Quebec','British Columbia','Alberta','Manitoba','Saskatchewan',
+  'Nova Scotia','New Brunswick','Newfoundland and Labrador','Prince Edward Island',
+]);
+
+// US state abbreviations
+const US_STATE_ABBR = new Set(['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC','PR','GU','AS','VI']);
+
+// Known countries — we only return a value if it matches this list (or is mapped via aliases)
+const COUNTRIES = new Set([
+  'United States','United Kingdom','Germany','France','Switzerland','Japan','China','India',
+  'Canada','Australia','Netherlands','Belgium','Sweden','Denmark','Norway','Finland',
+  'Spain','Italy','Ireland','Austria','Poland','Hungary','Czech Republic','Slovakia',
+  'Romania','Bulgaria','Greece','Portugal','Croatia','Serbia','Slovenia',
+  'Singapore','South Korea','Taiwan','Hong Kong','Israel','Turkey','South Africa',
+  'Brazil','Mexico','Argentina','Colombia','Chile','Peru',
+  'Russia','Ukraine','Pakistan','Bangladesh','Philippines','Malaysia','Indonesia','Thailand','Vietnam',
+  'Saudi Arabia','United Arab Emirates','Egypt','Kenya','Nigeria','Morocco',
+  'New Zealand','Argentina','Luxembourg','Iceland','Estonia','Latvia','Lithuania',
+  'Malta','Cyprus','Albania','Bosnia and Herzegovina','North Macedonia','Montenegro',
+  'Belarus','Moldova','Georgia','Armenia','Azerbaijan','Kazakhstan','Uzbekistan',
+  'Jordan','Lebanon','Kuwait','Qatar','Bahrain','Oman','Iraq','Iran',
+  'Puerto Rico',
+]);
 
 export function inferCountry(location) {
   if (!location) return '';
   const l = location.trim();
   if (!l) return '';
-  // Explicit multiple / global / remote
-  if (/multiple|various|global|worldwide/i.test(l)) return 'Multiple';
-  // Split and take last non-empty part
+
+  // Multiple / global / remote
+  if (/multiple|various|global|worldwide|all locations/i.test(l)) return 'Multiple';
+
+  // Workday sometimes uses "|" or ">" as a hierarchy separator
+  // e.g. "United States of America > New Jersey > Titusville" — first segment is the country
+  const hierSep = l.includes('>') ? '>' : l.startsWith('|') ? '|' : null;
+  if (hierSep) {
+    const first = l.split(hierSep)[0].trim();
+    return COUNTRY_ALIASES[first] || (COUNTRIES.has(first) ? first : '');
+  }
+
+  // Split by comma
   const parts = l.split(',').map(p => p.trim()).filter(Boolean);
   if (!parts.length) return '';
-  const last = parts[parts.length - 1];
-  // Normalize abbreviations
-  const norm = { 'US': 'United States', 'USA': 'United States', 'U.S.A.': 'United States', 'U.S.': 'United States', 'UK': 'United Kingdom', 'U.K.': 'United Kingdom', 'UAE': 'United Arab Emirates', 'KSA': 'Saudi Arabia' };
-  if (norm[last]) return norm[last];
-  // US state code → United States
-  if (US_STATES.has(last)) return 'United States';
-  // If last part is a known country-like string (has at least 4 chars, not all caps abbreviation) use it
-  if (parts.length >= 2 && last.length >= 2) return last;
-  // Only one part (just a city name with no country info)
+
+  // Check each part from the end — first one that resolves to a country wins
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    if (COUNTRY_ALIASES[p]) return COUNTRY_ALIASES[p];
+    if (COUNTRIES.has(p)) return p;
+    if (US_STATE_ABBR.has(p)) return 'United States';
+    if (US_STATE_NAMES.has(p)) return 'United States';
+  }
+
   return '';
 }
 
