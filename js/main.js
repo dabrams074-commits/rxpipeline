@@ -648,6 +648,198 @@ const COUNTRIES = new Set([
   'Slovenia','Croatia','Serbia','Slovakia','Czech Republic','Hungary','Romania','Bulgaria',
 ]);
 
+// City → Country lookup for city-only location strings
+// Covers pharma hubs and common ambiguous cities
+const CITY_COUNTRY = {
+  // ── United States ─────────────────────────────────────────────────
+  'TARRYTOWN':'United States','SLEEPY HOLLOW':'United States',
+  'BASKING RIDGE':'United States','PARSIPPANY':'United States',
+  'BRIDGEWATER':'United States','BEDMINSTER':'United States',
+  'East Hanover':'United States','Whippany':'United States',
+  'Florham Park':'United States','Morris Plains':'United States',
+  'North Chicago':'United States','Mettawa':'United States','Branchburg':'United States',
+  'Thousand Oaks':'United States','Newbury Park':'United States',
+  'Gaithersburg':'United States','Rockville':'United States','Bethesda':'United States',
+  'Foster City':'United States','Santa Monica':'United States',
+  'South San Francisco':'United States','Brisbane':'United States',
+  'La Jolla':'United States','Carlsbad':'United States','Oceanside':'United States',
+  'San Diego':'United States','San Francisco':'United States',
+  'Cambridge':'United States',  // Cambridge MA is primary pharma hub; Cambridge UK handled by comma context
+  'Waltham':'United States','Lexington':'United States','Bedford':'United States',
+  'Watertown':'United States','Framingham':'United States','Marlborough':'United States',
+  'Kenilworth':'United States','Rahway':'United States','Whitehouse Station':'United States',
+  'Hopewell':'United States','Lawrenceville':'United States','Plainsboro':'United States',
+  'Princeton':'United States','New Brunswick':'United States',
+  'Wilmington':'United States','Newark':'United States','Dover':'United States',
+  'Durham':'United States','Research Triangle Park':'United States','Mebane':'United States',
+  'Durham NC':'United States','Chapel Hill':'United States','Cary':'United States',
+  'Columbus':'United States','Cincinnati':'United States','Cleveland':'United States',
+  'Pittsburgh':'United States','Philadelphia':'United States',
+  'Chicago':'United States','Abbott Park':'United States',
+  'Indianapolis':'United States','Lilly Corporate Center':'United States',
+  'Salt Lake City':'United States','Boulder':'United States','Denver':'United States',
+  'Seattle':'United States','Bothell':'United States','Redmond':'United States',
+  'Portland':'United States','South Portland':'United States',
+  'Nashville':'United States','Memphis':'United States','Atlanta':'United States',
+  'Charlotte':'United States','Raleigh':'United States',
+  'Tampa':'United States','Miami':'United States','Orlando':'United States',
+  'Houston':'United States','Dallas':'United States','Austin':'United States',
+  'Phoenix':'United States','Scottsdale':'United States','Tempe':'United States',
+  'Minneapolis':'United States','St. Louis':'United States','Kansas City':'United States',
+  'Honolulu':'United States','Anchorage':'United States',
+  'Devens':'United States','Andover':'United States','Norwood':'United States',
+  'New Haven':'United States','Groton':'United States','Stamford':'United States',
+  'Sleepy Hollow':'United States','Tarrytown':'United States','Hawthorne':'United States',
+  'Basking Ridge':'United States','Titusville':'United States','Spring House':'United States',
+  // NJ Corporate / lab shorthand (Insmed style)
+  'NJ Corporate Headquarters':'United States',
+  'Research Development Lab - San Diego':'United States',
+  'Research Development Lab - New Jersey':'United States',
+  'Research Development Lab - Cambridge':'United States',
+  // ── Canada ────────────────────────────────────────────────────────
+  'Toronto':'Canada','Mississauga':'Canada','Ottawa':'Canada','Montreal':'Canada',
+  'Vancouver':'Canada','Calgary':'Canada','Edmonton':'Canada','Laval':'Canada',
+  'Kirkland':'Canada','Dorval':'Canada','Saint-Laurent':'Canada',
+  // ── United Kingdom ────────────────────────────────────────────────
+  'London':'United Kingdom','Uxbridge':'United Kingdom','Stockley Park':'United Kingdom',
+  'Stevenage':'United Kingdom','Hertfordshire':'United Kingdom',
+  'Macclesfield':'United Kingdom','Alderley Park':'United Kingdom',
+  'Oxford':'United Kingdom','Abingdon':'United Kingdom',
+  'Edinburgh':'United Kingdom','Glasgow':'United Kingdom','Manchester':'United Kingdom',
+  'Birmingham':'United Kingdom','Bristol':'United Kingdom','Swindon':'United Kingdom',
+  'Slough':'United Kingdom','Windsor':'United Kingdom','Maidenhead':'United Kingdom',
+  'Sandwich':'United Kingdom','Walton Oaks':'United Kingdom','Surrey':'United Kingdom',
+  'England':'United Kingdom','Scotland':'United Kingdom','Wales':'United Kingdom',
+  // ── Ireland ───────────────────────────────────────────────────────
+  'Dublin':'Ireland','Cork':'Ireland','Limerick':'Ireland','Galway':'Ireland',
+  'Dún Laoghaire':'Ireland','Citywest':'Ireland','Little Island':'Ireland',
+  // ── Switzerland ───────────────────────────────────────────────────
+  'Basel':'Switzerland','Zurich':'Switzerland','Zug':'Switzerland',
+  'Bern':'Switzerland','Geneva':'Switzerland','Lausanne':'Switzerland',
+  'Rotkreuz':'Switzerland','Kaiseraugst':'Switzerland','Allschwil':'Switzerland',
+  // ── Germany ───────────────────────────────────────────────────────
+  'Frankfurt':'Germany','Munich':'Germany','Berlin':'Germany','Hamburg':'Germany',
+  'Cologne':'Germany','Düsseldorf':'Germany','Stuttgart':'Germany',
+  'Mannheim':'Germany','Ludwigshafen':'Germany','Leverkusen':'Germany',
+  'Wuppertal':'Germany','Ingelheim':'Germany','Darmstadt':'Germany',
+  'Marburg':'Germany','Biberach':'Germany','Ulm':'Germany',
+  // ── France ────────────────────────────────────────────────────────
+  'Paris':'France','Lyon':'France','Strasbourg':'France','Bordeaux':'France',
+  'Toulouse':'France','Marseille':'France','Montpellier':'France',
+  'Gentilly':'France','Vitry-sur-Seine':'France','Suresnes':'France',
+  'Rueil-Malmaison':'France','Chilly-Mazarin':'France','Guildford':'France',
+  // ── Netherlands ───────────────────────────────────────────────────
+  'Amsterdam':'Netherlands','Leiden':'Netherlands','Utrecht':'Netherlands',
+  'Rotterdam':'Netherlands','Breda':'Netherlands','Eindhoven':'Netherlands',
+  'Hoofddorp':'Netherlands','Naarden':'Netherlands',
+  // ── Belgium ───────────────────────────────────────────────────────
+  'Brussels':'Belgium','Antwerp':'Belgium','Ghent':'Belgium','Mechelen':'Belgium',
+  'Beerse':'Belgium','Janssen':'Belgium',
+  // ── Sweden ────────────────────────────────────────────────────────
+  'Stockholm':'Sweden','Gothenburg':'Sweden','Malmö':'Sweden','Södertälje':'Sweden',
+  'Mölndal':'Sweden',
+  // ── Denmark ───────────────────────────────────────────────────────
+  'Copenhagen':'Denmark','Bagsværd':'Denmark','Kalundborg':'Denmark',
+  // ── Norway ────────────────────────────────────────────────────────
+  'Oslo':'Norway',
+  // ── Finland ───────────────────────────────────────────────────────
+  'Helsinki':'Finland','Espoo':'Finland','Turku':'Finland',
+  // ── Spain ─────────────────────────────────────────────────────────
+  'Madrid':'Spain','Barcelona':'Spain','Seville':'Spain','Valencia':'Spain',
+  'Bilbao':'Spain','Alcobendas':'Spain','Tres Cantos':'Spain',
+  // ── Italy ─────────────────────────────────────────────────────────
+  'Milan':'Italy','Rome':'Italy','Turin':'Italy','Naples':'Italy',
+  'Florence':'Italy','Bologna':'Italy','Pomezia':'Italy','Latina':'Italy',
+  'Segrate':'Italy','Sesto San Giovanni':'Italy',
+  // ── Austria ───────────────────────────────────────────────────────
+  'Vienna':'Austria','Graz':'Austria','Linz':'Austria',
+  // ── Poland ────────────────────────────────────────────────────────
+  'Warsaw':'Poland','Krakow':'Poland','Wroclaw':'Poland','Lodz':'Poland',
+  'Poznan':'Poland','Gdansk':'Poland',
+  // ── Hungary ───────────────────────────────────────────────────────
+  'Budapest':'Hungary',
+  // ── Czech Republic ────────────────────────────────────────────────
+  'Prague':'Czech Republic','Brno':'Czech Republic',
+  // ── Romania ───────────────────────────────────────────────────────
+  'Bucharest':'Romania','Cluj-Napoca':'Romania',
+  // ── Greece ────────────────────────────────────────────────────────
+  'Athens':'Greece','Thessaloniki':'Greece','Chortiatis':'Greece',
+  // ── Portugal ──────────────────────────────────────────────────────
+  'Lisbon':'Portugal','Porto':'Portugal',
+  // ── Slovenia ──────────────────────────────────────────────────────
+  'Ljubljana':'Slovenia','Mengeš':'Slovenia','Mengesh':'Slovenia',
+  // ── Turkey ────────────────────────────────────────────────────────
+  'Istanbul':'Turkey','İstanbul':'Turkey','Ankara':'Turkey','İstanbul Kurtköy':'Turkey',
+  'Kurtköy':'Turkey',
+  // ── Israel ────────────────────────────────────────────────────────
+  'Tel Aviv':'Israel','Jerusalem':'Israel','Haifa':'Israel','Petah Tikva':'Israel',
+  'Rehovot':'Israel','Ness Ziona':'Israel','Herzliya':'Israel',
+  // ── India ─────────────────────────────────────────────────────────
+  'Hyderabad':'India','Mumbai':'India','Bangalore':'India','Bengaluru':'India',
+  'Chennai':'India','Pune':'India','New Delhi':'India','Delhi':'India',
+  'Gurgaon':'India','Gurugram':'India','Noida':'India','Ahmedabad':'India',
+  'Kolkata':'India','Chandigarh':'India',
+  'Hyderabad (Office)':'India',
+  // ── China ─────────────────────────────────────────────────────────
+  'Shanghai':'China','Beijing':'China','Guangzhou':'China','Shenzhen':'China',
+  'Chengdu':'China','Hangzhou':'China','Suzhou':'China','Nanjing':'China',
+  'Tianjin':'China','Wuhan':'China','Zhengzhou':'China','Shangrao':'China',
+  'Chongqing':'China','Qingdao':'China','Dalian':'China','Xiamen':'China',
+  // ── Japan ─────────────────────────────────────────────────────────
+  'Tokyo':'Japan','Osaka':'Japan','Kyoto':'Japan','Yokohama':'Japan',
+  'Nagoya':'Japan','Kobe':'Japan','Fukuoka':'Japan',
+  // ── South Korea ───────────────────────────────────────────────────
+  'Seoul':'South Korea','Busan':'South Korea','Incheon':'South Korea',
+  // ── Singapore ─────────────────────────────────────────────────────
+  'Singapore':'Singapore',
+  // ── Australia ─────────────────────────────────────────────────────
+  'Sydney':'Australia','Melbourne':'Australia','Brisbane (AU)':'Australia',
+  'Perth':'Australia','Adelaide':'Australia','Canberra':'Australia',
+  'Mulgrave':'Australia','Macquarie Park':'Australia',
+  // ── New Zealand ───────────────────────────────────────────────────
+  'Auckland':'New Zealand','Wellington':'New Zealand','Christchurch':'New Zealand',
+  // ── Malaysia ──────────────────────────────────────────────────────
+  'Kuala Lumpur':'Malaysia','Petaling Jaya':'Malaysia','Selangor':'Malaysia',
+  // ── Indonesia ─────────────────────────────────────────────────────
+  'Jakarta':'Indonesia','Surabaya':'Indonesia','Bandung':'Indonesia',
+  // ── Philippines ───────────────────────────────────────────────────
+  'Manila':'Philippines','Taguig':'Philippines','Makati':'Philippines',
+  // ── Thailand ──────────────────────────────────────────────────────
+  'Bangkok':'Thailand','Chiang Mai':'Thailand',
+  // ── Vietnam ───────────────────────────────────────────────────────
+  'Ho Chi Minh City':'Vietnam','Hanoi':'Vietnam',
+  // ── Taiwan ────────────────────────────────────────────────────────
+  'Taipei':'Taiwan',
+  // ── Hong Kong ─────────────────────────────────────────────────────
+  'Hong Kong':'Hong Kong',
+  // ── Brazil ────────────────────────────────────────────────────────
+  'São Paulo':'Brazil','Sao Paulo':'Brazil','Rio de Janeiro':'Brazil',
+  'Santo Amaro':'Brazil','Barueri':'Brazil','Campinas':'Brazil',
+  // ── Mexico ────────────────────────────────────────────────────────
+  'Mexico City':'Mexico','Guadalajara':'Mexico','Monterrey':'Mexico',
+  'INSURGENTES':'Mexico',
+  // ── Colombia ──────────────────────────────────────────────────────
+  'Bogota':'Colombia','Bogotá':'Colombia','Medellín':'Colombia','Cali':'Colombia',
+  // ── Argentina ─────────────────────────────────────────────────────
+  'Buenos Aires':'Argentina','Córdoba':'Argentina','Rosario':'Argentina',
+  // ── Chile ─────────────────────────────────────────────────────────
+  'Santiago':'Chile',
+  // ── Peru ──────────────────────────────────────────────────────────
+  'Lima':'Peru',
+  // ── Costa Rica ────────────────────────────────────────────────────
+  'San Jose':'Costa Rica','Escazu':'Costa Rica','Grecia':'Costa Rica',
+  // ── South Africa ──────────────────────────────────────────────────
+  'Johannesburg':'South Africa','Cape Town':'South Africa','Durban':'South Africa',
+  // ── Egypt ─────────────────────────────────────────────────────────
+  'Cairo':'Egypt','Alexandria':'Egypt',
+  // ── United Arab Emirates ──────────────────────────────────────────
+  'Dubai':'United Arab Emirates','Abu Dhabi':'United Arab Emirates',
+  // ── Saudi Arabia ──────────────────────────────────────────────────
+  'Riyadh':'Saudi Arabia','Jeddah':'Saudi Arabia',
+  // ── Russia ────────────────────────────────────────────────────────
+  'Moscow':'Russia','Saint Petersburg':'Russia',
+};
+
 function resolveCountryToken(token) {
   if (!token) return '';
   if (COUNTRY_ALIASES[token]) return COUNTRY_ALIASES[token];
@@ -718,9 +910,16 @@ export function inferCountry(location) {
     if (r) return r;
   }
 
-  // Last resort: scan individual words for a state/country abbreviation
-  // Catches "NJ Corporate Headquarters", "Remote - New York" already handled above
-  const words = l.split(/[\s,]+/);
+  // City lookup — exact match on full string or first comma segment
+  const cityKey = parts.length ? parts[0] : l;
+  if (CITY_COUNTRY[l]) return CITY_COUNTRY[l];
+  if (CITY_COUNTRY[cityKey]) return CITY_COUNTRY[cityKey];
+  // Also try trimming parentheticals for "Hyderabad (Office)" → "Hyderabad"
+  const stripped = l.replace(/\s*\([^)]*\)\s*$/, '').trim();
+  if (stripped !== l && CITY_COUNTRY[stripped]) return CITY_COUNTRY[stripped];
+
+  // Last resort: scan individual words for a state/province abbreviation
+  const words = l.split(/[\s,\-]+/);
   for (const w of words) {
     if (US_STATE_ABBR.has(w)) return 'United States';
     if (CA_PROVINCE_ABBR.has(w)) return 'Canada';
