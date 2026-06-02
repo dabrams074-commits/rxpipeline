@@ -845,6 +845,8 @@ const CITY_COUNTRY = {
 function resolveCountryToken(token) {
   if (!token) return '';
   if (COUNTRY_ALIASES[token]) return COUNTRY_ALIASES[token];
+  // Try lowercase for uppercase ISO-2 codes: "PL" → "pl" → Poland, "IE" → "ie" → Ireland
+  if (COUNTRY_ALIASES[token.toLowerCase()]) return COUNTRY_ALIASES[token.toLowerCase()];
   if (COUNTRIES.has(token)) return token;
   if (US_STATE_ABBR.has(token)) return 'United States';
   if (CA_PROVINCE_ABBR.has(token)) return 'Canada';
