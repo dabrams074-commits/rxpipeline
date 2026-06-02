@@ -900,12 +900,11 @@ export function inferCountry(location) {
   }
 
   // Comma-separated: "City, State, Country" — scan right to left
+  // Also handles single-word country names: "Ireland", "Japan", "China"
   const parts = l.split(',').map(p => p.trim()).filter(Boolean);
-  if (parts.length > 1) {
-    for (let i = parts.length - 1; i >= 0; i--) {
-      const r = resolveCountryToken(parts[i]);
-      if (r) return r;
-    }
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const r = resolveCountryToken(parts[i]);
+    if (r) return r;
   }
 
   // Bare hyphen: "Greece-Thessaloniki Chortiatis" — check first hyphen segment
@@ -915,13 +914,18 @@ export function inferCountry(location) {
     if (r) return r;
   }
 
-  // City lookup — exact match on full string or first comma segment
+  // City lookup — try full string, first comma segment, then stripped parentheticals
   const cityKey = parts.length ? parts[0] : l;
   if (CITY_COUNTRY[l]) return CITY_COUNTRY[l];
   if (CITY_COUNTRY[cityKey]) return CITY_COUNTRY[cityKey];
-  // Also try trimming parentheticals for "Hyderabad (Office)" → "Hyderabad"
+  // Strip trailing parenthetical: "Hyderabad (Office)" → "Hyderabad", "Paris Headquarter (PHARMA)" → "Paris Headquarter"
   const stripped = l.replace(/\s*\([^)]*\)\s*$/, '').trim();
-  if (stripped !== l && CITY_COUNTRY[stripped]) return CITY_COUNTRY[stripped];
+  if (stripped !== l) {
+    if (CITY_COUNTRY[stripped]) return CITY_COUNTRY[stripped];
+    // Also try first word of stripped: "Paris Headquarter" → "Paris"
+    const firstWord = stripped.split(/\s+/)[0];
+    if (CITY_COUNTRY[firstWord]) return CITY_COUNTRY[firstWord];
+  }
 
   // Last resort: scan individual words for a state/province abbreviation
   const words = l.split(/[\s,\-]+/);
