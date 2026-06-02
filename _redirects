@@ -1,3 +1,6 @@
+# Admin page
+/admin  /admin.html  200
+
 # Workday API Proxies
 /api/pfizer              https://pfizer.wd1.myworkdayjobs.com/wday/cxs/pfizer/PfizerCareers/jobs  200!
 /api/msd                 https://msd.wd5.myworkdayjobs.com/wday/cxs/msd/SearchJobs/jobs  200!
