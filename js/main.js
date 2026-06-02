@@ -1283,8 +1283,17 @@ export function renderRoles() {
   const cb = document.getElementById('r-clear-btn'); if (cb) cb.style.display = (document.getElementById('r-search')?.value || document.getElementById('r-area')?.value || document.getElementById('r-func')?.value || document.getElementById('r-company')?.value || document.getElementById('r-dept')?.value || document.getElementById('r-loc')?.value) ? 'inline-flex' : 'none';
   if (!list.length && all_jobs.length > 0) { container.innerHTML = '<div class="roles-empty">No roles match your filters</div>'; return; }
   if (!list.length) return;
-  const cards = list.slice(0, limit).map(r => { try { return roleCardHTML(r); } catch(e) { return ''; } }).join('');
-  container.innerHTML = '<div class="roles-grid">' + cards + '</div>';
+  const cardArr = list.slice(0, limit).map(r => { try { return roleCardHTML(r); } catch(e) { return ''; } });
+  const classificationNote = `<div class="role-card classification-inline-note">
+    <div class="cin-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    <div class="cin-body">
+      <div class="cin-title">A note on job classification</div>
+      <div class="cin-text">Job function and location data is parsed directly from company career pages, which are sometimes inconsistently formatted or missing key details. We're continuously improving accuracy — anomalies will decrease over time. Spotted something off? <a href="mailto:hello@bioboard.io" class="cin-link">Send us a note</a> — every suggestion helps.</div>
+    </div>
+  </div>`;
+  if (cardArr.length > 1) cardArr.splice(1, 0, classificationNote);
+  else if (cardArr.length === 1) cardArr.push(classificationNote);
+  container.innerHTML = '<div class="roles-grid">' + cardArr.join('') + '</div>';
 }
 
 function roleCardHTML(r) {

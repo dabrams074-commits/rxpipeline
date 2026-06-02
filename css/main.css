@@ -877,6 +877,17 @@ font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted);
 display: flex; align-items: center; gap: 8px;
 padding: 14px 0; border-top: 1px solid var(--border); letter-spacing: 0.3px;
 }
+.classification-inline-note {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: rgba(13,148,136,0.07); border: 1px solid rgba(13,148,136,0.25) !important;
+  cursor: default !important;
+}
+.classification-inline-note:hover { transform: none !important; box-shadow: none !important; border-color: rgba(13,148,136,0.35) !important; }
+.cin-icon { color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+.cin-title { font-size: 0.72rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.cin-text { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); line-height: 1.65; letter-spacing: 0.2px; }
+.cin-link { color: var(--accent); text-decoration: none; }
+.cin-link:hover { text-decoration: underline; }
 .roles-empty { text-align: center; padding: 60px 24px; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* ── NEWS PAGE ── */
