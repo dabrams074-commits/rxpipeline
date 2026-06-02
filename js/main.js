@@ -1342,10 +1342,8 @@ function addRoleToTracker(r, btn, stage = 'Sourced') {
 export function inferArea(title, dept) { const t = (title + ' ' + dept).toLowerCase(); if (t.includes('oncol')) return 'Oncology'; if (t.includes('rare')) return 'Rare Disease'; if (t.includes('immun') || t.includes('autoimmun')) return 'Immunology'; if (t.includes('neuro') || t.includes('cns')) return 'Neuroscience'; if (t.includes('cardio') || t.includes('heart')) return 'Cardiovascular'; if (t.includes('vaccin')) return 'Vaccines'; if (t.includes('metabol') || t.includes('endocrin')) return 'Metabolic / Endocrine'; if (t.includes('infectious')) return 'Infectious Disease'; if (t.includes('ophthal')) return 'Ophthalmology'; return 'Diversified'; }
 function inferLevel(title) {
   const t = (title || '').toLowerCase();
-  if (t.includes('chief') || t.includes('cso') || t.includes('coo') || t.includes('ceo') || t.includes('cmo')) return 'C-Suite';
-  if (t.includes('executive vice') || t.includes('evp') || t.includes('senior vice') || t.includes('svp')) return 'SVP / EVP';
-  if (/\bhead of\b|\bhead,/.test(t)) return 'Head Of';
-  if (t.includes('vice president') || /\bvp\b/.test(t)) return 'VP';
+  if (t.includes('vice president') || t.includes('executive vice') || t.includes('evp') || t.includes('senior vice') || t.includes('svp') || /\bvp\b/.test(t) || t.includes('chief') || t.includes('ceo') || t.includes('coo') || t.includes('cso') || t.includes('cmo')) return 'VP';
+  if (/\bhead of\b|\bhead,/.test(t) || t.includes('executive director')) return 'Head Of / Executive Director';
   if (t.includes('senior director')) return 'Senior Director';
   if (t.includes('associate director')) return 'Associate Director';
   if (t.includes('director')) return 'Director';
