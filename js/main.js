@@ -4,11 +4,15 @@ import {
   setJobs, setEditId, setPanelJobId, resetTFilters
 } from './store.js';
 
-import { initAuth, signInWithGoogle, signOut, startCheckout, manageSubscription } from './auth.js';
+import { initAuth, signInWithGoogle, signInWithLinkedIn, signInWithApple, signOut, startCheckout, manageSubscription, toggleSignUp, emailAuth } from './auth.js';
 window.rxSignInWithGoogle      = signInWithGoogle;
+window.rxSignInWithLinkedIn    = signInWithLinkedIn;
+window.rxSignInWithApple       = signInWithApple;
 window.rxSignOut               = signOut;
 window.rxStartCheckout         = startCheckout;
 window.rxManageSubscription    = manageSubscription;
+window.rxToggleSignUp          = toggleSignUp;
+window.rxEmailAuth             = emailAuth;
 
 import {
   FETCH_COMPANIES, all_jobs, pfizer_filtered, addedRoleSet, selectedCompanies,

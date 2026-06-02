@@ -87,11 +87,75 @@ async function _checkAndGate(onReady) {
 // ── Public actions (wired to window.rx* in main.js) ─────────────────────────
 export async function signInWithGoogle() {
   const btn = document.getElementById('btn-google-signin');
-  if (btn) { btn.disabled = true; btn.querySelector('.btn-google-label').textContent = 'Redirecting…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
   await supabase.auth.signInWithOAuth({
     provider: 'google',
     options:  { redirectTo: window.location.origin },
   });
+}
+
+export async function signInWithLinkedIn() {
+  const btn = document.getElementById('btn-linkedin-signin');
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
+  await supabase.auth.signInWithOAuth({
+    provider: 'linkedin_oidc',
+    options:  { redirectTo: window.location.origin },
+  });
+}
+
+export async function signInWithApple() {
+  const btn = document.getElementById('btn-apple-signin');
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
+  await supabase.auth.signInWithOAuth({
+    provider: 'apple',
+    options:  { redirectTo: window.location.origin },
+  });
+}
+
+let _isSignUp = false;
+export function toggleSignUp(e) {
+  e.preventDefault();
+  _isSignUp = !_isSignUp;
+  const btn    = document.getElementById('btn-email-signin');
+  const toggle = document.querySelector('.auth-toggle');
+  const pwd    = document.getElementById('auth-password-input');
+  if (_isSignUp) {
+    btn.textContent    = 'Create account';
+    toggle.innerHTML   = 'Already have an account? <a href="#" onclick="window.rxToggleSignUp(event)">Sign in</a>';
+    pwd.autocomplete   = 'new-password';
+  } else {
+    btn.textContent    = 'Sign in';
+    toggle.innerHTML   = 'Don\'t have an account? <a href="#" onclick="window.rxToggleSignUp(event)">Sign up</a>';
+    pwd.autocomplete   = 'current-password';
+  }
+  document.getElementById('auth-email-error').style.display = 'none';
+}
+
+export async function emailAuth(e) {
+  e.preventDefault();
+  const email    = document.getElementById('auth-email-input').value.trim();
+  const password = document.getElementById('auth-password-input').value;
+  const btn      = document.getElementById('btn-email-signin');
+  const errEl    = document.getElementById('auth-email-error');
+  btn.disabled   = true;
+  btn.textContent = _isSignUp ? 'Creating account…' : 'Signing in…';
+  errEl.style.display = 'none';
+
+  const { error } = _isSignUp
+    ? await supabase.auth.signUp({ email, password })
+    : await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    errEl.textContent   = error.message;
+    errEl.style.display = 'block';
+    btn.disabled        = false;
+    btn.textContent     = _isSignUp ? 'Create account' : 'Sign in';
+  } else if (_isSignUp) {
+    errEl.style.cssText = 'display:block;color:var(--accent)';
+    errEl.textContent   = 'Check your email for a confirmation link.';
+    btn.disabled        = false;
+    btn.textContent     = 'Create account';
+  }
 }
 
 export async function signOut() {
