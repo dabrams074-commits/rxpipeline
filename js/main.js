@@ -842,21 +842,33 @@ const CITY_COUNTRY = {
   'Moscow':'Russia','Saint Petersburg':'Russia',
 };
 
-// Case-insensitive city lookup map (built once at load time)
-const CITY_COUNTRY_LC = Object.fromEntries(
-  Object.entries(CITY_COUNTRY).map(([k, v]) => [k.toLowerCase(), v])
-);
-function cityLookup(s) { return CITY_COUNTRY[s] || CITY_COUNTRY_LC[s.toLowerCase()] || ''; }
+// ── Case-insensitive lookup maps (built once at load time) ───────────────────
+const CITY_COUNTRY_LC    = Object.fromEntries(Object.entries(CITY_COUNTRY).map(([k,v])=>[k.toLowerCase(),v]));
+const COUNTRY_ALIASES_LC = Object.fromEntries(Object.entries(COUNTRY_ALIASES).map(([k,v])=>[k.toLowerCase(),v]));
+const COUNTRIES_LC       = new Map([...COUNTRIES].map(c=>[c.toLowerCase(),c]));
+const STATE_NAMES_LC     = new Set([...US_STATE_NAMES].map(s=>s.toLowerCase()));
+const CA_PROVINCE_LC     = new Set([...CA_PROVINCE_ABBR].map(s=>s.toLowerCase()));
+
+function cityLookup(s) {
+  const lc = s.toLowerCase();
+  return CITY_COUNTRY[s] || CITY_COUNTRY_LC[lc] || '';
+}
 
 function resolveCountryToken(token) {
   if (!token) return '';
+  const lc = token.toLowerCase();
+  // Country aliases (any case: "US", "us", "PL", "pl", "United States of America"…)
   if (COUNTRY_ALIASES[token]) return COUNTRY_ALIASES[token];
-  // Try lowercase for uppercase ISO-2 codes: "PL" → "pl" → Poland, "IE" → "ie" → Ireland
-  if (COUNTRY_ALIASES[token.toLowerCase()]) return COUNTRY_ALIASES[token.toLowerCase()];
+  if (COUNTRY_ALIASES_LC[lc]) return COUNTRY_ALIASES_LC[lc];
+  // Known country names ("Ireland", "IRELAND", "ireland"…)
   if (COUNTRIES.has(token)) return token;
-  if (US_STATE_ABBR.has(token)) return 'United States';
-  if (CA_PROVINCE_ABBR.has(token)) return 'Canada';
-  if (US_STATE_NAMES.has(token)) return 'United States';
+  if (COUNTRIES_LC.has(lc)) return COUNTRIES_LC.get(lc);
+  // US state abbreviations (uppercase canonical: NY, CA…)
+  if (US_STATE_ABBR.has(token.toUpperCase())) return 'United States';
+  // Canadian province abbreviations
+  if (CA_PROVINCE_ABBR.has(token.toUpperCase()) || CA_PROVINCE_LC.has(lc)) return 'Canada';
+  // US state full names ("New York", "NEW YORK", "new york"…)
+  if (US_STATE_NAMES.has(token) || STATE_NAMES_LC.has(lc)) return 'United States';
   return '';
 }
 
