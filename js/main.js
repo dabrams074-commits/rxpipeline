@@ -580,6 +580,30 @@ const COUNTRY_ALIASES = {
   'uz':'Uzbekistan','by':'Belarus','md':'Moldova','al':'Albania',
   'ba':'Bosnia and Herzegovina','mk':'North Macedonia','me':'Montenegro',
   'xk':'Kosovo',
+  // ISO-3 codes used by Workday (e.g. Merck: "USA - NJ - Rahway", "MYS - Selangor - ...")
+  'USA':'United States','GBR':'United Kingdom','DEU':'Germany','FRA':'France',
+  'CHE':'Switzerland','JPN':'Japan','CHN':'China','IND':'India',
+  'CAN':'Canada','AUS':'Australia','NLD':'Netherlands','BEL':'Belgium',
+  'SWE':'Sweden','DNK':'Denmark','NOR':'Norway','FIN':'Finland',
+  'ESP':'Spain','ITA':'Italy','IRL':'Ireland','AUT':'Austria',
+  'POL':'Poland','HUN':'Hungary','CZE':'Czech Republic','SVK':'Slovakia',
+  'ROU':'Romania','BGR':'Bulgaria','GRC':'Greece','PRT':'Portugal',
+  'HRV':'Croatia','SRB':'Serbia','SVN':'Slovenia','SGP':'Singapore',
+  'KOR':'South Korea','TWN':'Taiwan','HKG':'Hong Kong','ISR':'Israel',
+  'TUR':'Turkey','ZAF':'South Africa','BRA':'Brazil','MEX':'Mexico',
+  'ARG':'Argentina','COL':'Colombia','CHL':'Chile','PER':'Peru',
+  'RUS':'Russia','UKR':'Ukraine','PAK':'Pakistan','BGD':'Bangladesh',
+  'PHL':'Philippines','MYS':'Malaysia','IDN':'Indonesia','THA':'Thailand',
+  'VNM':'Vietnam','SAU':'Saudi Arabia','ARE':'United Arab Emirates',
+  'EGY':'Egypt','KEN':'Kenya','NGA':'Nigeria','MAR':'Morocco',
+  'NZL':'New Zealand','LUX':'Luxembourg','ISL':'Iceland',
+  'EST':'Estonia','LVA':'Latvia','LTU':'Lithuania','MLT':'Malta',
+  'CYP':'Cyprus','JOR':'Jordan','LBN':'Lebanon','KWT':'Kuwait',
+  'QAT':'Qatar','BHR':'Bahrain','OMN':'Oman','PRI':'Puerto Rico',
+  'CRI':'Costa Rica','PAN':'Panama','ECU':'Ecuador','URY':'Uruguay',
+  'LKA':'Sri Lanka','NPL':'Nepal','KHM':'Cambodia','AZE':'Azerbaijan',
+  'GEO':'Georgia','ARM':'Armenia','KAZ':'Kazakhstan','UZB':'Uzbekistan',
+  'BLR':'Belarus','MDA':'Moldova',
 };
 
 // All 50 US states + DC + territories as full names → United States
@@ -624,20 +648,30 @@ export function inferCountry(location) {
 
   // Multiple / global / remote
   if (/multiple|various|global|worldwide|all locations/i.test(l)) return 'Multiple';
+  // Workday "N Locations" pattern (e.g. "5 Locations", "2 Locations")
+  if (/^\d+\s+locations?$/i.test(l)) return 'Multiple';
 
-  // Workday sometimes uses "|" or ">" as a hierarchy separator
-  // e.g. "United States of America > New Jersey > Titusville" — first segment is the country
+  // Workday dash-hierarchy: "Country - Region - City" or "ISO3 - State - City"
+  // e.g. "United States - Kansas - McPherson", "USA - Pennsylvania - Rahway", "MYS - Selangor - PJ"
+  if (l.includes(' - ')) {
+    const first = l.split(' - ')[0].trim();
+    const mapped = COUNTRY_ALIASES[first];
+    if (mapped) return mapped;
+    if (COUNTRIES.has(first)) return first;
+  }
+
+  // Workday/other hierarchies using ">" or leading "|"
+  // e.g. "United States of America > New Jersey > Titusville"
   const hierSep = l.includes('>') ? '>' : l.startsWith('|') ? '|' : null;
   if (hierSep) {
     const first = l.split(hierSep)[0].trim();
     return COUNTRY_ALIASES[first] || (COUNTRIES.has(first) ? first : '');
   }
 
-  // Split by comma
+  // Comma-separated: "City, State, Country" — scan right to left for first country match
   const parts = l.split(',').map(p => p.trim()).filter(Boolean);
   if (!parts.length) return '';
 
-  // Check each part from the end — first one that resolves to a country wins
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i];
     if (COUNTRY_ALIASES[p]) return COUNTRY_ALIASES[p];
