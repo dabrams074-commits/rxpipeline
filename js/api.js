@@ -178,27 +178,25 @@ export async function fetchAllCompanyJobs(){
             q.done = true;
           }
         } else if (q.company.ats === 'Jibe') {
-          if (!q.seenIds) q.seenIds = new Set();
-          const LIMIT = 10;
-          const res = await fetch(`/api/jibe/${q.company.tenant}?keywords=&lang=en-gb&from=${q.offset}&num=${LIMIT}`);
+          const LIMIT = 500;
+          const res = await fetch(`/api/jibe/${q.company.tenant}?keywords=&lang=en-us&from=${q.offset}&num=${LIMIT}`);
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
+          if (q.total === null) q.total = data.totalCount || data.count || 0;
           const jobsArr = data.jobs || [];
-          const jobs = [];
-          for (const j of jobsArr) {
+          const fallbackUrl = q.company.tenant === 'gsk' ? 'https://jobs.gsk.com/en-gb/jobs' : `https://careers.${q.company.tenant}.com/jobs`;
+          const jobs = jobsArr.map(j => {
             const d = j.data || j;
-            const id = d.req_id || d.slug || '';
-            if (id && q.seenIds.has(id)) { q.done = true; break; }
-            if (id) q.seenIds.add(id);
+            const id = d.req_id || d.slug || String(Math.random());
             const posted = d.posted_date ? new Date(d.posted_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
             const loc = [d.city, d.state, d.country].filter(Boolean).join(', ');
-            jobs.push(stamp({ id: `GSK_${id||Math.random()}`, company: q.company.name, title: d.title||'', dept: (d.categories||[])[0]?.name||'', location: loc, posted, url: d.apply_url||d.canonical_url||'https://jobs.gsk.com/en-gb/jobs' }));
-          }
+            return stamp({ id: `${q.company.tenant}_${id}`, company: q.company.name, title: d.title||'', dept: (d.categories||[])[0]?.name||'', location: loc, posted, url: d.apply_url||d.canonical_url||fallbackUrl });
+          });
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
-          q.offset += LIMIT;
-          setPBar(q.key, q.jobCount, q.jobCount);
-          if(jobsArr.length < LIMIT || q.jobCount >= 1000) q.done = true;
+          q.offset += jobs.length;
+          setPBar(q.key, q.jobCount, q.total || q.jobCount);
+          if(jobs.length < LIMIT || q.jobCount >= (q.total || 9999)) q.done = true;
         } else if (q.company.ats === 'SmartRecruiters') {
           const LIMIT = 100;
           const res = await fetch(`/api/smartrecruiters/${q.company.tenant}?limit=${LIMIT}&offset=${q.offset}`);
