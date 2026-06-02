@@ -17,11 +17,11 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST')   return { statusCode: 405, headers: CORS, body: 'Method Not Allowed' };
 
   const STRIPE_KEY     = process.env.STRIPE_SECRET_KEY;
-  const SB_URL         = process.env.SUPABASE_URL;
+  const SB_URL         = 'https://ubfysqhdvqognxqjdhov.supabase.co';
   const SB_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const ADMIN_EMAIL    = process.env.ADMIN_EMAIL;
 
-  const missing = ['STRIPE_SECRET_KEY','SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','ADMIN_EMAIL']
+  const missing = ['STRIPE_SECRET_KEY','SUPABASE_SERVICE_ROLE_KEY','ADMIN_EMAIL']
     .filter(k => !process.env[k]);
   if (missing.length) {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: `Missing env vars: ${missing.join(', ')}` }) };
