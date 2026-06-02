@@ -626,6 +626,9 @@ const US_STATE_NAMES = new Set([
 // US state abbreviations
 const US_STATE_ABBR = new Set(['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC','PR','GU','AS','VI']);
 
+// Canadian province abbreviations
+const CA_PROVINCE_ABBR = new Set(['ON','QC','BC','AB','MB','SK','NS','NB','NL','PE','YT','NT','NU']);
+
 // Known countries — we only return a value if it matches this list (or is mapped via aliases)
 const COUNTRIES = new Set([
   'United States','United Kingdom','Germany','France','Switzerland','Japan','China','India',
@@ -633,53 +636,94 @@ const COUNTRIES = new Set([
   'Spain','Italy','Ireland','Austria','Poland','Hungary','Czech Republic','Slovakia',
   'Romania','Bulgaria','Greece','Portugal','Croatia','Serbia','Slovenia',
   'Singapore','South Korea','Taiwan','Hong Kong','Israel','Turkey','South Africa',
-  'Brazil','Mexico','Argentina','Colombia','Chile','Peru',
+  'Brazil','Mexico','Argentina','Colombia','Chile','Peru','Costa Rica','Panama',
+  'Guatemala','Ecuador','Uruguay','Paraguay','Bolivia','Venezuela','Dominican Republic',
   'Russia','Ukraine','Pakistan','Bangladesh','Philippines','Malaysia','Indonesia','Thailand','Vietnam',
   'Saudi Arabia','United Arab Emirates','Egypt','Kenya','Nigeria','Morocco',
-  'New Zealand','Argentina','Luxembourg','Iceland','Estonia','Latvia','Lithuania',
+  'New Zealand','Luxembourg','Iceland','Estonia','Latvia','Lithuania',
   'Malta','Cyprus','Albania','Bosnia and Herzegovina','North Macedonia','Montenegro',
   'Belarus','Moldova','Georgia','Armenia','Azerbaijan','Kazakhstan','Uzbekistan',
   'Jordan','Lebanon','Kuwait','Qatar','Bahrain','Oman','Iraq','Iran',
-  'Puerto Rico',
+  'Puerto Rico','Sri Lanka','Nepal','Cambodia','Myanmar',
+  'Slovenia','Croatia','Serbia','Slovakia','Czech Republic','Hungary','Romania','Bulgaria',
 ]);
+
+function resolveCountryToken(token) {
+  if (!token) return '';
+  if (COUNTRY_ALIASES[token]) return COUNTRY_ALIASES[token];
+  if (COUNTRIES.has(token)) return token;
+  if (US_STATE_ABBR.has(token)) return 'United States';
+  if (CA_PROVINCE_ABBR.has(token)) return 'Canada';
+  if (US_STATE_NAMES.has(token)) return 'United States';
+  return '';
+}
 
 export function inferCountry(location) {
   if (!location) return '';
-  const l = location.trim();
+  // Normalize em-dash / en-dash to spaced hyphen
+  let l = location.trim().replace(/\s*[–—]\s*/g, ' - ');
   if (!l) return '';
 
-  // Multiple / global / remote
+  // Multiple / global
   if (/multiple|various|global|worldwide|all locations/i.test(l)) return 'Multiple';
-  // Workday "N Locations" pattern (e.g. "5 Locations", "2 Locations")
   if (/^\d+\s+locations?$/i.test(l)) return 'Multiple';
 
-  // Workday dash-hierarchy: "Country - Region - City" or "ISO3 - State - City"
-  // e.g. "United States - Kansas - McPherson", "USA - Pennsylvania - Rahway", "MYS - Selangor - PJ"
-  if (l.includes(' - ')) {
-    const first = l.split(' - ')[0].trim();
-    const mapped = COUNTRY_ALIASES[first];
-    if (mapped) return mapped;
-    if (COUNTRIES.has(first)) return first;
+  // Pattern: "XX: rest" — ISO code prefix (Eli Lilly: "US: Louisville CO Site 3")
+  const colonMatch = l.match(/^([A-Za-z]{2,3}):\s/);
+  if (colonMatch) {
+    const r = resolveCountryToken(colonMatch[1].toUpperCase());
+    if (r) return r;
   }
 
-  // Workday/other hierarchies using ">" or leading "|"
-  // e.g. "United States of America > New Jersey > Titusville"
+  // Pattern: "Something (COUNTRY)" — parenthetical country (Novartis: "Remote Position (USA)", "Field Force (Indonesia)")
+  const parenMatch = l.match(/\(([^)]+)\)\s*$/);
+  if (parenMatch) {
+    const inner = parenMatch[1].trim();
+    const r = resolveCountryToken(inner) || resolveCountryToken(inner.toUpperCase());
+    if (r) return r;
+  }
+
+  // " - " separator — check FIRST then LAST segment
+  // First = Workday standard (Pfizer: "United States - Kansas - McPherson", Merck: "USA - PA - Rahway")
+  // Last  = BMS ("Princeton - NJ - US"), Moderna ("London - England"), Regeneron ("Remote - United States")
+  if (l.includes(' - ')) {
+    const segs = l.split(' - ').map(s => s.trim());
+    const first = segs[0], last = segs[segs.length - 1];
+    const rFirst = resolveCountryToken(first);
+    if (rFirst) return rFirst;
+    const rLast = resolveCountryToken(last);
+    if (rLast) return rLast;
+  }
+
+  // ">" or leading "|" hierarchy (e.g. "United States of America > New Jersey > City")
   const hierSep = l.includes('>') ? '>' : l.startsWith('|') ? '|' : null;
   if (hierSep) {
     const first = l.split(hierSep)[0].trim();
-    return COUNTRY_ALIASES[first] || (COUNTRIES.has(first) ? first : '');
+    return resolveCountryToken(first);
   }
 
-  // Comma-separated: "City, State, Country" — scan right to left for first country match
+  // Comma-separated: "City, State, Country" — scan right to left
   const parts = l.split(',').map(p => p.trim()).filter(Boolean);
-  if (!parts.length) return '';
+  if (parts.length > 1) {
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const r = resolveCountryToken(parts[i]);
+      if (r) return r;
+    }
+  }
 
-  for (let i = parts.length - 1; i >= 0; i--) {
-    const p = parts[i];
-    if (COUNTRY_ALIASES[p]) return COUNTRY_ALIASES[p];
-    if (COUNTRIES.has(p)) return p;
-    if (US_STATE_ABBR.has(p)) return 'United States';
-    if (US_STATE_NAMES.has(p)) return 'United States';
+  // Bare hyphen: "Greece-Thessaloniki Chortiatis" — check first hyphen segment
+  if (l.includes('-') && !l.includes(' - ')) {
+    const firstSeg = l.split('-')[0].trim();
+    const r = resolveCountryToken(firstSeg);
+    if (r) return r;
+  }
+
+  // Last resort: scan individual words for a state/country abbreviation
+  // Catches "NJ Corporate Headquarters", "Remote - New York" already handled above
+  const words = l.split(/[\s,]+/);
+  for (const w of words) {
+    if (US_STATE_ABBR.has(w)) return 'United States';
+    if (CA_PROVINCE_ABBR.has(w)) return 'Canada';
   }
 
   return '';
