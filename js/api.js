@@ -1,4 +1,4 @@
-import { esc, showToast, skeletons, buildFilters, renderRoles, inferArea, inferFunc, parsePostedDate } from './main.js';
+import { esc, showToast, skeletons, buildFilters, renderRoles, inferArea, inferFunc, inferCountry, parsePostedDate } from './main.js';
 import { saveCachedJobs, loadCachedJobs, cachedLiveJobs, lastFetchTime } from './store.js';
 
 export function sanitizeData(array) {
@@ -19,6 +19,7 @@ export const delay = ms => new Promise(res => setTimeout(res, ms));
 function stamp(job) {
   job._area = inferArea(job.title, job.dept || '');
   job._func = inferFunc(job.title, job.dept || '');
+  job._country = inferCountry(job.location || '');
   job._dateMs = parsePostedDate(job.posted);
   return job;
 }

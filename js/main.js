@@ -505,11 +505,11 @@ function switchLibTab(tab) {
 // ══════════════════════════════════════════
 export function buildFilters() {
   const companies = [...new Set(all_jobs.map(j => j.company).filter(Boolean))].sort();
-  const countries = [...new Set(all_jobs.map(j => {
-    if (!j.location) return null;
-    const parts = j.location.split(',');
-    return parts[parts.length - 1].trim();
-  }).filter(Boolean))].sort();
+  const rawCountries = all_jobs.map(j => j._country || inferCountry(j.location || '')).filter(Boolean);
+  const countrySet = [...new Set(rawCountries)];
+  const hasMultiple = countrySet.includes('Multiple');
+  const countries = countrySet.filter(c => c !== 'Multiple').sort();
+  if (hasMultiple) countries.push('Multiple');
   const presentFuncs = new Set(all_jobs.map(j => inferFunc(j.title, j.dept || '')).filter(Boolean));
   const funcOptgroups = FUNC_GROUPS
     .filter(g => g.items.some(i => presentFuncs.has(i)) || presentFuncs.has(g.group))
@@ -539,6 +539,30 @@ export function parsePostedDate(posted) {
   return isNaN(d) ? 0 : d.getTime();
 }
 
+// US state abbreviations — if the last comma-part is one of these, the country is United States
+const US_STATES = new Set(['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC','PR','GU']);
+
+export function inferCountry(location) {
+  if (!location) return '';
+  const l = location.trim();
+  if (!l) return '';
+  // Explicit multiple / global / remote
+  if (/multiple|various|global|worldwide/i.test(l)) return 'Multiple';
+  // Split and take last non-empty part
+  const parts = l.split(',').map(p => p.trim()).filter(Boolean);
+  if (!parts.length) return '';
+  const last = parts[parts.length - 1];
+  // Normalize abbreviations
+  const norm = { 'US': 'United States', 'USA': 'United States', 'U.S.A.': 'United States', 'U.S.': 'United States', 'UK': 'United Kingdom', 'U.K.': 'United Kingdom', 'UAE': 'United Arab Emirates', 'KSA': 'Saudi Arabia' };
+  if (norm[last]) return norm[last];
+  // US state code → United States
+  if (US_STATES.has(last)) return 'United States';
+  // If last part is a known country-like string (has at least 4 chars, not all caps abbreviation) use it
+  if (parts.length >= 2 && last.length >= 2) return last;
+  // Only one part (just a city name with no country info)
+  return '';
+}
+
 function getFilteredRoles() {
   const q = (document.getElementById('r-search')?.value || '').toLowerCase(); 
   const areaFilter = document.getElementById('r-area')?.value || '';
@@ -552,7 +576,7 @@ function getFilteredRoles() {
       const mQ = !q || (r.title||'').toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || (r.company||'').toLowerCase().includes(q) || area.toLowerCase().includes(q);
       const mArea = !areaFilter || area === areaFilter;
       const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
-      const mCountry = !country || (r.location || '').split(',').pop().trim() === country;
+      const mCountry = !country || (r._country || inferCountry(r.location || '')) === country;
       return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
     } catch(e) { return false; }
   }).sort((a, b) => { try { return (b._dateMs||0) - (a._dateMs||0); } catch(e) { return 0; } });
