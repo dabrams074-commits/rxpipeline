@@ -21,8 +21,10 @@ exports.handler = async (event) => {
   const SB_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const ADMIN_EMAIL    = process.env.ADMIN_EMAIL;
 
-  if (!STRIPE_KEY || !SB_URL || !SB_SERVICE_KEY || !ADMIN_EMAIL) {
-    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Missing required env vars' }) };
+  const missing = ['STRIPE_SECRET_KEY','SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','ADMIN_EMAIL']
+    .filter(k => !process.env[k]);
+  if (missing.length) {
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: `Missing env vars: ${missing.join(', ')}` }) };
   }
 
   // ── 1. Verify caller is the admin ──────────────────────────────────────────
