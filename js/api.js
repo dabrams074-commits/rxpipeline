@@ -40,7 +40,7 @@ export const FETCH_COMPANIES = [
   { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
   { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'roche-ext',               wdNum:3 },
   { name:'Becton Dickinson',        group:'Large Pharma',    ats:'Workday',   subdomain:'bdx',                    tenant:'EXTERNAL_CAREER_SITE_USA', wdNum:1 },
-  { name:'Zoetis',                  group:'Large Pharma',    ats:'Workday',   subdomain:'zoetis',                 tenant:'Zoetis',                  wdNum:1 },
+  { name:'Zoetis',                  group:'Large Pharma',    ats:'Workday',   subdomain:'zoetis',                 tenant:'zoetis',                  wdNum:5 },
   // ── Specialty Pharma & Established Brands ──
   { name:'Ipsen',                   group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'ipsen',      tenant:'Ipsen_Careers', wdNum:103 },
   { name:'Otsuka',                  group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'vhr-otsuka', tenant:'External',      wdNum:1, cxsId:'vhr_otsuka' },
@@ -49,12 +49,9 @@ export const FETCH_COMPANIES = [
   { name:'Gilead',                  group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'gilead',                tenant:'gileadcareers',           wdNum:1 },
   { name:'Vertex',                  group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'vrtx',                  tenant:'Vertex_Careers',          wdNum:501 },
   { name:'Moderna',                 group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'modernatx',             tenant:'M_tx',                    wdNum:1 },
-  { name:'BioNTech',                group:'Specialty Pharma & Established Brands', ats:'Workday',   subdomain:'biontech',               tenant:'BioNTech',                wdNum:1 },
-  { name:'United Therapeutics',     group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'unitedtherapeutics',    tenant:'UnitedTherapeutics',      wdNum:1 },
-  { name:'Royalty Pharma',          group:'Specialty Pharma & Established Brands', ats:'Workday',   subdomain:'royaltypharma',          tenant:'RoyaltyPharma',           wdNum:1 },
-  { name:'Jazz Pharmaceuticals',    group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'jazzpharma',            tenant:'Jazz',                    wdNum:1 },
+  { name:'United Therapeutics',     group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'vhr-unither',           tenant:'External',                wdNum:5, cxsId:'vhr_unither' },
+  { name:'Jazz Pharmaceuticals',    group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'vhr-jazz',              tenant:'JazzPharmaceuticals',     wdNum:1, cxsId:'vhr_jazz' },
   { name:'Incyte',                  group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'incyte',                tenant:'incyte',                  wdNum:1 },
-  { name:'Acadia',                  group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'acadia',                tenant:'Acadia_Careers',          wdNum:1 },
   // ── Biotech ──
   { name:'Alnylam',                 group:'Biotech',          ats:'Workday',  subdomain:'alnylam',               tenant:'Careers',                 wdNum:1 },
   { name:'Argenx',                  group:'Biotech',          ats:'Workday',  subdomain:'argenx',                tenant:'External_Careers',        wdNum:3 },
