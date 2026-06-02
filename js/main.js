@@ -567,11 +567,14 @@ export function buildFilters() {
   // Build state list from US jobs
   const usJobs = all_jobs.filter(j => (j._country || inferCountry(j.location || '')) === 'United States');
   const stateSet = [...new Set(usJobs.map(j => inferState(j.location || '')).filter(Boolean))].sort();
+  const hasNoState = usJobs.some(j => !inferState(j.location || ''));
 
   document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
   document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups + (presentFuncs.has('Other') ? '<option value="Other">Other</option>' : '');
   document.getElementById('r-loc').innerHTML = '<option value="">All Countries</option>' + countries.map(c => `<option>${esc(c)}</option>`).join('');
-  document.getElementById('r-state').innerHTML = '<option value="">All States</option>' + stateSet.map(s => `<option>${esc(s)}</option>`).join('');
+  document.getElementById('r-state').innerHTML = '<option value="">All States</option>' +
+    stateSet.map(s => `<option>${esc(s)}</option>`).join('') +
+    (hasNoState ? '<option value="__nostate__">Other (no state)</option>' : '');
   document.getElementById('roles-filters').style.display = 'flex';
 }
 
@@ -1016,7 +1019,8 @@ function getFilteredRoles() {
       const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
       const rc = r._country || inferCountry(r.location || '');
       const mCountry = !country || (country === 'Other (unclassified)' ? !rc : rc === country);
-      const mState   = !state || inferState(r.location || '') === state;
+      const rs = inferState(r.location || '');
+      const mState = !state || (state === '__nostate__' ? (rc === 'United States' && !rs) : rs === state);
       return mQ && mArea && mFunc && (!co || r.company === co) && mCountry && mState;
     } catch(e) { return false; }
   }).sort((a, b) => { try { return (b._dateMs||0) - (a._dateMs||0); } catch(e) { return 0; } });
