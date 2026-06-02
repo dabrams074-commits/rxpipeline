@@ -791,15 +791,18 @@ export function buildFilters() {
     }).join('');
   // Build state list from US jobs
   const usJobs = all_jobs.filter(j => (j._country || inferCountry(j.location || '')) === 'United States');
-  const stateSet = [...new Set(usJobs.map(j => inferState(j.location || '')).filter(Boolean))].sort();
-  const hasNoState = usJobs.some(j => !inferState(j.location || ''));
+  const allStates     = usJobs.map(j => inferState(j.location || '')).filter(Boolean);
+  const hasNationwide = allStates.includes('Nationwide');
+  const hasNoState    = usJobs.some(j => !inferState(j.location || ''));
+  const stateSet      = [...new Set(allStates.filter(s => s !== 'Nationwide'))].sort();
 
   document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
   document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups + (presentFuncs.has('Other') ? '<option value="Other">Other</option>' : '');
   document.getElementById('r-loc').innerHTML = '<option value="">All Countries</option>' + countries.map(c => `<option>${esc(c)}</option>`).join('');
   document.getElementById('r-state').innerHTML = '<option value="">All States</option>' +
     stateSet.map(s => `<option>${esc(s)}</option>`).join('') +
-    (hasNoState ? '<option value="__nostate__">Other (no state)</option>' : '');
+    (hasNationwide ? '<option value="Nationwide">Nationwide (no specific state)</option>' : '') +
+    (hasNoState    ? '<option value="__nostate__">Other (no state)</option>' : '');
   document.getElementById('roles-filters').style.display = 'flex';
 }
 
