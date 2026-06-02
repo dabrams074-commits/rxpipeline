@@ -523,23 +523,41 @@ const STATE_ABBR_TO_NAME = {
 export function inferState(location) {
   if (!location) return '';
   const l = location.trim().replace(/\s*[–—]\s*/g, ' - ');
-  // "City, ST, Country" or "City, ST" — check comma parts
+
+  // Helper: check a single token against abbr map and full state names
+  function checkToken(t) {
+    if (!t) return '';
+    const up = t.toUpperCase().replace(/[^A-Z]/g, '');  // strip digits/punct
+    if (STATE_ABBR_TO_NAME[up]) return STATE_ABBR_TO_NAME[up];
+    const lc = t.toLowerCase().trim();
+    if (US_STATE_NAMES.has(t.trim())) return t.trim();
+    if (STATE_NAMES_LC.has(lc)) {
+      for (const s of US_STATE_NAMES) { if (s.toLowerCase() === lc) return s; }
+    }
+    return '';
+  }
+
+  // 1. Comma-separated parts: "City, ST, Country" or "City, ST"
   const parts = l.split(',').map(p => p.trim());
   for (const p of parts) {
-    const up = p.toUpperCase();
-    if (STATE_ABBR_TO_NAME[up]) return STATE_ABBR_TO_NAME[up];
-    if (US_STATE_NAMES.has(p) || STATE_NAMES_LC.has(p.toLowerCase())) {
-      // Normalize to title case from our set
-      for (const s of US_STATE_NAMES) { if (s.toLowerCase() === p.toLowerCase()) return s; }
-    }
+    const r = checkToken(p);
+    if (r) return r;
   }
-  // "City - ST - US" dash format
+
+  // 2. Dash-separated: "City - ST - US" or "AbbVie - IL - US"
   const segs = l.split(' - ').map(s => s.trim());
   for (const s of segs) {
-    const up = s.toUpperCase();
-    if (STATE_ABBR_TO_NAME[up]) return STATE_ABBR_TO_NAME[up];
-    if (US_STATE_NAMES.has(s)) return s;
+    const r = checkToken(s);
+    if (r) return r;
   }
+
+  // 3. Space-separated words — catches "North Chicago IL" or "Glenview IL 60025"
+  const words = l.split(/[\s,]+/);
+  for (const w of words) {
+    const up = w.toUpperCase().replace(/[^A-Z]/g, '');
+    if (up.length === 2 && STATE_ABBR_TO_NAME[up]) return STATE_ABBR_TO_NAME[up];
+  }
+
   return '';
 }
 
