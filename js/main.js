@@ -708,17 +708,15 @@ export function inferState(location) {
     if (up.length === 2 && STATE_ABBR_TO_NAME[up]) return STATE_ABBR_TO_NAME[up];
   }
 
-  // 4. City lookup — "Boston", "Tarrytown", "Cambridge" etc.
-  // Try full location string, then first comma part, then first word
-  const cityKey = parts[0] || l;
-  if (CITY_STATE[cityKey]) return CITY_STATE[cityKey];
-  if (CITY_STATE_LC[cityKey.toLowerCase()]) return CITY_STATE_LC[cityKey.toLowerCase()];
-  // Try multi-word city from first two comma parts joined
-  if (parts.length >= 2) {
-    const twoWord = parts[0];
-    if (CITY_STATE[twoWord]) return CITY_STATE[twoWord];
-    if (CITY_STATE_LC[twoWord.toLowerCase()]) return CITY_STATE_LC[twoWord.toLowerCase()];
+  // 4. City lookup — case-insensitive, tries each comma part and bare location
+  const cityLookup = (s) => CITY_STATE_LC[s.toLowerCase().trim()] || '';
+  for (const p of parts) {
+    const r = cityLookup(p);
+    if (r) return r;
   }
+  // Try full string in case there are no commas
+  const r = cityLookup(l);
+  if (r) return r;
 
   return '';
 }
@@ -728,10 +726,12 @@ export function buildFilters() {
   const companies = [...new Set(all_jobs.map(j => j.company).filter(Boolean))].sort();
   const rawCountries = all_jobs.map(j => j._country || inferCountry(j.location || '')).filter(Boolean);
   const countrySet = [...new Set(rawCountries)];
-  const hasMultiple = countrySet.includes('Multiple');
-  const hasRemote = countrySet.includes('Remote');
+  const hasMultiple   = countrySet.includes('Multiple');
+  const hasRemote     = countrySet.includes('Remote');
+  const hasFieldBased = countrySet.includes('Field Based');
   const hasOther = all_jobs.some(j => !(j._country || inferCountry(j.location || '')));
-  const countries = countrySet.filter(c => c !== 'Multiple' && c !== 'Remote').sort();
+  const countries = countrySet.filter(c => c !== 'Multiple' && c !== 'Remote' && c !== 'Field Based').sort();
+  if (hasFieldBased) countries.push('Field Based');
   if (hasRemote) countries.push('Remote');
   if (hasMultiple) countries.push('Multiple');
   if (hasOther) countries.push('Other (unclassified)');
@@ -1106,6 +1106,9 @@ export function inferCountry(location) {
 
   // Remote
   if (/\bremote\b/i.test(l)) return 'Remote';
+
+  // Field Based
+  if (/field[- ]?based|field force|field medical|field sales|field rep|home[- ]?based/i.test(l)) return 'Field Based';
 
   // Multiple / global
   if (/multiple|various|global|worldwide|all locations/i.test(l)) return 'Multiple';
