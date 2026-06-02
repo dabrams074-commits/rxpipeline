@@ -967,16 +967,6 @@ font-family: 'DM Mono', monospace; font-size: 0.62rem;
 color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;
 }
 
-/* ── COVERAGE NOTE ── */
-.coverage-note {
-display: flex; align-items: flex-start; gap: 7px;
-background: var(--surface); border: 1px solid var(--border);
-border-radius: var(--radius); padding: 10px 14px; margin-bottom: 10px;
-font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted);
-line-height: 1.5;
-}
-.coverage-note svg { flex-shrink: 0; margin-top: 1px; opacity: 0.5; }
-.coverage-note strong { color: var(--text); font-weight: 500; }
 
 /* ── COMPANY SELECTOR ── */
 .company-selector-wrap {
