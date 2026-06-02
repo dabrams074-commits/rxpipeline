@@ -508,8 +508,10 @@ export function buildFilters() {
   const rawCountries = all_jobs.map(j => j._country || inferCountry(j.location || '')).filter(Boolean);
   const countrySet = [...new Set(rawCountries)];
   const hasMultiple = countrySet.includes('Multiple');
+  const hasOther = all_jobs.some(j => !(j._country || inferCountry(j.location || '')));
   const countries = countrySet.filter(c => c !== 'Multiple').sort();
   if (hasMultiple) countries.push('Multiple');
+  if (hasOther) countries.push('Other (unclassified)');
   const presentFuncs = new Set(all_jobs.map(j => inferFunc(j.title, j.dept || '')).filter(Boolean));
   const funcOptgroups = FUNC_GROUPS
     .filter(g => g.items.some(i => presentFuncs.has(i)) || presentFuncs.has(g.group))
@@ -696,7 +698,8 @@ function getFilteredRoles() {
       const mQ = !q || (r.title||'').toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || (r.company||'').toLowerCase().includes(q) || area.toLowerCase().includes(q);
       const mArea = !areaFilter || area === areaFilter;
       const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
-      const mCountry = !country || (r._country || inferCountry(r.location || '')) === country;
+      const rc = r._country || inferCountry(r.location || '');
+      const mCountry = !country || (country === 'Other (unclassified)' ? !rc : rc === country);
       return mQ && mArea && mFunc && (!co || r.company === co) && mCountry;
     } catch(e) { return false; }
   }).sort((a, b) => { try { return (b._dateMs||0) - (a._dateMs||0); } catch(e) { return 0; } });
