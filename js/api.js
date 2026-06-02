@@ -51,7 +51,7 @@ export const FETCH_COMPANIES = [
   { name:'Moderna',                 group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'modernatx',             tenant:'M_tx',                    wdNum:1 },
   { name:'United Therapeutics',     group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'vhr-unither',           tenant:'External',                wdNum:5, cxsId:'vhr_unither' },
   { name:'Jazz Pharmaceuticals',    group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'vhr-jazz',              tenant:'JazzPharmaceuticals',     wdNum:1, cxsId:'vhr_jazz' },
-  { name:'Incyte',                  group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'incyte',                tenant:'incyte',                  wdNum:1 },
+  { name:'Incyte',                  group:'Specialty Pharma & Established Brands', ats:'Jibe',     subdomain:'',                      tenant:'incyte',                  wdNum:0 },
   // ── Biotech ──
   { name:'Alnylam',                 group:'Biotech',          ats:'Workday',  subdomain:'alnylam',               tenant:'Careers',                 wdNum:1 },
   { name:'Argenx',                  group:'Biotech',          ats:'Workday',  subdomain:'argenx',                tenant:'External_Careers',        wdNum:3 },

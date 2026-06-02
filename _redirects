@@ -15,8 +15,6 @@
 /api/takeda              https://takeda.wd3.myworkdayjobs.com/wday/cxs/takeda/External/jobs  200!
 /api/abbvie              https://abbvie.wd1.myworkdayjobs.com/wday/cxs/abbvie/AbbVie_External/jobs  200!
 /api/modernatx           https://modernatx.wd1.myworkdayjobs.com/wday/cxs/modernatx/M_tx/jobs  200!
-/api/acadia              https://acadia.wd1.myworkdayjobs.com/wday/cxs/acadia/Acadia_Careers/jobs  200!
-/api/novonordisk         https://novonordisk.wd3.myworkdayjobs.com/wday/cxs/novonordisk/NovoNordisk/jobs  200!
 /api/jj                  https://jj.wd5.myworkdayjobs.com/wday/cxs/jj/JJ/jobs  200!
 /api/sarepta             https://sarepta.wd5.myworkdayjobs.com/wday/cxs/sarepta/sarepta_external/jobs  200!
 /api/ultragenyx          https://ultragenyx.wd1.myworkdayjobs.com/wday/cxs/ultragenyx/ultragenyx/jobs  200!
@@ -26,22 +24,20 @@
 /api/argenx              https://argenx.wd3.myworkdayjobs.com/wday/cxs/argenx/External_Careers/jobs  200!
 /api/alnylam             https://alnylam.wd1.myworkdayjobs.com/wday/cxs/alnylam/Careers/jobs  200!
 /api/roche               https://roche.wd3.myworkdayjobs.com/wday/cxs/roche/roche-ext/jobs  200!
-/api/thermofisher        https://thermofisher.wd1.myworkdayjobs.com/wday/cxs/thermofisher/ThermoFisherScientific/jobs  200!
-/api/bdx                 https://bdx.wd1.myworkdayjobs.com/wday/cxs/bdx/BD/jobs  200!
-/api/zoetis              https://zoetis.wd1.myworkdayjobs.com/wday/cxs/zoetis/Zoetis/jobs  200!
-/api/unitedtherapeutics  https://unitedtherapeutics.wd1.myworkdayjobs.com/wday/cxs/unitedtherapeutics/UnitedTherapeutics/jobs  200!
+/api/bdx                 https://bdx.wd1.myworkdayjobs.com/wday/cxs/bdx/EXTERNAL_CAREER_SITE_USA/jobs  200!
+/api/zoetis              https://zoetis.wd5.myworkdayjobs.com/wday/cxs/zoetis/zoetis/jobs  200!
 /api/genmab              https://genmab.wd3.myworkdayjobs.com/wday/cxs/genmab/Genmab_External/jobs  200!
 /api/illumina            https://illumina.wd1.myworkdayjobs.com/wday/cxs/illumina/illumina/jobs  200!
 /api/incyte              https://incyte.wd1.myworkdayjobs.com/wday/cxs/incyte/incyte/jobs  200!
 /api/ionis               https://ionis.wd1.myworkdayjobs.com/wday/cxs/ionis/Ionis/jobs  200!
 /api/neurocrine          https://neurocrine.wd1.myworkdayjobs.com/wday/cxs/neurocrine/Neurocrine_External/jobs  200!
 /api/halozyme            https://halozyme.wd1.myworkdayjobs.com/wday/cxs/halozyme/Halozyme/jobs  200!
-/api/biontech            https://biontech.wd1.myworkdayjobs.com/wday/cxs/biontech/BioNTech/jobs  200!
-/api/jazzpharma          https://jazzpharma.wd1.myworkdayjobs.com/wday/cxs/jazzpharma/Jazz/jobs  200!
+/api/incyte              https://incyte.wd1.myworkdayjobs.com/wday/cxs/incyte/incyte/jobs  200!
 /api/madrigalpharma      https://madrigalpharma.wd501.myworkdayjobs.com/wday/cxs/madrigalpharma/Madrigal/jobs  200!
 
-# Jibe (iCIMS) Proxies
-/api/jibe/:cid  https://jobs.gsk.com/api/jobs  200!
+# Jibe (iCIMS) Proxies — company-specific domains, specific rules must come before wildcard
+/api/jibe/incyte  https://careers.incyte.com/api/jobs  200!
+/api/jibe/:cid    https://jobs.gsk.com/api/jobs  200!
 
 # ATS Proxies
 /api/greenhouse/* https://boards-api.greenhouse.io/v1/boards/:splat/jobs?content=true  200!
