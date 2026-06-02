@@ -666,9 +666,6 @@ const US_STATE_NAMES = new Set([
   'Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
   'Virginia','Washington','West Virginia','Wisconsin','Wyoming',
   'District of Columbia','Puerto Rico','Guam','American Samoa','Virgin Islands',
-  // Canadian provinces (Workday often lumps Canada similar to US)
-  'Ontario','Quebec','British Columbia','Alberta','Manitoba','Saskatchewan',
-  'Nova Scotia','New Brunswick','Newfoundland and Labrador','Prince Edward Island',
 ]);
 
 // US state abbreviations
