@@ -190,7 +190,7 @@ function exportCSV() {
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `rxpipeline-${todayStr()}.csv`;
+  a.download = `bioboard-${todayStr()}.csv`;
   a.click(); URL.revokeObjectURL(a.href);
   showToast(`Exported ${jobs.length} roles to CSV`);
 }
@@ -1605,7 +1605,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show welcome toast after successful Stripe checkout redirect
     const params = new URLSearchParams(window.location.search);
     if (params.get('checkout') === 'success') {
-      setTimeout(() => showToast('🎉 Subscription active — welcome to Rx Pipeline!'), 600);
+      setTimeout(() => showToast('🎉 Subscription active — welcome to bioboard.io!'), 600);
       history.replaceState({}, '', window.location.pathname);
     }
   });
