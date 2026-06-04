@@ -1339,7 +1339,78 @@ function addRoleToTracker(r, btn, stage = 'Sourced') {
   document.getElementById('tracker-badge').textContent = jobs.length; updateTrackerStats(); showToast(`${r.company} role added`);
 }
 
-export function inferArea(title, dept) { const t = (title + ' ' + dept).toLowerCase(); if (t.includes('oncol')) return 'Oncology'; if (t.includes('rare')) return 'Rare Disease'; if (t.includes('immun') || t.includes('autoimmun')) return 'Immunology'; if (t.includes('neuro') || t.includes('cns')) return 'Neuroscience'; if (t.includes('cardio') || t.includes('heart')) return 'Cardiovascular'; if (t.includes('vaccin')) return 'Vaccines'; if (t.includes('metabol') || t.includes('endocrin')) return 'Metabolic / Endocrine'; if (t.includes('infectious')) return 'Infectious Disease'; if (t.includes('ophthal')) return 'Ophthalmology'; return 'Diversified'; }
+const AREA_CONDITIONS = {
+  'Oncology': [
+    'oncol','tumor','tumour','cancer','carcinoma','lymphoma','leukemia','leukaemia',
+    'myeloma','melanoma','sarcoma','glioma','glioblastoma','lung cancer','breast cancer',
+    'colorectal','bladder cancer','prostate cancer','ovarian cancer','cervical cancer',
+    'renal cell','hepatocellular','pancreatic cancer','gastric cancer','esophageal',
+    'head and neck cancer','thyroid cancer','endometrial','mesothelioma','neuroblastoma',
+    'medulloblastoma','aml','cll','cml','all','nhl','hodgkin','mds','mpn',
+    'checkpoint inhibitor','car-t','car t','immuno-oncol','io ',
+  ],
+  'Rare Disease': [
+    'rare disease','rare disorder','orphan','spinal muscular atrophy','sma ',
+    'duchenne','muscular dystrophy','phenylketonuria','pku','gaucher','fabry',
+    'pompe','hunter syndrome','hurler','niemann-pick','wilson disease',
+    'hemophilia','haemophilia','von willebrand','thalassemia','thalassaemia',
+    'sickle cell','cystic fibrosis','friedreich','rett syndrome','angelman',
+    'prader-willi','tuberous sclerosis','neurofibromatosis','amyloidosis','transthyretin','attr ',
+    'hereditary angioedema','hae ','lysosomal','enzyme replacement',
+  ],
+  'Immunology': [
+    'immun','autoimmun','rheumatoid arthritis','psoriasis','psoriatic','lupus','sle ',
+    'ankylosing spondylitis','inflammatory bowel','crohn','ulcerative colitis',
+    'multiple sclerosis',' ms ','atopic dermatitis','eczema','asthma','copd',
+    'eosinophil','il-4','il-5','il-13','il-17','il-23','il-33','jak inhibitor',
+    'biologic','biosimilar','transplant','graft','gvhd','allerg','hay fever',
+    'uveitis','myasthenia gravis','sjögren','sjogren','vasculitis','scleroderma',
+  ],
+  'Neuroscience': [
+    'neuro','cns ','central nervous','alzheimer','dementia','parkinson',
+    'epilep','seizure','migraine','headache','multiple sclerosis',' ms ',
+    'huntington','als ','amyotrophic','stroke','tia ','schizophrenia','bipolar',
+    'depression','anxiety','adhd','autism','asd ','ocd ','ptsd','insomnia','sleep disorder',
+    'narcolepsy','restless leg','neuropathic pain','spasticity','traumatic brain',
+    'tbi ','spinal cord','rare neurolog','rare neuro',
+  ],
+  'Cardiovascular': [
+    'cardio','heart failure','hypertension','atrial fibrillation','afib',
+    'coronary artery','myocardial','heart attack','thrombosis','stroke',
+    'dyslipidemia','hypercholesterol','ldl','hdl','lipid','atherosclerosis',
+    'aortic','valve disease','cardiomyopathy','peripheral artery','pvd ',
+    'venous thromboembolism','vte ','anticoagul','antithrombotic',
+  ],
+  'Vaccines': [
+    'vaccin','immuniz','mrna vaccine','flu vaccine','influenza vaccine',
+    'covid vaccine','rsv ','hpv vaccine','meningococcal','pneumococcal',
+    'rotavirus','hepatitis vaccine','rabies','adjuvant',
+  ],
+  'Metabolic / Endocrine': [
+    'metabol','endocrin','diabetes','insulin','obesity','weight loss','glp-1',
+    'sglt2','thyroid','hyperthyroid','hypothyroid','adrenal','cushing',
+    'acromegaly','growth hormone','pituitary','non-alcoholic steatohepatitis',
+    'nash ','nafld','fatty liver','gout','hyperuricemia','osteoporosis','bone density',
+  ],
+  'Infectious Disease': [
+    'infectious','infect','hiv ','aids ','hepatitis','hbv','hcv','tuberculosis',
+    'malaria','dengue','zika','ebola','influenza','flu ','covid','sars','coronavirus',
+    'antimicrobial','antibiotic','antifungal','antiviral','rsv ','cmv ',
+    'pneumonia','sepsis','c. diff','clostridium','mrsa',
+  ],
+  'Ophthalmology': [
+    'ophthal','retina','macular degeneration','amd ','diabetic retinopathy',
+    'glaucoma','dry eye','wet amd','neovascular','intravitreal','ocular',
+  ],
+};
+
+export function inferArea(title, dept) {
+  const t = (title + ' ' + dept).toLowerCase();
+  for (const [area, keywords] of Object.entries(AREA_CONDITIONS)) {
+    if (keywords.some(k => t.includes(k))) return area;
+  }
+  return 'Diversified';
+}
 function inferLevel(title) {
   const t = (title || '').toLowerCase();
   if (t.includes('vice president') || /\bvp\b/.test(t)) return 'VP';
