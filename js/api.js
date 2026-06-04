@@ -199,11 +199,7 @@ export async function fetchAllCompanyJobs(){
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           if(q.total === null) q.total = data.totalFound || 0;
-          const srJobUrl = (j, tenant) => {
-            if (tenant === 'AbbVie') return j.id ? `https://careers.abbvie.com/en-us/jobs/${j.id}` : 'https://careers.abbvie.com/en-us/jobs';
-            return j.ref || `https://careers.smartrecruiters.com/${tenant}/`;
-          };
-          const jobs = (data.content||[]).map(j=>stamp({ id: j.id||String(Math.random()), company: q.company.name, title: j.name||'', dept: j.department?.label||'', location: [j.location?.city, j.location?.country].filter(Boolean).join(', '), posted: j.releasedDate ? new Date(j.releasedDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: srJobUrl(j, q.company.tenant) }));
+          const jobs = (data.content||[]).map(j=>stamp({ id: j.id||String(Math.random()), company: q.company.name, title: j.name||'', dept: j.department?.label||'', location: [j.location?.city, j.location?.country].filter(Boolean).join(', '), posted: j.releasedDate ? new Date(j.releasedDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: j.id ? `https://jobs.smartrecruiters.com/${q.company.tenant}/${j.id}` : `https://jobs.smartrecruiters.com/${q.company.tenant}` }));
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
           q.offset += LIMIT;
