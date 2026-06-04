@@ -6,7 +6,7 @@
 <title>bioboard.io</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/main.css?v=30">
+<link rel="stylesheet" href="./css/main.css?v=31">
 </head>
 <body>
 
@@ -31,6 +31,10 @@
     <button class="nav-tab" id="tab-news" onclick="switchView('news')">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg>
       News
+    </button>
+    <button class="nav-tab" id="tab-community" onclick="switchView('community')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Community
     </button>
   </nav>
   <div class="header-right">
@@ -533,6 +537,65 @@
   </div>
 </div>
 
+<div class="view" id="view-community">
+  <div class="community-page">
+
+    <!-- Win Wall -->
+    <div class="community-section">
+      <div class="community-section-header">
+        <div>
+          <h2 class="community-section-title">🎉 Win Wall</h2>
+          <p class="community-section-sub">Landed a role through bioboard? Share your win and inspire others.</p>
+        </div>
+      </div>
+      <form class="community-form" id="win-form" onsubmit="submitWin(event)">
+        <div class="community-form-row">
+          <input class="community-input" id="win-company" placeholder="Company" required>
+          <input class="community-input" id="win-role" placeholder="Role / Title" required>
+        </div>
+        <textarea class="community-textarea" id="win-message" placeholder="Share a few words about your experience… (optional)" rows="2"></textarea>
+        <button class="btn-community-post" type="submit">🎉 Post My Win</button>
+      </form>
+      <div id="wins-container" class="wins-grid"></div>
+    </div>
+
+    <div class="community-divider"></div>
+
+    <!-- Message Board -->
+    <div class="community-section">
+      <div class="community-section-header">
+        <div>
+          <h2 class="community-section-title">💬 Discussion</h2>
+          <p class="community-section-sub">Interview tips, company culture, salary talk, networking — all welcome.</p>
+        </div>
+        <select class="filter-select" id="post-category-filter" onchange="loadPosts()" style="width:auto">
+          <option value="">All Topics</option>
+          <option>Interview Tips</option>
+          <option>Company Culture</option>
+          <option>Salary & Comp</option>
+          <option>Networking</option>
+          <option>General</option>
+        </select>
+      </div>
+      <form class="community-form" id="post-form" onsubmit="submitPost(event)">
+        <div class="community-form-row">
+          <select class="community-input" id="post-category">
+            <option>General</option>
+            <option>Interview Tips</option>
+            <option>Company Culture</option>
+            <option>Salary & Comp</option>
+            <option>Networking</option>
+          </select>
+        </div>
+        <textarea class="community-textarea" id="post-message" placeholder="What's on your mind?" rows="3" required></textarea>
+        <button class="btn-community-post" type="submit">Post</button>
+      </form>
+      <div id="posts-container" class="posts-list"></div>
+    </div>
+
+  </div>
+</div>
+
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-title" id="modalTitle">Add Role</div>
@@ -898,6 +961,6 @@
 </div>
 <!-- ── End Auth Overlay ─────────────────────────────────────────────────── -->
 
-<script type="module" src="./js/main.js?v=37"></script>
+<script type="module" src="./js/main.js?v=38"></script>
 </body>
 </html>

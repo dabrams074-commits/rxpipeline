@@ -4,7 +4,7 @@ import {
   setJobs, setEditId, setPanelJobId, resetTFilters
 } from './store.js';
 
-import { initAuth, signInWithGoogle, signInWithLinkedIn, signInWithApple, signOut, startCheckout, manageSubscription, toggleSignUp, emailAuth } from './auth.js';
+import { initAuth, signInWithGoogle, signInWithLinkedIn, signInWithApple, signOut, startCheckout, manageSubscription, toggleSignUp, emailAuth, supabase } from './auth.js';
 window.rxSignInWithGoogle      = signInWithGoogle;
 window.rxSignInWithLinkedIn    = signInWithLinkedIn;
 window.rxSignInWithApple       = signInWithApple;
@@ -35,10 +35,10 @@ export function showToast(msg) { const t = document.getElementById('toast'); t.t
 let currentView = 'home';
 function switchView(v) {
   currentView = v;
-  ['home', 'tracker', 'library', 'liveroles', 'news'].forEach(id => {
+  ['home', 'tracker', 'library', 'liveroles', 'news', 'community'].forEach(id => {
     document.getElementById('view-' + id).classList.toggle('active', v === id);
   });
-  ['tracker', 'library', 'liveroles', 'news'].forEach(id => {
+  ['tracker', 'library', 'liveroles', 'news', 'community'].forEach(id => {
     const el = document.getElementById('tab-' + id);
     if (el) el.classList.toggle('active', v === id);
   });
@@ -49,6 +49,7 @@ function switchView(v) {
   if (v === 'tracker') renderTracker();
   if (v === 'home') updateHomeCards();
   if (v === 'news') loadNews();
+  if (v === 'community') { loadWins(); loadPosts(); }
 }
 
 function updateHomeCards() {
@@ -1998,6 +1999,99 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ══════════════════════════════════════════
+// COMMUNITY
+// ══════════════════════════════════════════
+function communityUser() {
+  const u = getUser();
+  if (!u) return null;
+  const meta = u.user_metadata || {};
+  return meta.full_name || meta.name || u.email.split('@')[0];
+}
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - new Date(ts)) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+async function submitWin(e) {
+  e.preventDefault();
+  const name = communityUser();
+  if (!name) return;
+  const company = document.getElementById('win-company').value.trim();
+  const role    = document.getElementById('win-role').value.trim();
+  const message = document.getElementById('win-message').value.trim();
+  const btn = e.target.querySelector('button');
+  btn.disabled = true; btn.textContent = 'Posting…';
+  const { error } = await supabase.from('job_wins').insert({ user_id: getUser().id, display_name: name, company, role, message });
+  if (error) { showToast('Error posting win'); btn.disabled = false; btn.textContent = '🎉 Post My Win'; return; }
+  e.target.reset();
+  btn.disabled = false; btn.textContent = '🎉 Post My Win';
+  showToast('🎉 Win posted!');
+  loadWins();
+}
+
+async function loadWins() {
+  const container = document.getElementById('wins-container');
+  if (!container) return;
+  container.innerHTML = '<div class="community-loading">Loading…</div>';
+  const { data, error } = await supabase.from('job_wins').select('*').order('created_at', { ascending: false }).limit(50);
+  if (error || !data?.length) { container.innerHTML = '<div class="community-empty">No wins yet — be the first to post!</div>'; return; }
+  container.innerHTML = data.map(w => `
+    <div class="win-card">
+      <div class="win-header">
+        <div class="win-avatar">${w.display_name[0].toUpperCase()}</div>
+        <div>
+          <div class="win-name">${esc(w.display_name)}</div>
+          <div class="win-meta">${esc(w.role)} · ${esc(w.company)}</div>
+        </div>
+        <div class="win-time">${timeAgo(w.created_at)}</div>
+      </div>
+      ${w.message ? `<div class="win-message">${esc(w.message)}</div>` : ''}
+    </div>`).join('');
+}
+
+async function submitPost(e) {
+  e.preventDefault();
+  const name = communityUser();
+  if (!name) return;
+  const message  = document.getElementById('post-message').value.trim();
+  const category = document.getElementById('post-category').value;
+  const btn = e.target.querySelector('button');
+  btn.disabled = true; btn.textContent = 'Posting…';
+  const { error } = await supabase.from('community_posts').insert({ user_id: getUser().id, display_name: name, message, category });
+  if (error) { showToast('Error posting'); btn.disabled = false; btn.textContent = 'Post'; return; }
+  e.target.reset();
+  btn.disabled = false; btn.textContent = 'Post';
+  showToast('Post published!');
+  loadPosts();
+}
+
+async function loadPosts() {
+  const container = document.getElementById('posts-container');
+  if (!container) return;
+  container.innerHTML = '<div class="community-loading">Loading…</div>';
+  const category = document.getElementById('post-category-filter')?.value || '';
+  let query = supabase.from('community_posts').select('*').order('created_at', { ascending: false }).limit(100);
+  if (category) query = query.eq('category', category);
+  const { data, error } = await query;
+  if (error || !data?.length) { container.innerHTML = '<div class="community-empty">No posts yet — start the conversation!</div>'; return; }
+  container.innerHTML = data.map(p => `
+    <div class="post-card">
+      <div class="post-header">
+        <div class="win-avatar">${p.display_name[0].toUpperCase()}</div>
+        <div>
+          <div class="win-name">${esc(p.display_name)}</div>
+          <div class="win-meta">${esc(p.category)} · ${timeAgo(p.created_at)}</div>
+        </div>
+      </div>
+      <div class="post-body">${esc(p.message)}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
 // WINDOW MAPPINGS
 // ══════════════════════════════════════════
 window.switchView = switchView;
@@ -2030,6 +2124,10 @@ window.addRoleToTracker = addRoleToTracker;
 window.updateJobStage = updateJobStage;
 window.forceRefreshBaseline = forceRefreshBaseline;
 window.loadNews = () => { newsLoaded = false; loadNews(); };
+window.submitWin  = submitWin;
+window.submitPost = submitPost;
+window.loadWins   = loadWins;
+window.loadPosts  = loadPosts;
 window.renderNews = renderNews;
 
 window.tFilters = tFilters;
