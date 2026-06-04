@@ -134,38 +134,11 @@
 <div class="view" id="view-tracker">
   <div class="page">
 
-<div class="search-bar">
-  <div class="sb-input-wrap">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input class="sb-input" type="text" id="t-search" placeholder="Search companies or roles…" oninput="renderTracker();updateClearBtn()">
-  </div>
-  <select class="sb-select" id="sb-area" onchange="tFilters.area=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()">
-    <option value="">All Areas</option>
-    <option>Oncology</option>
-    <option>Rare Disease</option>
-    <option>Immunology</option>
-    <option>Vaccines</option>
-    <option>Neuroscience</option>
-    <option>Cardiovascular</option>
-    <option>Metabolic / Endocrine</option>
-    <option>Infectious Disease</option>
-    <option>Ophthalmology</option>
-    <option>Diversified</option>
-    <option>Other</option>
-  </select>
-  <select class="sb-select" id="sb-level" onchange="tFilters.level=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()">
-    <option value="">All Levels</option>
-    <option>Analyst</option>
-    <option>Associate</option>
-    <option>Manager</option>
-    <option>Senior Manager</option>
-    <option>Director</option>
-    <option>Senior Director</option>
-    <option>VP</option>
-    <option value="SVP / EVP">SVP / EVP</option>
-    <option>C-Suite</option>
-  </select>
-  <select class="sb-select" id="sb-func" onchange="tFilters.func=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()">
+<div class="search-bar" style="justify-content:flex-end">
+  <input type="hidden" id="t-search" value="">
+  <select style="display:none" id="sb-area"></select>
+  <select style="display:none" id="sb-level"></select>
+  <select style="display:none" id="sb-func">
     <option value="">All Functions</option>
     <optgroup label="Commercial Operations">
       <option value="Commercial Operations">— All Commercial Ops —</option>
@@ -350,16 +323,8 @@
     </optgroup>
     <option value="Other">Other</option>
   </select>
-  <select class="sb-select" id="sb-type" onchange="tFilters.type=this.value;this.classList.toggle('active',!!this.value);updateClearBtn();renderTracker()" style="border-right:none">
-    <option value="">All Types</option>
-    <option>Full-Time</option>
-    <option>Contract</option>
-    <option>Consulting</option>
-    <option value="Interim">Interim / Fractional</option>
-    <option>Remote</option>
-    <option>Hybrid</option>
-  </select>
-  <button class="sb-clear" id="sb-clear-btn" onclick="clearSearchBar()">✕ Clear</button>
+  <select style="display:none" id="sb-type"></select>
+  <button style="display:none" id="sb-clear-btn"></button>
   <button class="btn-primary" onclick="openModal()">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Add Role
@@ -976,6 +941,6 @@
 </div>
 <!-- ── End Auth Overlay ─────────────────────────────────────────────────── -->
 
-<script type="module" src="./js/main.js?v=42"></script>
+<script type="module" src="./js/main.js?v=43"></script>
 </body>
 </html>
