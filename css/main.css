@@ -243,6 +243,22 @@ cursor: pointer; transition: all 0.2s;
   .home-title { font-size: 2.2rem; }
 }
 
+/* Home community teaser */
+.home-community { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 900px; margin: 32px auto 0; padding: 0 24px 40px; }
+@media (max-width: 700px) { .home-community { grid-template-columns: 1fr; } }
+.home-community-col { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+.home-community-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.home-community-title { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+.home-community-link { background: none; border: none; color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.68rem; cursor: pointer; padding: 0; }
+.home-community-link:hover { text-decoration: underline; }
+.home-community-feed { display: flex; flex-direction: column; gap: 10px; }
+.home-community-item { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; padding: 8px; border-radius: 8px; }
+.home-community-item:hover { background: rgba(255,255,255,0.04); }
+.home-ci-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+.home-ci-meta { font-weight: 400; color: var(--muted); }
+.home-ci-text { font-size: 0.78rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.home-community-empty { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); text-align: center; padding: 16px 0; }
+
 /* ── MAIN WRAPPER ── */
 .page { max-width: 1400px; margin: 0 auto; padding: 28px 24px; }
 

@@ -6,7 +6,7 @@
 <title>bioboard.io</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/main.css?v=31">
+<link rel="stylesheet" href="./css/main.css?v=32">
 </head>
 <body>
 
@@ -117,6 +117,25 @@
         </div>
       </div>
     </div>
+
+    <!-- Community teaser -->
+    <div class="home-community">
+      <div class="home-community-col">
+        <div class="home-community-header">
+          <span class="home-community-title">🎉 Recent Wins</span>
+          <button class="home-community-link" onclick="switchView('community')">View all →</button>
+        </div>
+        <div id="home-wins" class="home-community-feed"></div>
+      </div>
+      <div class="home-community-col">
+        <div class="home-community-header">
+          <span class="home-community-title">💬 Discussion</span>
+          <button class="home-community-link" onclick="switchView('community')">View all →</button>
+        </div>
+        <div id="home-posts" class="home-community-feed"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -961,6 +980,6 @@
 </div>
 <!-- ── End Auth Overlay ─────────────────────────────────────────────────── -->
 
-<script type="module" src="./js/main.js?v=38"></script>
+<script type="module" src="./js/main.js?v=39"></script>
 </body>
 </html>

@@ -59,6 +59,46 @@ function updateHomeCards() {
   if (libBadge) libBadge.textContent = FETCH_COMPANIES.length + ' companies';
   const rolesBadge = document.getElementById('home-roles-badge');
   if (rolesBadge) rolesBadge.textContent = all_jobs.length > 0 ? all_jobs.length + ' roles loaded' : 'Fetch to load';
+  loadHomeCommunity();
+}
+
+async function loadHomeCommunity() {
+  const winsEl  = document.getElementById('home-wins');
+  const postsEl = document.getElementById('home-posts');
+  if (!winsEl || !postsEl) return;
+
+  const [winsRes, postsRes] = await Promise.all([
+    supabase.from('job_wins').select('*').order('created_at', { ascending: false }).limit(3),
+    supabase.from('community_posts').select('*').order('created_at', { ascending: false }).limit(3),
+  ]);
+
+  if (!winsRes.data?.length) {
+    winsEl.innerHTML = '<div class="home-community-empty">No wins yet — be the first!</div>';
+  } else {
+    winsEl.innerHTML = winsRes.data.map(w => `
+      <div class="home-community-item" onclick="switchView('community')">
+        <div class="win-avatar" style="width:26px;height:26px;font-size:0.75rem">${w.display_name[0].toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div class="home-ci-name">${esc(w.display_name)} <span class="home-ci-meta">got a role at ${esc(w.company)}</span></div>
+          ${w.message ? `<div class="home-ci-text">${esc(w.message)}</div>` : ''}
+        </div>
+        <div class="win-time">${timeAgo(w.created_at)}</div>
+      </div>`).join('');
+  }
+
+  if (!postsRes.data?.length) {
+    postsEl.innerHTML = '<div class="home-community-empty">No posts yet — start the conversation!</div>';
+  } else {
+    postsEl.innerHTML = postsRes.data.map(p => `
+      <div class="home-community-item" onclick="switchView('community')">
+        <div class="win-avatar" style="width:26px;height:26px;font-size:0.75rem">${p.display_name[0].toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div class="home-ci-name">${esc(p.display_name)} <span class="home-ci-meta">${esc(p.category)}</span></div>
+          <div class="home-ci-text">${esc(p.message)}</div>
+        </div>
+        <div class="win-time">${timeAgo(p.created_at)}</div>
+      </div>`).join('');
+  }
 }
 
 // ══════════════════════════════════════════
