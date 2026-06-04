@@ -40,7 +40,6 @@ export const FETCH_COMPANIES = [
   { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
   { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'roche-ext',               wdNum:3 },
   { name:'Becton Dickinson',        group:'Large Pharma',    ats:'Workday',   subdomain:'bdx',                    tenant:'EXTERNAL_CAREER_SITE_USA', wdNum:1 },
-  { name:'Zoetis',                  group:'Large Pharma',    ats:'Workday',   subdomain:'zoetis',                 tenant:'zoetis',                  wdNum:5 },
   // ── Specialty Pharma & Established Brands ──
   { name:'Ipsen',                   group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'ipsen',      tenant:'Ipsen_Careers', wdNum:103 },
   { name:'Otsuka',                  group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'vhr-otsuka', tenant:'External',      wdNum:1, cxsId:'vhr_otsuka' },

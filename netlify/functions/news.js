@@ -43,7 +43,6 @@ const COMPANY_FEEDS = [
   { company:'Cytokinetics',        url: GN('"Cytokinetics" press release') },
   { company:'IQVIA',               url: GN('"IQVIA" press release') },
   { company:'Thermo Fisher',       url: GN('"Thermo Fisher Scientific" press release') },
-  { company:'Zoetis',              url: GN('"Zoetis" press release') },
   { company:'Natera',              url: GN('"Natera" press release') },
 ];
 
