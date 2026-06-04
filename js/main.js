@@ -1488,14 +1488,18 @@ FUNC_GROUPS.forEach(g => { FUNC_GROUP_MAP[g.group] = g.group; g.items.forEach(it
 export function inferFunc(title, dept) {
   const t = (title + ' ' + dept).toLowerCase();
 
+  // ── Animal Health / Veterinary — return Other so these can be excluded ────
+  if (t.includes('animal health') || t.includes('vétérinaire') || t.includes('veterinaire') || t.includes('veterinary') || t.includes('volaille') || t.includes('livestock') || t.includes('poultry') || t.includes('zoetis') || t.includes('elanco')) return 'Other';
+
   // ── Sales (most common unclassified bucket) ──────────────────────────────
   if (t.includes('sales force effectiveness') || / sfe\b/.test(t)) return 'Sales Force Effectiveness';
   if (t.includes('customer facing effectiveness') || t.includes('customer-facing effectiveness')) return 'Sales Force Effectiveness';
+  if (t.includes('ffe ') || t.includes('-ffe') || t.includes(' ffe') || t.includes('gtmc') || t.includes('field force excellence')) return 'Sales Force Effectiveness';
   if (t.includes('incentive compensation')) return 'Incentive Compensation';
   if (t.includes('field force')) return 'Field Force Deployment';
   if (t.includes('call planning')) return 'Call Planning';
   if (t.includes('targeting') && t.includes('segmentation')) return 'Targeting & Segmentation';
-  if (t.includes('commercial training')) return 'Commercial Training';
+  if (t.includes('commercial training') || t.includes('销售培训') || t.includes('sales training manager') || t.includes('training manager') && t.includes('sales')) return 'Commercial Training';
   // Field Sales — broad net for rep/specialist/territory/account roles
   if (t.includes('pharmaceutical sales') || t.includes('pharma sales')) return 'Field Sales';
   if (t.includes('specialty sales') || t.includes('specialty care sales')) return 'Field Sales';
@@ -1570,13 +1574,13 @@ export function inferFunc(title, dept) {
 
   // ── Market Access & Pricing ──────────────────────────────────────────────
   if (t.includes('heor') || t.includes('health economics') || t.includes('outcomes research')) return 'HEOR';
-  if (t.includes('government affairs') || t.includes('community liaison') || t.includes('community relations') || t.includes('external affairs') || t.includes('stakeholder engagement') && t.includes('sponsorship') || t.includes('strategic communications') && !t.includes('medical')) return 'Government Affairs';
+  if (t.includes('government affairs') || t.includes('community liaison') || t.includes('community relations') || t.includes('external affairs') || t.includes('stakeholder engagement') && t.includes('sponsorship') || t.includes('strategic communications') && !t.includes('medical') || t.includes('policy manager') || t.includes('public-private partnership') || t.includes('public private partnership') || t.includes('state affairs') || t.includes('political affairs')) return 'Government Affairs';
   if (t.includes('formulary')) return 'Formulary Access';
   if (t.includes('340b')) return '340B';
   if (t.includes('gpo') || t.includes('idn strategy')) return 'GPO/IDN Strategy';
   if (t.includes('contracting') || t.includes('contract pricing')) return 'Contracting & Pricing';
   if (t.includes('patient access') || t.includes('access lead')) return 'Access & Reimbursement';
-  if (t.includes('market access') || t.includes('payer') || t.includes('reimburs') || t.includes('value and access') || t.includes('value & access') || t.includes('enterprise employer access')) return 'Payer Strategy';
+  if (t.includes('market access') || t.includes('payer') || t.includes('reimburs') || t.includes('value and access') || t.includes('value & access') || t.includes('enterprise employer access') || / p&r\b/.test(t) || t.includes('pricing & reimbursement') || t.includes('pricing and reimbursement') || t.includes('business access manager')) return 'Payer Strategy';
 
   // ── Medical Affairs ───────────────────────────────────────────────────────
   if (t.includes('medical science liaison') || / msl\b/.test(t)) return 'Medical Science Liaisons (MSLs)';
@@ -1585,7 +1589,7 @@ export function inferFunc(title, dept) {
   if (t.includes('expert engagement') || t.includes('kol ') || t.includes('key opinion leader')) return 'Advisory Boards';
   if (t.includes('disease area strategist') || t.includes('disease area partner') || t.includes('disease area expert')) return 'Medical Affairs';
   if (t.includes('medical communications') || t.includes('med comms')) return 'Medical Communications';
-  if (t.includes('medical information')) return 'Medical Information';
+  if (t.includes('medical information') || t.includes('pharmaceutical information') || t.includes('pharmaceutical info')) return 'Medical Information';
   if (t.includes('publication')) return 'Publication Planning';
   if (t.includes('advisory board')) return 'Advisory Boards';
   if (t.includes('evidence generation')) return 'Evidence Generation';
@@ -1603,7 +1607,7 @@ export function inferFunc(title, dept) {
   if (t.includes('clinical pharmacology')) return 'Clinical Pharmacology';
   if (t.includes('clinical data')) return 'Clinical Data Management';
   if (t.includes('patient recruitment') || t.includes('patient finding') || t.includes('patient enrollment')) return 'Patient Recruitment';
-  if (t.includes('ecoa') || t.includes('eCOA') || t.includes('study delivery') || t.includes('centralized study') || t.includes('local study')) return 'Clinical Operations';
+  if (t.includes('ecoa') || t.includes('eCOA') || t.includes('study delivery') || t.includes('centralized study') || t.includes('local study') || t.includes('centralized monitor') || t.includes('central monitor')) return 'Clinical Operations';
   if (t.includes('study start') || t.includes('site start') || t.includes('site activation') || /\bcra\b/.test(t) || t.includes('clinical research associate') || /\bcta\b/.test(t) || t.includes('clinical trial assistant') || t.includes('patient & site') || t.includes('site engagement')) return 'Clinical Operations';
   if (t.includes('trial delivery') || t.includes('trial manager') || t.includes('global trial') || t.includes('country study manager')) return 'Clinical Project Management';
   if (t.includes('essential document') || t.includes('trial associate') || t.includes('study coordinator')) return 'Clinical Operations';
@@ -1661,7 +1665,7 @@ export function inferFunc(title, dept) {
   if (t.includes('validation')) return 'Validation';
   if (t.includes('supply chain') || t.includes('supply planning') || t.includes('transportation management') || t.includes('transport management') || t.includes('sap transportation') || t.includes('trade analyst') || t.includes('external planning lead')) return 'Supply Chain Planning';
   if (t.includes('logistics')) return 'Logistics';
-  if (t.includes('procurement') || t.includes('category buyer') || t.includes('global buyer')) return 'Procurement';
+  if (t.includes('procurement') || t.includes('category buyer') || t.includes('global buyer') || t.includes('strategic sourcing') || t.includes('supplier relationship') || t.includes('source to pay') || t.includes('s2p ')) return 'Procurement';
   if (t.includes('technical operations') || t.includes('tech ops')) return 'Technical Operations';
   if (t.includes('process development') || t.includes('analytical development') || t.includes('mbr designer') || t.includes('batch record') || t.includes('ctrs') || t.includes('business process architecture') || /\bmes\b/.test(t) && t.includes('architect')) return 'Process Development';
   if (t.includes('process control') || t.includes('process automation') || t.includes('automation engineer')) return 'Technical Operations';
@@ -1673,7 +1677,7 @@ export function inferFunc(title, dept) {
   if (t.includes('sterilization') || t.includes('sterilisation') || t.includes('sterility assurance')) return 'Manufacturing Sciences';
   if (t.includes('inspection management') || t.includes('inspection readiness')) return 'Quality Assurance';
   if (t.includes('mfg tech') || t.includes('shift lead') || t.includes('shift supervisor') || t.includes('préparateur') || t.includes('preparateur') || t.includes('assembler') || t.includes('monteur')) return 'Manufacturing Sciences';
-  if (t.includes('ms&t') || t.includes('mst ') || t.includes('manufacturing science')) return 'Manufacturing Sciences';
+  if (t.includes('ms&t') || t.includes('mst ') || t.includes('manufacturing science') || t.includes('msat') || t.includes('control room') || t.includes('c&q ') || (t.includes('commissioning') && t.includes('qualification'))) return 'Manufacturing Sciences';
   if (/\bts\/ms\b/.test(t) || /\bts ms\b/.test(t)) return 'Manufacturing Sciences';
   if (t.includes('sterile drug') || t.includes('drug product associate') || t.includes('sterile fill') || t.includes('drug substance') || t.includes('sterility steward')) return 'Manufacturing Sciences';
   if (t.includes('production associate') || t.includes('production operator') || t.includes('production technician')) return 'Manufacturing Sciences';
@@ -1694,6 +1698,7 @@ export function inferFunc(title, dept) {
   if (t.includes('treasury')) return 'Treasury';
   if (t.includes('business analyst') && t.includes('control')) return 'FP&A';
   if (t.includes('payroll') || t.includes('o2c') || t.includes('collections analyst')) return 'Accounting';
+  if (t.includes('r2r') || t.includes('a2r') || t.includes('record to report') || t.includes('account to report') || t.includes('fair market value') || t.includes('fin. processes') || t.includes('financial processes')) return 'Accounting';
   if (t.includes('accounting') || t.includes('accountant')) return 'Accounting';
   if (t.includes('tax')) return 'Tax';
   if (t.includes('finance') || t.includes('pricing') || t.includes('finanzas') || t.includes('payment analyst') || t.includes('contas a pagar')) return 'FP&A';
@@ -1715,9 +1720,9 @@ export function inferFunc(title, dept) {
   if (t.includes('digital health')) return 'Digital Health';
   if (t.includes('knowledge graph') || t.includes('data platform') || t.includes('ai platform') || t.includes('identity security') || t.includes('access management') || t.includes('workday') || t.includes('database design') || t.includes('data migration')) return 'Commercial IT';
   if (t.includes('machine learning') || t.includes('artificial intelligence') || t.includes('ai/ml') || t.includes('ai product') || t.includes('ai application') || t.includes('research ai') || t.includes('ai delivery') || t.includes('ai science') || t.includes('ai-enabled') || t.includes('ai enabled')) return 'AI/ML';
-  if (t.includes('cybersecurity') || t.includes('cyber security') || t.includes('cyber resilience') || t.includes('information security') || t.includes('product security')) return 'Cybersecurity';
+  if (t.includes('cybersecurity') || t.includes('cyber security') || t.includes('cyber resilience') || t.includes('information security') || t.includes('product security') || t.includes('threat detection') || t.includes('cyber value') || t.includes('threat response') || t.includes('soc analyst')) return 'Cybersecurity';
   if (t.includes('solutions architect') || t.includes('solution architect')) return 'Enterprise Architecture';
-  if (t.includes('cloud') || t.includes('infrastructure') || t.includes('platform support') || t.includes('servicenow') || t.includes('business transformation') || t.includes('solutions support') || t.includes('operating system') || t.includes('technology leader')) return 'Commercial IT';
+  if (t.includes('cloud') || t.includes('infrastructure') || t.includes('platform support') || t.includes('servicenow') || t.includes('business transformation') || t.includes('solutions support') || t.includes('operating system') || t.includes('technology leader') || t.includes('scrum master') || t.includes('anaplan') || t.includes('itot') || t.includes('it/ot')) return 'Commercial IT';
   if (t.includes('commercial it')) return 'Commercial IT';
   if (t.includes('veeva') || t.includes('crm/veeva')) return 'CRM/Veeva Administration';
   if (t.includes('digital') || t.includes('software') || t.includes('information technology') || t.includes('developer') || t.includes('engineer') && t.includes('application')) return 'Commercial IT';
@@ -1727,7 +1732,7 @@ export function inferFunc(title, dept) {
   if (t.includes('hr business partner') || t.includes('hrbp') || t.includes('people partner') || t.includes('people business partner') || t.includes('employer business') || t.includes('employment experience')) return 'HR Business Partners';
   if (t.includes('compensation') || t.includes('benefits') || t.includes('payroll')) return 'Compensation & Benefits';
   if (t.includes('learning') || t.includes('l&d') || t.includes('training system') || t.includes('gd training') || t.includes('leadership development') || /\btraining\b/.test(t) || t.includes('traineeprogramm') || t.includes('alternance') || t.includes('formation') && t.includes('relation')) return 'Learning & Development';
-  if (t.includes('organizational effectiveness')) return 'Organizational Effectiveness';
+  if (t.includes('organizational effectiveness') || t.includes('reward lead') || t.includes('people experience') || t.includes('culture director') || t.includes('team effectiveness') || t.includes('culture &') || t.includes('culture and') || t.includes('people culture')) return 'Organizational Effectiveness';
   if (t.includes('human resources') || /\bhr\b/.test(t)) return 'HR Business Partners';
 
   // ── Legal & Compliance ────────────────────────────────────────────────────
