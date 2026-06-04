@@ -1689,7 +1689,7 @@ export function inferFunc(title, dept) {
   if (t.includes('patent') || t.includes('intellectual property') || / ip\b/.test(t)) return 'IP/Patents';
   if (t.includes('healthcare law')) return 'Healthcare Law';
   if (t.includes('contracts') || t.includes('contract management')) return 'Contracts';
-  if (t.includes('legal') || t.includes('counsel') || t.includes('governance counsel') || t.includes('securities')) return 'Legal Counsel';
+  if (t.includes('counsel') || t.includes('attorney') || t.includes('lawyer') || t.includes('litigation') || t.includes('legal') || t.includes('governance') || t.includes('securities law') || t.includes('healthcare law')) return 'Legal Counsel';
 
   // ── Patient Services & Access ─────────────────────────────────────────────
   if (t.includes('hub service') || t.includes('hub ')) return 'Hub Services';
@@ -1730,7 +1730,7 @@ export function inferFunc(title, dept) {
 
   // ── Tier 2: "Other / [Group]" — ordered most-specific first ─────────────
   // Legal (lawyer/attorney/counsel before any broad commercial catch)
-  if (t.includes('legal') || t.includes('lawyer') || t.includes('attorney') || t.includes('counsel') || t.includes('litigation') || t.includes('patent') || t.includes('intellectual property') || t.includes('contract') || t.includes('governance') || t.includes('privacy') || t.includes('compliance')) return 'Other / Legal & Compliance';
+  if (t.includes('patent') || t.includes('intellectual property') || t.includes('contract') || t.includes('compliance') || t.includes('privacy')) return 'Other / Legal & Compliance';
   // Finance (specific finance terms before broad business)
   if (t.includes('finance') || t.includes('financ') || t.includes('accounting') || t.includes('accountant') || t.includes('treasury') || t.includes('budget') || t.includes('audit') || t.includes('tax') || t.includes('fiscal') || t.includes('payroll') || t.includes('payment') || t.includes('invoice')) return 'Other / Finance';
   // HR (people/employee terms before commercial)
