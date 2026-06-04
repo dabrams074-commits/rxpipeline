@@ -58,11 +58,15 @@ async function _checkAndGate(onReady) {
   _updateUserPill();
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
     const res = await fetch('/.netlify/functions/check-subscription', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email: _currentUser.email }),
+      signal:  controller.signal,
     });
+    clearTimeout(timeout);
     const { active } = await res.json();
 
     if (active) {
