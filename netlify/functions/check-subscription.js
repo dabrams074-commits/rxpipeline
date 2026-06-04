@@ -28,10 +28,11 @@ exports.handler = async (event) => {
 
   const SECRET = process.env.STRIPE_SECRET_KEY;
   if (!SECRET) {
+    // Stripe not yet configured — let all authenticated users in
     return {
-      statusCode: 500,
-      headers: CORS,
-      body: JSON.stringify({ active: false, error: 'Missing STRIPE_SECRET_KEY' }),
+      statusCode: 200,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: true, reason: 'stripe_not_configured' }),
     };
   }
 
