@@ -1187,13 +1187,13 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
   background: var(--accent); box-shadow: 0 0 10px var(--accent);
 }
 .auth-headline {
-  font-family: 'DM Serif Display', serif; font-size: 1.7rem;
-  color: var(--text); text-align: center; line-height: 1.25;
-  margin-bottom: 12px;
+  font-family: 'DM Serif Display', serif; font-size: 2.4rem;
+  color: var(--text); text-align: center; line-height: 1.2;
+  margin-bottom: 14px;
 }
 .auth-sub {
-  font-size: 0.82rem; color: var(--muted); text-align: center;
-  line-height: 1.6; margin-bottom: 28px; max-width: 340px;
+  font-size: 1.05rem; color: var(--muted); text-align: center;
+  line-height: 1.6; margin-bottom: 32px; max-width: 380px;
 }
 
 /* OAuth buttons */
@@ -1237,11 +1237,11 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
 }
 .btn-email-signin:hover { opacity: 0.88; }
 .btn-email-signin:disabled { opacity: 0.6; cursor: not-allowed; }
-.auth-toggle { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 4px; }
+.auth-toggle { font-size: 0.95rem; color: var(--muted); text-align: center; margin-top: 8px; }
 .auth-toggle a { color: var(--accent); text-decoration: none; }
 .auth-toggle a:hover { text-decoration: underline; }
 .auth-pricing-note {
-  font-family: 'DM Mono', monospace; font-size: 0.65rem;
+  font-family: 'DM Mono', monospace; font-size: 0.82rem;
   color: var(--muted); text-align: center; margin-top: 16px;
   letter-spacing: 0.3px;
 }
