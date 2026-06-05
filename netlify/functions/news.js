@@ -44,6 +44,7 @@ const COMPANY_FEEDS = [
   { company:'IQVIA',               url: GN('"IQVIA" press release') },
   { company:'Thermo Fisher',       url: GN('"Thermo Fisher Scientific" press release') },
   { company:'Natera',              url: GN('"Natera" press release') },
+  { company:'Iovance',             url: GN('"Iovance Biotherapeutics" press release') },
 ];
 
 // ── Industry / topic feeds ────────────────────────────────────────────────────

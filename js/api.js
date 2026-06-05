@@ -67,7 +67,8 @@ export const FETCH_COMPANIES = [
   { name:'Natera',                  group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'natera',   wdNum:0 },
   { name:'Protagonist',             group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'protagonist', wdNum:0 },
   { name:'Nuvalent',                group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'nuvalent', wdNum:0 },
-  { name:'Disc Medicine',           group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'discmedicine', wdNum:0 },
+  { name:'Disc Medicine',           group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'discmedicine',           wdNum:0 },
+  { name:'Iovance Biotherapeutics', group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'iovancebiotherapeutics',    wdNum:0 },
   { name:'Viatris',                 group:'Specialty Pharma & Established Brands', ats:'Workday', subdomain:'viatris', tenant:'External', wdNum:5 },
   // ── CRO / Services ──
   { name:'IQVIA',                   group:'CRO & Services',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
