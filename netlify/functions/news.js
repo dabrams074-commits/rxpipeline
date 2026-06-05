@@ -58,6 +58,18 @@ const TOPIC_FEEDS = [
   { url:GN('pharma biotech drug pipeline clinical trial'),              source:'Google News',    topic:'Pipeline' },
   { url:GN('pharma biotech merger acquisition deal'),                   source:'Google News',    topic:'M&A' },
   { url:GN('pharma biotech earnings revenue quarterly results'),        source:'Google News',    topic:'Earnings' },
+  // ── Medical Journals ───────────────────────────────────────────────────────
+  { url:'https://www.nejm.org/action/showFeed?type=etoc&feed=rss&jc=nejm',                           source:'NEJM',                   topic:'Journals' },
+  { url:'https://evidence.nejm.org/action/showFeed?type=etoc&feed=rss&jc=evid',                      source:'NEJM Evidence',          topic:'Journals' },
+  { url:'https://www.thelancet.com/rssfeed/lancet_online.xml',                                        source:'The Lancet',             topic:'Journals' },
+  { url:'https://jamanetwork.com/rss/site_3/67.xml',                                                  source:'JAMA',                   topic:'Journals' },
+  { url:'https://www.nature.com/nm.rss',                                                              source:'Nature Medicine',        topic:'Journals' },
+  { url:'https://www.nature.com/nbt.rss',                                                             source:'Nature Biotechnology',   topic:'Journals' },
+  { url:'https://www.cell.com/cell/rss',                                                              source:'Cell',                   topic:'Journals' },
+  { url:'https://ascopubs.org/action/showFeed?type=etoc&feed=rss&jc=jco',                            source:'J Clinical Oncology',    topic:'Journals' },
+  { url:'https://aacrjournals.org/clincancerres/rss/1',                                               source:'Clinical Cancer Res',   topic:'Journals' },
+  { url:'https://ashpublications.org/rss/site_1/1.xml',                                               source:'Blood (ASH)',            topic:'Journals' },
+  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/medwatch/rss.xml',        source:'FDA MedWatch',           topic:'Journals' },
 ];
 
 exports.handler = async () => {
