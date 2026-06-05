@@ -52,34 +52,6 @@
       <p class="home-sub">Your pharma career intelligence platform</p>
     </div>
     <div class="home-cards">
-      <div class="home-card" onclick="switchView('tracker')">
-        <div class="home-card-icon green">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        </div>
-        <div>
-          <div class="home-card-label">Pipeline</div>
-          <div class="home-card-title">My Tracker</div>
-        </div>
-        <div class="home-card-desc">Manage your active job pipeline across Sourced, Applied, Interviewing, and Offer stages with notes and interview scheduling.</div>
-        <span class="home-card-badge green" id="home-tracker-badge">0 roles tracked</span>
-        <div class="home-card-arrow">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </div>
-      </div>
-      <div class="home-card" onclick="switchView('library')">
-        <div class="home-card-icon purple">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-        </div>
-        <div>
-          <div class="home-card-label">Intelligence</div>
-          <div class="home-card-title">Company Library</div>
-        </div>
-        <div class="home-card-desc">Browse and star top pharma companies. Track active roles per company and access their career sites directly.</div>
-        <span class="home-card-badge purple" id="home-lib-badge">0 companies</span>
-        <div class="home-card-arrow">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </div>
-      </div>
       <div class="home-card" onclick="switchView('liveroles')">
         <div class="home-card-icon orange">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
@@ -94,6 +66,20 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </div>
       </div>
+      <div class="home-card" onclick="switchView('tracker')">
+        <div class="home-card-icon green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <div>
+          <div class="home-card-label">Pipeline</div>
+          <div class="home-card-title">My Tracker</div>
+        </div>
+        <div class="home-card-desc">Manage your active job pipeline across Sourced, Applied, Interviewing, and Offer stages with notes and interview scheduling.</div>
+        <span class="home-card-badge green" id="home-tracker-badge">0 roles tracked</span>
+        <div class="home-card-arrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </div>
       <div class="home-card" onclick="switchView('news')">
         <div class="home-card-icon blue">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg>
@@ -104,6 +90,20 @@
         </div>
         <div class="home-card-desc">Live pharma &amp; biotech headlines from FiercePharma, BioPharma Dive, STAT News, Endpoints, and FDA — organized by topic.</div>
         <span class="home-card-badge blue">Latest headlines</span>
+        <div class="home-card-arrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </div>
+      <div class="home-card" onclick="switchView('library')">
+        <div class="home-card-icon purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        </div>
+        <div>
+          <div class="home-card-label">Intelligence</div>
+          <div class="home-card-title">Company Library</div>
+        </div>
+        <div class="home-card-desc">Browse and star top pharma companies. Track active roles per company and access their career sites directly.</div>
+        <span class="home-card-badge purple" id="home-lib-badge">0 companies</span>
         <div class="home-card-arrow">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </div>
