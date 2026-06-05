@@ -1827,7 +1827,7 @@ export function inferFunc(title, dept) {
 // ══════════════════════════════════════════
 // NEWS PAGE
 // ══════════════════════════════════════════
-const TOPICS = ['Company News','Industry','Pipeline','Regulatory','M&A','Earnings','Journals'];
+const TOPICS = ['Industry','Pipeline','Regulatory','M&A','Earnings','Journals','Company News'];
 const TOPIC_LABELS = { 'Company News':'Company Press Releases', Industry:'Industry Headlines', Pipeline:'Pipeline & Approvals', Regulatory:'Regulatory & FDA', 'M&A':'M&A & Deals', Earnings:'Earnings & Finance', Journals:'Medical Journals' };
 let newsLoaded = false;
 let newsArticles = [];
