@@ -1248,46 +1248,54 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
 
 /* ── Why bioboard landing layout ── */
 .auth-login-wrap {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 48px; width: 100%; max-width: 860px; padding: 20px 0 60px;
+  display: flex; flex-direction: row; align-items: flex-start;
+  gap: 64px; width: 100%; max-width: 1100px; padding: 40px 20px 80px;
+  min-height: calc(100vh - 80px);
+}
+.auth-login-wrap .auth-card {
+  flex: 0 0 420px; position: sticky; top: 40px;
 }
 .why-bioboard {
-  text-align: center; max-width: 760px; width: 100%;
+  flex: 1; text-align: left; padding-top: 8px;
 }
 .why-eyebrow {
   font-size: 0.72rem; font-weight: 600; letter-spacing: 2px;
   text-transform: uppercase; color: #0D9488; margin-bottom: 14px;
 }
 .why-headline {
-  font-family: 'DM Serif Display', serif; font-size: 2.2rem;
+  font-family: 'DM Serif Display', serif; font-size: 2.4rem;
   color: var(--text); line-height: 1.2; margin-bottom: 18px;
 }
 .why-body {
-  font-size: 0.92rem; color: var(--muted); line-height: 1.75;
-  max-width: 640px; margin: 0 auto 40px;
+  font-size: 0.95rem; color: var(--muted); line-height: 1.75;
+  margin-bottom: 40px;
 }
 .why-pillars {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  display: grid; grid-template-columns: 1fr; gap: 16px;
 }
 .why-pillar {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 12px; padding: 24px 20px; text-align: left;
+  display: flex; gap: 18px; align-items: flex-start;
 }
 .why-pillar-icon {
-  width: 44px; height: 44px; border-radius: 10px;
+  flex: 0 0 44px; width: 44px; height: 44px; border-radius: 10px;
   background: rgba(13,148,136,0.12); border: 1px solid rgba(13,148,136,0.2);
   display: flex; align-items: center; justify-content: center;
-  color: #0D9488; margin-bottom: 14px;
+  color: #0D9488;
 }
-.why-pillar h3 {
-  font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 8px;
+.why-pillar-text h3 {
+  font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 6px;
 }
-.why-pillar p {
-  font-size: 0.82rem; color: var(--muted); line-height: 1.65;
+.why-pillar-text p {
+  font-size: 0.85rem; color: var(--muted); line-height: 1.65; margin: 0;
 }
-@media (max-width: 640px) {
-  .why-pillars { grid-template-columns: 1fr; }
-  .why-headline { font-size: 1.6rem; }
+@media (max-width: 860px) {
+  .auth-login-wrap { flex-direction: column; align-items: center; gap: 40px; }
+  .auth-login-wrap .auth-card { flex: none; position: static; width: 100%; max-width: 460px; }
+  .why-bioboard { text-align: center; }
+  .why-pillar { flex-direction: column; gap: 12px; }
+  .why-headline { font-size: 1.8rem; }
 }
 
 /* Paywall-specific */
