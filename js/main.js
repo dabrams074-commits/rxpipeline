@@ -2030,6 +2030,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cnt) cnt.textContent = FETCH_COMPANIES.length;
     const libBadge = document.getElementById('lib-badge');
     if (libBadge) libBadge.textContent = FETCH_COMPANIES.length;
+    const liveCount = document.getElementById('live-roles-count');
+    if (liveCount) liveCount.textContent = FETCH_COMPANIES.length;
     const liveBadge = document.getElementById('live-badge');
     if (liveBadge) liveBadge.textContent = 'Live';
     buildCompanyCheckboxes();
