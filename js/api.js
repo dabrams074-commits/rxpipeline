@@ -160,22 +160,23 @@ export async function fetchAllCompanyJobs(){
       try {
         if (q.company.ats === 'Workday') {
           const LIMIT = 20;
-          const res = await fetch('/.netlify/functions/wd', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ subdomain: q.company.subdomain, wdNum: q.company.wdNum, tenant: q.company.tenant, cxsId: q.company.cxsId || null, limit: LIMIT, offset: q.offset, searchText:'', appliedFacets: {} }) });
+          const BASE = `/api/${q.company.subdomain}`;
+          const res = await fetch(BASE, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({ limit: LIMIT, offset: q.offset, searchText:'', appliedFacets: {} }) });
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           if(!data.jobPostings) throw new Error('No jobPostings');
-          
+
           if(q.total === null) {
             q.total = data.total || data.jobPostings.length;
           }
-          
+
           const jobs = data.jobPostings.map(j => normalizeJob(j, q.company));
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
           q.offset += LIMIT;
-          
+
           setPBar(q.key, q.jobCount, q.total);
-          
+
           if (data.jobPostings.length < LIMIT || q.offset >= q.total) {
             q.done = true;
           }
