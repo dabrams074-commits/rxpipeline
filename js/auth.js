@@ -67,13 +67,16 @@ async function _checkAndGate(onReady) {
       signal:  controller.signal,
     });
     clearTimeout(timeout);
-    const { active } = await res.json();
+    const { active, reason, daysLeft } = await res.json();
 
     if (active) {
       _hideOverlay();
       if (!_onReadyCalled) {
         _onReadyCalled = true;
         onReady?.();
+      }
+      if (reason === 'trial' && daysLeft != null) {
+        _showTrialBanner(daysLeft);
       }
     } else {
       _showOverlay('paywall');
@@ -228,6 +231,15 @@ function _showOverlay(state) {
 function _hideOverlay() {
   const overlay = document.getElementById('auth-overlay');
   if (overlay) overlay.style.display = 'none';
+}
+
+function _showTrialBanner(daysLeft) {
+  if (document.getElementById('trial-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'trial-banner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a6b3c;color:#fff;text-align:center;padding:8px 16px;font-size:13px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:12px;';
+  banner.innerHTML = `<span>🎉 You have <strong>${daysLeft} day${daysLeft === 1 ? '' : 's'}</strong> left in your free trial.</span><button onclick="window.rxStartCheckout()" style="background:#fff;color:#1a6b3c;border:none;border-radius:4px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Subscribe now</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;margin-left:4px;">×</button>`;
+  document.body.prepend(banner);
 }
 
 function _renderPaywallUser() {
