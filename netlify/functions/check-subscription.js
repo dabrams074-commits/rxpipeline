@@ -17,13 +17,25 @@ exports.handler = async (event) => {
     return { statusCode: 405, headers: CORS, body: 'Method Not Allowed' };
   }
 
-  const { email } = JSON.parse(event.body || '{}');
+  const { email, createdAt } = JSON.parse(event.body || '{}');
   if (!email) {
     return {
       statusCode: 400,
       headers: CORS,
       body: JSON.stringify({ active: false, error: 'email required' }),
     };
+  }
+
+  // 10-day free trial based on account creation date
+  if (createdAt) {
+    const daysSinceSignup = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
+    if (daysSinceSignup < 10) {
+      return {
+        statusCode: 200,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: true, reason: 'trial', daysLeft: Math.ceil(10 - daysSinceSignup) }),
+      };
+    }
   }
 
   const SECRET = process.env.STRIPE_SECRET_KEY;

@@ -63,7 +63,7 @@ async function _checkAndGate(onReady) {
     const res = await fetch('/.netlify/functions/check-subscription', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email: _currentUser.email }),
+      body:    JSON.stringify({ email: _currentUser.email, createdAt: _currentUser.created_at }),
       signal:  controller.signal,
     });
     clearTimeout(timeout);
@@ -176,7 +176,7 @@ export async function manageSubscription() {
     const res = await fetch('/.netlify/functions/create-portal-session', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email: _currentUser.email }),
+      body:    JSON.stringify({ email: _currentUser.email, createdAt: _currentUser.created_at }),
     });
     const { url, error } = await res.json();
     if (url) {
