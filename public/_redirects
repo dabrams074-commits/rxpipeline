@@ -38,9 +38,10 @@
 /api/vhr-unither         https://vhr-unither.wd5.myworkdayjobs.com/wday/cxs/vhr_unither/External/jobs  200!
 /api/vhr-jazz            https://vhr-jazz.wd1.myworkdayjobs.com/wday/cxs/vhr_jazz/JazzPharmaceuticals/jobs  200!
 /api/viatris             https://viatris.wd5.myworkdayjobs.com/wday/cxs/viatris/External/jobs  200!
-/api/halozyme            https://halozyme.wd1.myworkdayjobs.com/wday/cxs/halozyme/Halozyme_Therapeutics/jobs  200!
+/api/exelixis            https://exelixis.wd1.myworkdayjobs.com/wday/cxs/exelixis/Exel/jobs  200!
+/api/halozyme            https://halozyme.wd1.myworkdayjobs.com/wday/cxs/halozyme/halozymecareers/jobs  200!
 /api/parexel             https://parexel.wd1.myworkdayjobs.com/wday/cxs/parexel/Parexel_External_Careers/jobs  200!
-/api/lonza               https://lonza.wd1.myworkdayjobs.com/wday/cxs/lonza/External/jobs  200!
+/api/lonza               https://lonza.wd3.myworkdayjobs.com/wday/cxs/lonza/Lonza_Careers/jobs  200!
 
 # Jibe (iCIMS) Proxies — company-specific domains, specific rules must come before wildcard
 /api/jibe/incyte  https://careers.incyte.com/api/jobs  200!

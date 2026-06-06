@@ -72,12 +72,12 @@ export const FETCH_COMPANIES = [
   { name:'Viatris',                 group:'Specialty Pharma & Established Brands', ats:'Workday', subdomain:'viatris', tenant:'External', wdNum:5 },
   // ── Biotech (additional) ──
   { name:'Acadia Pharmaceuticals',  group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'acadiapharmaceuticals',  wdNum:0 },
-  { name:'Exelixis',                group:'Biotech',          ats:'Greenhouse', subdomain:'',          tenant:'exelixis',                wdNum:0 },
-  { name:'Halozyme',                group:'Biotech',          ats:'Workday',  subdomain:'halozyme',              tenant:'Halozyme_Therapeutics',   wdNum:1 },
+  { name:'Exelixis',                group:'Biotech',          ats:'Workday',  subdomain:'exelixis',      tenant:'Exel',                    wdNum:1 },
+  { name:'Halozyme',                group:'Biotech',          ats:'Workday',  subdomain:'halozyme',              tenant:'halozymecareers',         wdNum:1 },
   // ── CRO / Services ──
   { name:'IQVIA',                   group:'CRO & Services',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
   { name:'Parexel',                 group:'CRO & Services',   ats:'Workday',  subdomain:'parexel',               tenant:'Parexel_External_Careers', wdNum:1 },
-  { name:'Lonza',                   group:'CRO & Services',   ats:'Workday',  subdomain:'lonza',                 tenant:'External',                wdNum:1 },
+  { name:'Lonza',                   group:'CRO & Services',   ats:'Workday',  subdomain:'lonza',                 tenant:'Lonza_Careers',           wdNum:3 },
 ];
 
 export let all_jobs = []; 
