@@ -238,8 +238,11 @@ function _showTrialBanner(daysLeft) {
   const banner = document.createElement('div');
   banner.id = 'trial-banner';
   banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a6b3c;color:#fff;text-align:center;padding:8px 16px;font-size:13px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:12px;';
-  banner.innerHTML = `<span>🎉 You have <strong>${daysLeft} day${daysLeft === 1 ? '' : 's'}</strong> left in your free trial.</span><button onclick="window.rxStartCheckout()" style="background:#fff;color:#1a6b3c;border:none;border-radius:4px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Subscribe now</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;margin-left:4px;">×</button>`;
+  const dismiss = () => { banner.remove(); document.body.style.paddingTop = ''; };
+  banner.innerHTML = `<span>🎉 You have <strong>${daysLeft} day${daysLeft === 1 ? '' : 's'}</strong> left in your free trial.</span><button onclick="window.rxStartCheckout()" style="background:#fff;color:#1a6b3c;border:none;border-radius:4px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Subscribe now</button><button id="trial-banner-close" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;margin-left:4px;">×</button>`;
   document.body.prepend(banner);
+  document.body.style.paddingTop = banner.offsetHeight + 'px';
+  document.getElementById('trial-banner-close').addEventListener('click', dismiss);
 }
 
 function _renderPaywallUser() {
