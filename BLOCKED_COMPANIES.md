@@ -22,7 +22,9 @@ These companies use ATS platforms that do not expose a public API, making it imp
 - **Catalent** — Phenom People
 - **Sun Pharma** — TalentBrew
 
-## Needs verification (ATS unclear)
-- **Lonza** — added as Workday (lonza.wd5); confirm tenant loads correctly
-- **Exelixis** — added as Workday (exelixis.wd3); confirm tenant loads correctly
-- **Halozyme** — added as Workday (halozyme.wd5); confirm tenant loads correctly
+## Workday — bot protection blocks Netlify function IPs
+- **Halozyme** — Workday wd1 (halozymecareers); correct URL confirmed but server returns no jobPostings for server-side requests
+
+## Confirmed working (previously unverified)
+- **Lonza** — Workday wd3, tenant Lonza_Careers ✓
+- **Exelixis** — Workday wd1, tenant Exel ✓
