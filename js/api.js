@@ -73,7 +73,7 @@ export const FETCH_COMPANIES = [
   // ── Biotech (additional) ──
   { name:'Acadia Pharmaceuticals',  group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'acadiapharmaceuticals',  wdNum:0 },
   { name:'Exelixis',                group:'Biotech',          ats:'Workday',  subdomain:'exelixis',      tenant:'Exel',                    wdNum:1 },
-  { name:'Halozyme',                group:'Biotech',          ats:'Workday',  subdomain:'halozyme',              tenant:'halozymecareers',         wdNum:1 },
+  // { name:'Halozyme', group:'Biotech', ats:'Workday', subdomain:'halozyme', tenant:'halozymecareers', wdNum:1 }, // Blocked by Workday bot protection
   // ── CRO / Services ──
   { name:'IQVIA',                   group:'CRO & Services',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
   { name:'Parexel',                 group:'CRO & Services',   ats:'Workday',  subdomain:'parexel',               tenant:'Parexel_External_Careers', wdNum:1 },
