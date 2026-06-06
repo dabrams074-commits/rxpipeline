@@ -384,7 +384,7 @@
   <div class="page">
     <div class="lib-header">
       <div class="lib-title">Live Roles</div>
-      <div class="lib-sub">Real-time job listings from <strong id="live-roles-count">29</strong> pharma companies · Workday, Greenhouse &amp; Workable ATS</div>
+      <div class="lib-sub">Real-time job listings from <strong id="live-roles-count">35</strong> pharma companies · Workday, Greenhouse &amp; Workable ATS</div>
     </div>
 
     <div class="company-selector-wrap">
@@ -425,28 +425,28 @@
     <div class="lib-toolbar" id="roles-filters" style="display:none">
       <div class="search-wrap">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="search-input" type="text" id="r-search" placeholder="Search title, area, department, location…" oninput="clearTimeout(window._rsT);window._rsT=setTimeout(renderRoles,200)">
+        <input class="search-input" type="text" id="r-search" placeholder="Search title, area, department, location…" oninput="clearTimeout(window._rsT);window._rsT=setTimeout(window.resetAndRenderRoles,200)">
       </div>
-      <select class="filter-select" id="r-area" onchange="renderRoles()">
+      <select class="filter-select" id="r-area" onchange="window.resetAndRenderRoles()">
         <option value="">All Areas</option>
         <option>Oncology</option><option>Rare Disease</option><option>Immunology</option>
         <option>Neuroscience</option><option>Cardiovascular</option><option>Vaccines</option>
         <option>Metabolic / Endocrine</option><option>Infectious Disease</option>
         <option>Ophthalmology</option><option>Diversified</option>
       </select>
-      <select class="filter-select" id="r-company" onchange="renderRoles()">
+      <select class="filter-select" id="r-company" onchange="window.resetAndRenderRoles()">
         <option value="">All Companies</option>
       </select>
-      <select class="filter-select" id="r-func" onchange="renderRoles()">
+      <select class="filter-select" id="r-func" onchange="window.resetAndRenderRoles()">
         <option value="">All Functions</option>
       </select>
       <select class="filter-select" id="r-loc" onchange="window.onCountryChange()">
         <option value="">All Countries</option>
       </select>
-      <select class="filter-select" id="r-state" onchange="renderRoles()" style="display:none">
+      <select class="filter-select" id="r-state" onchange="window.resetAndRenderRoles()" style="display:none">
         <option value="">All States</option>
       </select>
-      <select class="filter-select" id="r-level" onchange="renderRoles()">
+      <select class="filter-select" id="r-level" onchange="window.resetAndRenderRoles()">
         <option value="">All Levels</option>
         <option>VP</option>
         <option>Head Of / Executive Director</option>
@@ -476,6 +476,10 @@
         <div class="fetch-empty-title">No jobs loaded yet</div>
         <div class="fetch-empty-sub">Select one or more companies above, then click Fetch Live Jobs to pull listings directly from their career sites</div>
       </div>
+    </div>
+
+    <div id="load-more-wrap" style="display:none;text-align:center;padding:20px 0 8px">
+      <button id="load-more-btn" onclick="window.loadMoreRoles()" style="padding:10px 32px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.9rem;cursor:pointer;font-weight:500">Load more roles</button>
     </div>
 
 <div class="roles-footer" id="roles-footer" style="display:none">
@@ -940,6 +944,6 @@
 </div>
 <!-- ── End Auth Overlay ─────────────────────────────────────────────────── -->
 
-<script type="module" src="./js/main.js?v=47"></script>
+<script type="module" src="./js/main.js"></script>
 </body>
 </html>

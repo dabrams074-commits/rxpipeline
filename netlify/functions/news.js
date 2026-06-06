@@ -93,7 +93,10 @@ exports.handler = async () => {
     }))
   ]);
 
-  const coArticles    = coResults.flatMap(r    => r.status === 'fulfilled' ? r.value : []);
+  const fourMonthsAgo = Date.now() - (4 * 30 * 24 * 60 * 60 * 1000);
+
+  const coArticles    = coResults.flatMap(r    => r.status === 'fulfilled' ? r.value : [])
+    .filter(a => !a.dateMs || a.dateMs >= fourMonthsAgo);
   const topicArticles = topicResults.flatMap(r => r.status === 'fulfilled' ? r.value : []);
 
   const seen = new Set();
