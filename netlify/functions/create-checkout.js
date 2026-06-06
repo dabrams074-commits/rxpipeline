@@ -42,6 +42,7 @@ exports.handler = async (event) => {
     'line_items[0][price]':             PRICE_ID,
     'line_items[0][quantity]':          '1',
     'subscription_data[trial_period_days]': '10',
+    allow_promotion_codes:              'true',
     customer_email:                     email,
     success_url:                        `${SITE_URL}/?checkout=success`,
     cancel_url:                         `${SITE_URL}/?checkout=cancelled`,
