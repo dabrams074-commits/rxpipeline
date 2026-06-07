@@ -810,14 +810,12 @@ export function buildFilters() {
   const companies = [...new Set(all_jobs.map(j => j.company).filter(Boolean))].sort();
   const rawCountries = all_jobs.map(j => j._country || inferCountry(j.location || '')).filter(Boolean);
   const countrySet = [...new Set(rawCountries)];
-  const hasMultiple   = countrySet.includes('Multiple');
   const hasRemote     = countrySet.includes('Remote');
   const hasFieldBased = countrySet.includes('Field Based');
   const hasOther = all_jobs.some(j => !(j._country || inferCountry(j.location || '')));
-  const countries = countrySet.filter(c => c !== 'Multiple' && c !== 'Remote' && c !== 'Field Based').sort();
+  const countries = countrySet.filter(c => c !== 'Remote' && c !== 'Field Based').sort();
   if (hasFieldBased) countries.push('Field Based');
   if (hasRemote) countries.push('Remote');
-  if (hasMultiple) countries.push('Multiple');
   if (hasOther) countries.push('Other (unclassified)');
   const presentFuncs = new Set(all_jobs.map(j => inferFunc(j.title, j.dept || '')).filter(Boolean));
   const funcOptgroups = FUNC_GROUPS
@@ -1206,9 +1204,12 @@ export function inferCountry(location) {
   if (/field[- ]?based|field force|field medical|field sales|field rep|field non-?sales|home[- ]?based/i.test(l)) return 'Field Based';
   if (l.split(' - ').map(s => s.trim().toLowerCase()).some(s => s === 'field')) return 'Field Based';
 
-  // Multiple / global
-  if (/multiple|various|global|worldwide|all locations/i.test(l)) return 'Multiple';
-  if (/^\d+\s+locations?$/i.test(l)) return 'Multiple';
+  // "N Locations" or vague multi-location strings — return unclassified so jobs
+  // still appear in the list but don't pile up in a useless "Multiple" bucket.
+  if (/^\d+\s+locations?$/i.test(l)) return '';
+  if (/^multiple locations?$/i.test(l)) return '';
+  // "global" / "worldwide" / "various" — genuinely cross-border; leave unclassified
+  if (/^(global|worldwide|various|all locations)$/i.test(l)) return '';
 
   // Pattern: "XX: rest" — ISO code prefix (Eli Lilly: "US: Louisville CO Site 3")
   const colonMatch = l.match(/^([A-Za-z]{2,3}):\s/);
