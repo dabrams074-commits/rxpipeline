@@ -3,20 +3,42 @@ import { saveCachedJobs, loadCachedJobs, cachedLiveJobs, lastFetchTime } from '.
 
 export function sanitizeData(array) {
   if (!Array.isArray(array)) return array;
-  return array.map(j => ({
-    id: j.id || j.ID || String(Math.random()),
-    company: j.company || j.Company || '',
-    title: j.title || j.Title || '',
-    dept: j.dept || j.Department || j.Dept || '',
-    location: j.location || j.Location || '',
-    posted: j.posted || j.Posted || '',
-    url: j.url || j.URL || j.Url || ''
-  }));
+  return array.map(j => {
+    const job = {
+      id: j.id || j.ID || String(Math.random()),
+      company: j.company || j.Company || '',
+      title: j.title || j.Title || '',
+      dept: j.dept || j.Department || j.Dept || '',
+      location: j.location || j.Location || '',
+      posted: j.posted || j.Posted || '',
+      url: j.url || j.URL || j.Url || ''
+    };
+    return stamp(job);
+  });
 }
 
 export const delay = ms => new Promise(res => setTimeout(res, ms));
 
+// Parse location from Workday URL path slug, e.g.
+// "/job/Cambridge--Massachusetts/Research-Scientist_R123" → "Cambridge, Massachusetts"
+function _locFromPath(path) {
+  if (!path) return '';
+  const m = path.match(/\/job\/([^\/]+)\//);
+  if (!m) return '';
+  const slug = m[1];
+  if (/multiple|various|global|worldwide/i.test(slug)) return '';
+  return slug.replace(/--/g, ', ').replace(/-/g, ' ');
+}
+
 function stamp(job) {
+  // If location is "N Locations", try to extract from the job URL path
+  if (/^\d+\s+locations?$/i.test((job.location || '').trim()) && job.url) {
+    try {
+      const pathname = new URL(job.url).pathname;
+      const extracted = _locFromPath(pathname);
+      if (extracted) job.location = extracted;
+    } catch {}
+  }
   job._area = inferArea(job.title, job.dept || '');
   job._func = inferFunc(job.title, job.dept || '');
   job._country = inferCountry(job.location || '');
@@ -170,11 +192,6 @@ export async function fetchAllCompanyJobs(){
           }
 
           const jobs = data.jobPostings.map(j => normalizeJob(j, q.company));
-          // TEMP DEBUG — log first batch of one company to see raw fields
-          if (q.offset === 0 && q.company.name === 'Pfizer') {
-            console.log('DEBUG Workday raw sample:', JSON.stringify(data.jobPostings.slice(0,3), null, 2));
-            console.log('DEBUG normalized locs:', jobs.slice(0,3).map(j=>({loc:j.location,country:j._country})));
-          }
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
           q.offset += LIMIT;
@@ -279,18 +296,6 @@ export async function fetchAllCompanyJobs(){
 }
 
 export function setPBar(key, done, total){ const pct = total>0 ? Math.round((done/total)*100) : 100; const pb = document.getElementById('pb-'+key); const pc = document.getElementById('pc-'+key); if(pb) pb.style.width=pct+'%'; if(pc) pc.textContent = total>0 ? `${done}/${total}` : done+' jobs'; }
-
-// Parse location from Workday externalPath slug, e.g.
-// "/job/Cambridge--Massachusetts/Research-Scientist_R123" → "Cambridge, Massachusetts"
-function _locFromPath(path) {
-  if (!path) return '';
-  const m = path.match(/\/job\/([^\/]+)\//);
-  if (!m) return '';
-  const slug = m[1];
-  if (/multiple|various|global|worldwide/i.test(slug)) return '';
-  // Double-dash = separator between city and state/country; single dash = space
-  return slug.replace(/--/g, ', ').replace(/-/g, ' ');
-}
 
 export function normalizeJob(j, c){
   const title = j.title||j.jobPostingTitle||'';
