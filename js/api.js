@@ -31,8 +31,8 @@ function _locFromPath(path) {
 }
 
 function stamp(job) {
-  // If location is "N Locations", try to extract from the job URL path
-  if (/^\d+\s+locations?$/i.test((job.location || '').trim()) && job.url) {
+  // If location is vague ("5 Locations", "Multiple Locations", "Various", "Global"), try URL
+  if (/^\d+\s+locations?$|multiple|various|global|worldwide|all locations/i.test((job.location || '').trim()) && job.url) {
     try {
       const pathname = new URL(job.url).pathname;
       const extracted = _locFromPath(pathname);
