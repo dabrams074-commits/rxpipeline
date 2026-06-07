@@ -808,11 +808,13 @@ export function inferState(location) {
 // ══════════════════════════════════════════
 export function buildFilters() {
   const companies = [...new Set(all_jobs.map(j => j.company).filter(Boolean))].sort();
-  const rawCountries = all_jobs.map(j => j._country || inferCountry(j.location || '')).filter(Boolean);
+  // Treat stale 'Multiple' (old cached value) same as unclassified
+  const _rc = j => { const c = j._country || inferCountry(j.location || ''); return c === 'Multiple' ? '' : c; };
+  const rawCountries = all_jobs.map(j => _rc(j)).filter(Boolean);
   const countrySet = [...new Set(rawCountries)];
   const hasRemote     = countrySet.includes('Remote');
   const hasFieldBased = countrySet.includes('Field Based');
-  const hasOther = all_jobs.some(j => !(j._country || inferCountry(j.location || '')));
+  const hasOther = all_jobs.some(j => !_rc(j));
   const countries = countrySet.filter(c => c !== 'Remote' && c !== 'Field Based').sort();
   if (hasFieldBased) countries.push('Field Based');
   if (hasRemote) countries.push('Remote');
@@ -1298,7 +1300,7 @@ function getFilteredRoles() {
       const mQ = !q || (r.title||'').toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || (r.company||'').toLowerCase().includes(q) || area.toLowerCase().includes(q);
       const mArea = !areaFilter || area === areaFilter;
       const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
-      const rc = r._country || inferCountry(r.location || '');
+      const rc = (r._country || inferCountry(r.location || '')).replace(/^Multiple$/, '');
       const mCountry = !country || (country === 'Other (unclassified)' ? !rc : rc === country);
       const rs = inferState(r.location || '');
       const mState = !state || (state === '__nostate__' ? (rc === 'United States' && !rs) : rs === state);

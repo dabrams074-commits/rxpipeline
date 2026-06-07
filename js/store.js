@@ -62,9 +62,11 @@ function openDB() {
     const request = indexedDB.open('rx-pipeline-db', 2);
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
-      if (!db.objectStoreNames.contains('library')) {
-        db.createObjectStore('library');
+      // Delete old store on upgrade so stale cached data is cleared
+      if (db.objectStoreNames.contains('library')) {
+        db.deleteObjectStore('library');
       }
+      db.createObjectStore('library');
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
