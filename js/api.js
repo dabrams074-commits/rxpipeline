@@ -276,7 +276,11 @@ export async function fetchAllCompanyJobs(){
 export function setPBar(key, done, total){ const pct = total>0 ? Math.round((done/total)*100) : 100; const pb = document.getElementById('pb-'+key); const pc = document.getElementById('pc-'+key); if(pb) pb.style.width=pct+'%'; if(pc) pc.textContent = total>0 ? `${done}/${total}` : done+' jobs'; }
 
 export function normalizeJob(j, c){
-  const title = j.title||j.jobPostingTitle||''; const loc = (j.locationsText||j.primaryLocation||j.bulletFields?.[0]||'').replace(/^\|+/,'').trim(); const dept = (j.jobCategory||j.categories?.[0]?.value||'').trim();
+  const title = j.title||j.jobPostingTitle||'';
+  // When Workday returns "5 Locations" as locationsText, use primaryLocation instead
+  const rawLocText = j.locationsText || '';
+  const locText = /^\d+\s+locations?$/i.test(rawLocText.trim()) ? '' : rawLocText;
+  const loc = (locText || j.primaryLocation || j.bulletFields?.[0] || '').replace(/^\|+/,'').trim(); const dept = (j.jobCategory||j.categories?.[0]?.value||'').trim();
   let posted = j.postedOn || ''; if (posted && !posted.toLowerCase().includes('ago') && !posted.toLowerCase().includes('today')) { const d = new Date(posted); if(!isNaN(d)) posted = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
   const id = (j.bulletFields?.[1]||j.externalPath||String(Math.random())).replace(/\//g,'_'); const path = j.externalPath||'';
   let url = '';
