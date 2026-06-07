@@ -280,7 +280,15 @@ export function normalizeJob(j, c){
   // When Workday returns "5 Locations" as locationsText, use primaryLocation instead
   const rawLocText = j.locationsText || '';
   const locText = /^\d+\s+locations?$/i.test(rawLocText.trim()) ? '' : rawLocText;
-  const loc = (locText || j.primaryLocation || j.bulletFields?.[0] || '').replace(/^\|+/,'').trim(); const dept = (j.jobCategory||j.categories?.[0]?.value||'').trim();
+  // primaryLocation may be a string or an object with a descriptor property
+  const primaryLoc = typeof j.primaryLocation === 'string'
+    ? j.primaryLocation
+    : (j.primaryLocation?.descriptor || '');
+  // locations[] array fallback — take first entry's descriptor
+  const firstLocArr = Array.isArray(j.locations) && j.locations.length
+    ? (typeof j.locations[0] === 'string' ? j.locations[0] : j.locations[0]?.descriptor || '')
+    : '';
+  const loc = (locText || primaryLoc || firstLocArr || j.bulletFields?.[0] || '').replace(/^\|+/,'').trim(); const dept = (j.jobCategory||j.categories?.[0]?.value||'').trim();
   let posted = j.postedOn || ''; if (posted && !posted.toLowerCase().includes('ago') && !posted.toLowerCase().includes('today')) { const d = new Date(posted); if(!isNaN(d)) posted = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
   const id = (j.bulletFields?.[1]||j.externalPath||String(Math.random())).replace(/\//g,'_'); const path = j.externalPath||'';
   let url = '';
