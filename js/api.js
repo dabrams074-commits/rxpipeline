@@ -67,7 +67,6 @@ export const FETCH_COMPANIES = [
   { name:'AbbVie',                  group:'Large Pharma',    ats:'SmartRecruiters', subdomain:'', tenant:'AbbVie',               wdNum:0 },
   { name:'J&J',                     group:'Large Pharma',    ats:'Workday',   subdomain:'jj',                     tenant:'JJ',                      wdNum:5 },
   { name:'Roche',                   group:'Large Pharma',    ats:'Workday',   subdomain:'roche',                  tenant:'roche-ext',               wdNum:3 },
-  { name:'Becton Dickinson',        group:'Large Pharma',    ats:'Workday',   subdomain:'bdx',                    tenant:'EXTERNAL_CAREER_SITE_USA', wdNum:1 },
   // ── Specialty Pharma & Established Brands ──
   { name:'Ipsen',                   group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'ipsen',      tenant:'Ipsen_Careers', wdNum:103 },
   { name:'Otsuka',                  group:'Specialty Pharma & Established Brands', ats:'Workday',  subdomain:'vhr-otsuka', tenant:'External',      wdNum:1, cxsId:'vhr_otsuka' },
@@ -102,7 +101,8 @@ export const FETCH_COMPANIES = [
   { name:'Acadia Pharmaceuticals',  group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'acadiapharmaceuticals',  wdNum:0 },
   { name:'Exelixis',                group:'Biotech',          ats:'Workday',  subdomain:'exelixis',      tenant:'Exel',                    wdNum:1 },
   // { name:'Halozyme', group:'Biotech', ats:'Workday', subdomain:'halozyme', tenant:'halozymecareers', wdNum:1 }, // Blocked by Workday bot protection
-  // ── CRO / Services ──
+  // ── CRO / Services / Medical Devices ──
+  { name:'Becton Dickinson',        group:'CRO & Services',   ats:'Workday',   subdomain:'bdx',                    tenant:'EXTERNAL_CAREER_SITE_USA', wdNum:1 },
   { name:'IQVIA',                   group:'CRO & Services',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
   { name:'Parexel',                 group:'CRO & Services',   ats:'Workday',  subdomain:'parexel',               tenant:'Parexel_External_Careers', wdNum:1 },
   { name:'Lonza',                   group:'CRO & Services',   ats:'Workday',  subdomain:'lonza',                 tenant:'Lonza_Careers',           wdNum:3 },
