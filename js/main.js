@@ -871,6 +871,13 @@ const COUNTRY_ALIASES = {
   'Republic of Ireland':'Ireland','Eire':'Ireland',
   'Czechia':'Czech Republic','Türkiye':'Turkey',
   'United States of America':'United States',
+  // Uppercase ISO-2 country codes (e.g. "Warsaw - PL", "Barcelona - ES")
+  'PL':'Poland','ES':'Spain','IT':'Italy','FR':'France','DE':'Germany',
+  'NL':'Netherlands','BE':'Belgium','AT':'Austria','HU':'Hungary','CZ':'Czech Republic',
+  'PT':'Portugal','IE':'Ireland','SE':'Sweden','DK':'Denmark','NO':'Norway',
+  'FI':'Finland','CN':'China','JP':'Japan','AU':'Australia','SG':'Singapore',
+  'TW':'Taiwan','KR':'South Korea','BR':'Brazil','MX':'Mexico','RU':'Russia',
+  'TR':'Turkey','ZA':'South Africa','AR':'Argentina',
   // Lowercase ISO-2 codes returned by SmartRecruiters
   'us':'United States','gb':'United Kingdom','uk':'United Kingdom',
   'de':'Germany','fr':'France','ch':'Switzerland','jp':'Japan',
@@ -1238,6 +1245,9 @@ export function inferCountry(location) {
     if (rFirst) return rFirst;
     const rLast = resolveCountryToken(last);
     if (rLast) return rLast;
+    // Fallback: try city lookup on first segment (e.g. "Warsaw - PL", "Tokyo - JP")
+    const cFirst = cityLookup(first);
+    if (cFirst) return cFirst;
   }
 
   // ">" or leading "|" hierarchy (e.g. "United States of America > New Jersey > City")
