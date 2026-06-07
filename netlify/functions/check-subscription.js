@@ -29,7 +29,7 @@ exports.handler = async (event) => {
   // 10-day free trial based on account creation date
   if (createdAt) {
     const daysSinceSignup = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
-    if (daysSinceSignup < 1) {
+    if (daysSinceSignup < 10) {
       return {
         statusCode: 200,
         headers: { ...CORS, 'Content-Type': 'application/json' },
