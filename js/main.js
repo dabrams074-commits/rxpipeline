@@ -974,11 +974,12 @@ const COUNTRIES = new Set([
 // Covers pharma hubs and common ambiguous cities
 const CITY_COUNTRY = {
   // ── United States ─────────────────────────────────────────────────
-  'TARRYTOWN':'United States','SLEEPY HOLLOW':'United States',
+  'TARRYTOWN':'United States','SLEEPY HOLLOW':'United States','RENSSELAER':'United States',
   'BASKING RIDGE':'United States','PARSIPPANY':'United States',
   'BRIDGEWATER':'United States','BEDMINSTER':'United States',
   'East Hanover':'United States','Whippany':'United States',
   'Florham Park':'United States','Morris Plains':'United States',
+  'Warren':'United States','Durham':'United States','Irvine':'United States',
   'North Chicago':'United States','Mettawa':'United States','Branchburg':'United States',
   'Thousand Oaks':'United States','Newbury Park':'United States',
   'Gaithersburg':'United States','Rockville':'United States','Bethesda':'United States',
@@ -1049,6 +1050,7 @@ const CITY_COUNTRY = {
   'Paris':'France','Lyon':'France','Strasbourg':'France','Bordeaux':'France',
   'Toulouse':'France','Marseille':'France','Montpellier':'France',
   'Gentilly':'France','Vitry-sur-Seine':'France','Suresnes':'France',
+  'Sisteron':'France','Aramon':'France','Ambarès':'France','Ambarès-et-Lagrave':'France',
   'Rueil-Malmaison':'France','Chilly-Mazarin':'France','Guildford':'France',
   // ── Netherlands ───────────────────────────────────────────────────
   'Amsterdam':'Netherlands','Leiden':'Netherlands','Utrecht':'Netherlands',
@@ -1074,7 +1076,7 @@ const CITY_COUNTRY = {
   'Florence':'Italy','Bologna':'Italy','Pomezia':'Italy','Latina':'Italy',
   'Segrate':'Italy','Sesto San Giovanni':'Italy',
   // ── Austria ───────────────────────────────────────────────────────
-  'Vienna':'Austria','Graz':'Austria','Linz':'Austria',
+  'Vienna':'Austria','Graz':'Austria','Linz':'Austria','Schaftenau':'Austria','Langkampfen':'Austria',
   // ── Poland ────────────────────────────────────────────────────────
   'Warsaw':'Poland','Krakow':'Poland','Wroclaw':'Poland','Lodz':'Poland',
   'Poznan':'Poland','Gdansk':'Poland',
