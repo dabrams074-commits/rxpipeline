@@ -170,6 +170,11 @@ export async function fetchAllCompanyJobs(){
           }
 
           const jobs = data.jobPostings.map(j => normalizeJob(j, q.company));
+          // TEMP DEBUG — log first batch of one company to see raw fields
+          if (q.offset === 0 && q.company.name === 'Pfizer') {
+            console.log('DEBUG Workday raw sample:', JSON.stringify(data.jobPostings.slice(0,3), null, 2));
+            console.log('DEBUG normalized locs:', jobs.slice(0,3).map(j=>({loc:j.location,country:j._country})));
+          }
           all_jobs = all_jobs.concat(jobs);
           q.jobCount += jobs.length;
           q.offset += LIMIT;
