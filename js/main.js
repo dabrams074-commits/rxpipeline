@@ -726,6 +726,7 @@ const STATE_ABBR_TO_NAME = {
 
 export function inferState(location) {
   if (!location) return '';
+  location = firstLocation(location);
   const l = location.trim().replace(/\s*[–—]\s*/g, ' - ');
 
   // Bare US designations → "Nationwide"
@@ -1184,8 +1185,16 @@ function resolveCountryToken(token) {
   return '';
 }
 
+// Extract first location from multi-location strings like "New York | Boston" or "NY; MA"
+function firstLocation(location) {
+  if (!location) return '';
+  // Split on pipe, semicolon, or " / " separators and take the first part
+  return location.split(/\s*[\|;]\s*|\s+\/\s+/)[0].trim();
+}
+
 export function inferCountry(location) {
   if (!location) return '';
+  location = firstLocation(location);
   // Normalize em-dash / en-dash to spaced hyphen
   let l = location.trim().replace(/\s*[–—]\s*/g, ' - ');
   if (!l) return '';
