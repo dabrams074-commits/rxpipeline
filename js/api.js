@@ -275,6 +275,18 @@ export async function fetchAllCompanyJobs(){
 
 export function setPBar(key, done, total){ const pct = total>0 ? Math.round((done/total)*100) : 100; const pb = document.getElementById('pb-'+key); const pc = document.getElementById('pc-'+key); if(pb) pb.style.width=pct+'%'; if(pc) pc.textContent = total>0 ? `${done}/${total}` : done+' jobs'; }
 
+// Parse location from Workday externalPath slug, e.g.
+// "/job/Cambridge--Massachusetts/Research-Scientist_R123" → "Cambridge, Massachusetts"
+function _locFromPath(path) {
+  if (!path) return '';
+  const m = path.match(/\/job\/([^\/]+)\//);
+  if (!m) return '';
+  const slug = m[1];
+  if (/multiple|various|global|worldwide/i.test(slug)) return '';
+  // Double-dash = separator between city and state/country; single dash = space
+  return slug.replace(/--/g, ', ').replace(/-/g, ' ');
+}
+
 export function normalizeJob(j, c){
   const title = j.title||j.jobPostingTitle||'';
   // When Workday returns "5 Locations" as locationsText, use primaryLocation instead
@@ -288,7 +300,9 @@ export function normalizeJob(j, c){
   const firstLocArr = Array.isArray(j.locations) && j.locations.length
     ? (typeof j.locations[0] === 'string' ? j.locations[0] : j.locations[0]?.descriptor || '')
     : '';
-  const loc = (locText || primaryLoc || firstLocArr || j.bulletFields?.[0] || '').replace(/^\|+/,'').trim(); const dept = (j.jobCategory||j.categories?.[0]?.value||'').trim();
+  // Last resort: parse city/state from the URL path slug
+  const pathLoc = _locFromPath(j.externalPath || '');
+  const loc = (locText || primaryLoc || firstLocArr || pathLoc || '').replace(/^\|+/,'').trim(); const dept = (j.jobCategory||j.categories?.[0]?.value||'').trim();
   let posted = j.postedOn || ''; if (posted && !posted.toLowerCase().includes('ago') && !posted.toLowerCase().includes('today')) { const d = new Date(posted); if(!isNaN(d)) posted = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
   const id = (j.bulletFields?.[1]||j.externalPath||String(Math.random())).replace(/\//g,'_'); const path = j.externalPath||'';
   let url = '';
