@@ -101,11 +101,11 @@ export const FETCH_COMPANIES = [
   { name:'Acadia Pharmaceuticals',  group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'acadiapharmaceuticals',  wdNum:0 },
   { name:'Exelixis',                group:'Biotech',          ats:'Workday',  subdomain:'exelixis',      tenant:'Exel',                    wdNum:1 },
   // { name:'Halozyme', group:'Biotech', ats:'Workday', subdomain:'halozyme', tenant:'halozymecareers', wdNum:1 }, // Blocked by Workday bot protection
-  // ── CRO / Services / Medical Devices ──
-  { name:'Becton Dickinson',        group:'CRO & Services',   ats:'Workday',   subdomain:'bdx',                    tenant:'EXTERNAL_CAREER_SITE_USA', wdNum:1 },
-  { name:'IQVIA',                   group:'CRO & Services',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
-  { name:'Parexel',                 group:'CRO & Services',   ats:'Workday',  subdomain:'parexel',               tenant:'Parexel_External_Careers', wdNum:1 },
-  { name:'Lonza',                   group:'CRO & Services',   ats:'Workday',  subdomain:'lonza',                 tenant:'Lonza_Careers',           wdNum:3 },
+  // ── CRO, Services & Medical Devices ──
+  { name:'Becton Dickinson',        group:'CRO, Services & Medical Devices',   ats:'Workday',   subdomain:'bdx',                    tenant:'EXTERNAL_CAREER_SITE_USA', wdNum:1 },
+  { name:'IQVIA',                   group:'CRO, Services & Medical Devices',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
+  { name:'Parexel',                 group:'CRO, Services & Medical Devices',   ats:'Workday',  subdomain:'parexel',               tenant:'Parexel_External_Careers', wdNum:1 },
+  { name:'Lonza',                   group:'CRO, Services & Medical Devices',   ats:'Workday',  subdomain:'lonza',                 tenant:'Lonza_Careers',           wdNum:3 },
 ];
 
 export let all_jobs = []; 
