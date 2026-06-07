@@ -19,14 +19,20 @@ export function sanitizeData(array) {
 
 export const delay = ms => new Promise(res => setTimeout(res, ms));
 
-// Parse location from Workday URL path slug, e.g.
-// "/job/Cambridge--Massachusetts/Research-Scientist_R123" → "Cambridge, Massachusetts"
+// Parse location from Workday URL path slug.
+// Triple-dash format: "United-States---New-York---New-York-City" → "United States, New York, New York City"
+// Double-dash format: "Cambridge--Massachusetts" → "Cambridge, Massachusetts"
 function _locFromPath(path) {
   if (!path) return '';
   const m = path.match(/\/job\/([^\/]+)\//);
   if (!m) return '';
   const slug = m[1];
   if (/multiple|various|global|worldwide/i.test(slug)) return '';
+  if (slug.includes('---')) {
+    // Triple-dash separates country/state/city; single dash = space within a word
+    return slug.split('---').map(p => p.replace(/-/g, ' ')).join(', ');
+  }
+  // Double-dash separates city from state; single dash = space
   return slug.replace(/--/g, ', ').replace(/-/g, ' ');
 }
 
