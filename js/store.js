@@ -59,7 +59,7 @@ export async function loadJobsFromCloud() {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('rx-pipeline-db', 1);
+    const request = indexedDB.open('rx-pipeline-db', 2);
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('library')) {
