@@ -2054,10 +2054,13 @@ function renderNews() {
   filtered.forEach(a => { if (byTopic[a.topic]) byTopic[a.topic].push(a); });
 
   const newsCardHTML = a => `
-    <a class="news-card" href="${esc(a.url)}" target="_blank" rel="noopener">
-      <div class="news-card-meta"><span class="news-source">${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
-      <div class="news-card-title">${esc(a.title)}</div>
-      ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
+    <a class="news-card${a.image ? ' news-card-has-image' : ''}" href="${esc(a.url)}" target="_blank" rel="noopener">
+      ${a.image ? `<img class="news-card-img" src="${esc(a.image)}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
+      <div class="news-card-body">
+        <div class="news-card-meta"><span class="news-source">${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
+        <div class="news-card-title">${esc(a.title)}</div>
+        ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
+      </div>
     </a>`;
 
   container.innerHTML = TOPICS.filter(t => byTopic[t].length).map(t => {

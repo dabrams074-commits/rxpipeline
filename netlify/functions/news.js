@@ -131,7 +131,25 @@ function parseRSS(xml, max = 12) {
     const desc = clean(get(chunk, 'description') || get(chunk, 'summary') || get(chunk, 'content')).slice(0, 220);
     if (!title || !url) continue;
     const dateMs = date ? new Date(date).getTime() : 0;
-    items.push({ title, url, date: dateMs ? new Date(dateMs).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', dateMs, summary: desc });
+
+    // Extract image: try media:content, media:thumbnail, enclosure, then <img> in description
+    let image = '';
+    const mediaContent = chunk.match(/<media:content[^>]+url="([^"]+)"[^>]*(?:medium="image"|type="image[^"]*")?/i)
+                      || chunk.match(/<media:content[^>]+(?:medium="image"|type="image[^"]*")[^>]+url="([^"]+)"/i);
+    const mediaThumbnail = chunk.match(/<media:thumbnail[^>]+url="([^"]+)"/i);
+    const enclosure = chunk.match(/<enclosure[^>]+url="([^"]+)"[^>]*type="image/i);
+    const rawDesc = get(chunk, 'description') || get(chunk, 'summary') || '';
+    const imgInDesc = rawDesc.match(/<img[^>]+src="([^"]+)"/i);
+
+    if (mediaContent) image = mediaContent[1];
+    else if (mediaThumbnail) image = mediaThumbnail[1];
+    else if (enclosure) image = enclosure[1];
+    else if (imgInDesc) image = imgInDesc[1];
+
+    // Skip tracking pixels and tiny images
+    if (image && (image.includes('pixel') || image.includes('1x1') || image.includes('tracking'))) image = '';
+
+    items.push({ title, url, date: dateMs ? new Date(dateMs).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', dateMs, summary: desc, image });
     if (items.length >= max) break;
   }
   return items;

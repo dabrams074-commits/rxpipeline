@@ -946,8 +946,11 @@ padding: 14px 0; border-top: 1px solid var(--border); letter-spacing: 0.3px;
 .news-co-group { margin-bottom: 24px; }
 .news-co-group-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--accent2); margin-bottom: 10px; padding-left: 2px; }
 .news-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
-.news-card { display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-decoration: none; transition: border-color 0.15s, transform 0.15s; }
+.news-card { display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none; transition: border-color 0.15s, transform 0.15s; }
 .news-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.news-card-img { width: 100%; height: 160px; object-fit: cover; display: block; border-bottom: 1px solid var(--border); }
+.news-card-body { padding: 14px 16px 16px; }
+.news-card:not(.news-card-has-image) .news-card-body { padding: 16px; }
 .news-card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .news-source { font-family: 'DM Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent2); }
 .news-date { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); }
