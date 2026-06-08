@@ -17,7 +17,8 @@ window.rxEmailAuth             = emailAuth;
 import {
   FETCH_COMPANIES, all_jobs, pfizer_filtered, addedRoleSet, selectedCompanies,
   saveAddedRoles, buildCompanyCheckboxes, toggleCoSelect, selectAllCompanies, selectNoneCompanies,
-  fetchAllCompanyJobs, setPfizerFiltered, initCachedLibrary, forceRefreshBaseline
+  fetchAllCompanyJobs, setPfizerFiltered, initCachedLibrary, forceRefreshBaseline,
+  playBaselineAnimation, baselineAnimationPending
 } from './api.js';
 
 // ══════════════════════════════════════════
@@ -47,6 +48,7 @@ function switchView(v) {
   if (v === 'home') updateHomeCards();
   if (v === 'news') loadNews();
   if (v === 'community') { loadWins(); loadPosts(); }
+  if (v === 'liveroles' && baselineAnimationPending) { playBaselineAnimation(); }
 }
 
 function updateHomeCards() {

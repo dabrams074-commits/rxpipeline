@@ -358,17 +358,11 @@ export async function forceRefreshBaseline() {
   }
 }
 
+// Set to true once baseline data is loaded but animation hasn't run yet
+export let baselineAnimationPending = false;
+
 export async function initCachedLibrary() {
-  const container  = document.getElementById('roles-container');
-  const statusEl   = document.getElementById('fetch-status');
-  const progressDiv = document.getElementById('fetch-progress');
-  const progressList = document.getElementById('progress-list');
-
-  // Show skeletons right away so the page feels instant
-  if (container) container.innerHTML = skeletons(8);
-  if (statusEl) { statusEl.className = 'fetch-status loading'; statusEl.textContent = 'Loading jobs…'; }
-
-  // ── 1. Try IndexedDB cache first, fall back to baseline JSON ──────────────
+  // ── 1. Load data silently in the background ───────────────────────────────
   await loadCachedJobs();
   let jobs = cachedLiveJobs && cachedLiveJobs.length >= 1000 ? sanitizeData(cachedLiveJobs) : null;
 
@@ -377,32 +371,55 @@ export async function initCachedLibrary() {
       const res = await fetch('./jobs-baseline.json');
       if (res.ok) {
         jobs = sanitizeData(await res.json());
-        await saveCachedJobs(jobs);           // warm the cache for next visit
+        await saveCachedJobs(jobs);
       }
     } catch (e) { console.error('Baseline load failed:', e); }
   }
 
   if (!jobs || jobs.length === 0) {
+    const statusEl = document.getElementById('fetch-status');
     if (statusEl) { statusEl.className = 'fetch-status error'; statusEl.textContent = '✗ Could not load jobs. Try Refresh Live Jobs.'; }
     return;
   }
 
   all_jobs = jobs;
-  const total = jobs.length;
 
-  // ── 2. Animated skeleton delay (2–5 s scaled to job count) ───────────────
+  // Update home badge immediately (visible on home tab)
+  const homeRolesBadge = document.getElementById('home-roles-badge');
+  if (homeRolesBadge) homeRolesBadge.textContent = jobs.length.toLocaleString() + ' roles loaded';
+  const liveBadge = document.getElementById('live-badge');
+  if (liveBadge) liveBadge.textContent = jobs.length;
+
+  // ── 2. If Live Roles tab is already active, animate now; otherwise defer ──
+  const liveRolesActive = document.getElementById('view-liveroles')?.classList.contains('active');
+  if (liveRolesActive) {
+    await playBaselineAnimation();
+  } else {
+    baselineAnimationPending = true;
+  }
+}
+
+export async function playBaselineAnimation() {
+  baselineAnimationPending = false;
+  const total      = all_jobs.length;
+  const container  = document.getElementById('roles-container');
+  const statusEl   = document.getElementById('fetch-status');
+
+  // Show skeletons while animating
+  if (container) container.innerHTML = skeletons(8);
+  if (statusEl) { statusEl.className = 'fetch-status loading'; statusEl.textContent = `Loading… 0 jobs`; }
+
+  // Count up over 2–5 s scaled to job count
   const duration =
     total < 4000  ? 2000 :
     total < 7000  ? 3000 :
     total < 10000 ? 4000 : 5000;
 
-  // Count up in the status bar while skeletons show
   const start = Date.now();
   await new Promise(resolve => {
     const tick = () => {
-      const elapsed = Date.now() - start;
-      const pct     = Math.min(100, elapsed / duration);
-      const shown   = Math.round(pct * total);
+      const pct   = Math.min(1, (Date.now() - start) / duration);
+      const shown = Math.round(pct * total);
       if (statusEl) statusEl.textContent = `Loading… ${shown.toLocaleString()} jobs`;
       if (pct >= 1) { resolve(); return; }
       requestAnimationFrame(tick);
@@ -410,12 +427,11 @@ export async function initCachedLibrary() {
     requestAnimationFrame(tick);
   });
 
-  // ── 3. Render real results ────────────────────────────────────────────────
+  // Render real results
   buildFilters();
   renderRoles();
 
   if (statusEl) { statusEl.className = 'fetch-status success'; statusEl.textContent = `✓ ${total.toLocaleString()} roles loaded`; }
-
   const sbRoles = document.getElementById('sb-roles');
   if (sbRoles) sbRoles.textContent = total;
   const liveCount = document.getElementById('live-roles-count');
@@ -424,15 +440,8 @@ export async function initCachedLibrary() {
   if (footer) footer.style.display = 'flex';
   const rCount = document.getElementById('r-count');
   if (rCount) rCount.textContent = total.toLocaleString() + ' roles';
-  const liveBadge = document.getElementById('live-badge');
-  if (liveBadge) liveBadge.textContent = total;
-  const homeRolesBadge = document.getElementById('home-roles-badge');
-  if (homeRolesBadge) homeRolesBadge.textContent = total.toLocaleString() + ' roles loaded';
-
   const btn = document.getElementById('btn-fetch');
   if (btn) {
     btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Refresh Live Jobs`;
   }
-
-  setTimeout(() => { if (progressDiv) progressDiv.style.display = 'none'; }, 2000);
 }
