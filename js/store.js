@@ -59,7 +59,7 @@ export async function loadJobsFromCloud() {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('rx-pipeline-db', 2);
+    const request = indexedDB.open('rx-pipeline-db', 3);
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
       // Delete old store on upgrade so stale cached data is cleared
