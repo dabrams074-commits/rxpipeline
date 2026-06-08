@@ -1096,7 +1096,7 @@ white-space: nowrap;
 /* PROGRESS LIST */
 #fetch-progress {
   position: sticky;
-  top: 0;
+  top: 64px;
   z-index: 20;
   background: var(--bg);
   padding-bottom: 4px;

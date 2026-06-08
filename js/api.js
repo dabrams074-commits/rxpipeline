@@ -411,62 +411,66 @@ export async function playBaselineAnimation() {
   if (container) container.innerHTML = skeletons(8);
   if (statusEl) { statusEl.className = 'fetch-status loading'; statusEl.textContent = `Loading… 0 jobs`; }
 
-  // ── Build per-company counts from loaded data ─────────────────────────────
+  // ── Build per-company counts — sort ASCENDING so small companies go first ──
   const companyCounts = {};
   for (const job of all_jobs) {
     companyCounts[job.company] = (companyCounts[job.company] || 0) + 1;
   }
   const companies = Object.entries(companyCounts)
-    .sort((a, b) => b[1] - a[1]); // sort by count descending
+    .sort((a, b) => a[1] - b[1]); // ascending: smallest first
 
-  // Render per-company progress rows (all at 0% to start)
+  const maxCount = companies[companies.length - 1]?.[1] || 1;
+  const total15  = 15000; // total animation duration ms
+  const stagger  = total15 * 0.5; // first half = stagger window (0–7.5 s)
+  const fillWin  = total15 * 0.5; // second half = max fill time
+
+  // Each company: startDelay = position fraction × stagger window
+  //               fillTime   = (count / maxCount) × fillWindow
+  // → small companies start early and fill almost instantly
+  // → large companies start late and fill slowly
+  const schedule = companies.map(([name, count], i) => ({
+    name,
+    count,
+    key: name.replace(/[\s&/]/g, '-'),
+    startDelay: (i / (companies.length - 1 || 1)) * stagger,
+    fillTime:   (count / maxCount) * fillWin
+  }));
+
+  // Render per-company progress rows (hidden until their start time)
   if (progressDiv && progressList) {
     progressDiv.style.display = 'block';
-    progressList.innerHTML = companies.map(([name, count]) => {
-      const key = name.replace(/[\s&/]/g, '-');
-      return `
-        <div class="progress-item" id="pi-${key}">
-          <div class="progress-label">${name}</div>
-          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-${key}" style="width:0%"></div></div>
-          <div class="progress-count" id="pc-${key}">0 / ${count}</div>
-        </div>`;
-    }).join('');
-  }
-
-  // ── Animate bars — each fills at a rate inversely proportional to job count ─
-  // Largest company takes the full 15 s; smaller ones finish proportionally earlier
-  const duration = 15000;
-  const maxCount = companies[0]?.[1] || 1; // companies sorted desc, so [0] is biggest
-  const sqrtMax  = Math.sqrt(maxCount);
-
-  // Disable CSS transition so JS animation runs cleanly
-  for (const [name] of companies) {
-    const pb = document.getElementById('pb-' + name.replace(/[\s&/]/g, '-'));
-    if (pb) pb.style.transition = 'none';
+    progressList.innerHTML = schedule.map(({ name, count, key }) => `
+      <div class="progress-item" id="pi-${key}" style="opacity:0">
+        <div class="progress-label">${name}</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-${key}" style="width:0%;transition:none"></div></div>
+        <div class="progress-count" id="pc-${key}">0 / ${count.toLocaleString()}</div>
+      </div>`).join('');
   }
 
   const start = Date.now();
   await new Promise(resolve => {
     const tick = () => {
-      const elapsed = Date.now() - start;
+      const elapsed    = Date.now() - start;
       let overallShown = 0;
 
-      for (const [name, count] of companies) {
-        const key          = name.replace(/[\s&/]/g, '-');
-        // Square-root scaling: small companies finish much faster than large ones
-        const compDuration = duration * (Math.sqrt(count) / sqrtMax);
-        const pct          = Math.min(1, elapsed / compDuration);
-        const done         = Math.round(pct * count);
-        overallShown      += done;
+      for (const { key, count, startDelay, fillTime } of schedule) {
+        const pi = document.getElementById('pi-' + key);
         const pb = document.getElementById('pb-' + key);
         const pc = document.getElementById('pc-' + key);
+        if (elapsed < startDelay) {
+          // Not started yet — keep hidden
+          continue;
+        }
+        if (pi && pi.style.opacity === '0') pi.style.opacity = '1'; // fade in
+        const pct  = Math.min(1, (elapsed - startDelay) / fillTime);
+        const done = Math.round(pct * count);
+        overallShown += done;
         if (pb) pb.style.width = Math.round(pct * 100) + '%';
         if (pc) pc.textContent = `${done.toLocaleString()} / ${count.toLocaleString()}`;
       }
 
       if (statusEl) statusEl.textContent = `Loading… ${overallShown.toLocaleString()} jobs`;
-
-      if (elapsed >= duration) { resolve(); return; }
+      if (elapsed >= total15) { resolve(); return; }
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
