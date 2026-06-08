@@ -433,8 +433,11 @@ export async function playBaselineAnimation() {
     }).join('');
   }
 
-  // ── Animate all bars filling up over 15 s ────────────────────────────────
+  // ── Animate bars — each fills at a rate inversely proportional to job count ─
+  // Largest company takes the full 15 s; smaller ones finish proportionally earlier
   const duration = 15000;
+  const maxCount = companies[0]?.[1] || 1; // companies sorted desc, so [0] is biggest
+  const sqrtMax  = Math.sqrt(maxCount);
 
   // Disable CSS transition so JS animation runs cleanly
   for (const [name] of companies) {
@@ -445,23 +448,25 @@ export async function playBaselineAnimation() {
   const start = Date.now();
   await new Promise(resolve => {
     const tick = () => {
-      const pct   = Math.min(1, (Date.now() - start) / duration);
-      const shown = Math.round(pct * total);
+      const elapsed = Date.now() - start;
+      let overallShown = 0;
 
-      // Update status bar count
-      if (statusEl) statusEl.textContent = `Loading… ${shown.toLocaleString()} jobs`;
-
-      // Update each company bar
       for (const [name, count] of companies) {
-        const key   = name.replace(/[\s&/]/g, '-');
-        const pb    = document.getElementById('pb-' + key);
-        const pc    = document.getElementById('pc-' + key);
-        const done  = Math.round(pct * count);
+        const key          = name.replace(/[\s&/]/g, '-');
+        // Square-root scaling: small companies finish much faster than large ones
+        const compDuration = duration * (Math.sqrt(count) / sqrtMax);
+        const pct          = Math.min(1, elapsed / compDuration);
+        const done         = Math.round(pct * count);
+        overallShown      += done;
+        const pb = document.getElementById('pb-' + key);
+        const pc = document.getElementById('pc-' + key);
         if (pb) pb.style.width = Math.round(pct * 100) + '%';
         if (pc) pc.textContent = `${done.toLocaleString()} / ${count.toLocaleString()}`;
       }
 
-      if (pct >= 1) { resolve(); return; }
+      if (statusEl) statusEl.textContent = `Loading… ${overallShown.toLocaleString()} jobs`;
+
+      if (elapsed >= duration) { resolve(); return; }
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -485,6 +490,5 @@ export async function playBaselineAnimation() {
     btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Refresh Live Jobs`;
   }
 
-  // Keep bars visible for 8 seconds so user can read them, then hide
-  setTimeout(() => { if (progressDiv) progressDiv.style.display = 'none'; }, 8000);
+  // Bars stay visible until user triggers a live refresh
 }

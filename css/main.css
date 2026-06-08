@@ -1094,6 +1094,13 @@ white-space: nowrap;
 .co-check-item.error .co-check-status { color: var(--danger); }
 
 /* PROGRESS LIST */
+#fetch-progress {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+  padding-bottom: 4px;
+}
 .progress-list {
 display: flex; flex-direction: column; gap: 6px;
 margin-bottom: 14px; padding: 14px 16px;
