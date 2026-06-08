@@ -370,7 +370,7 @@ export async function initCachedLibrary() {
 
   // ── 1. Try IndexedDB cache first, fall back to baseline JSON ──────────────
   await loadCachedJobs();
-  let jobs = cachedLiveJobs && cachedLiveJobs.length > 0 ? sanitizeData(cachedLiveJobs) : null;
+  let jobs = cachedLiveJobs && cachedLiveJobs.length >= 1000 ? sanitizeData(cachedLiveJobs) : null;
 
   if (!jobs || jobs.length === 0) {
     try {
