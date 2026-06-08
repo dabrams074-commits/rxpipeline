@@ -2059,7 +2059,6 @@ function renderNews() {
       <div class="news-card-body">
         <div class="news-card-meta"><span class="news-source">${esc(a.source)}</span><span class="news-date">${esc(a.date)}</span></div>
         <div class="news-card-title">${esc(a.title)}</div>
-        ${a.summary ? `<div class="news-card-summary">${esc(a.summary)}</div>` : ''}
       </div>
     </a>`;
 
