@@ -925,6 +925,15 @@ padding: 14px 0; border-top: 1px solid var(--border); letter-spacing: 0.3px;
 .community-empty { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); padding: 20px 0; text-align: center; }
 .wins-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
 .win-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.win-card.pinned, .post-card.pinned { border-color: var(--accent); }
+.win-card.mod-hidden, .post-card.mod-hidden { opacity: 0.45; border-style: dashed; }
+.pin-badge { font-size: 0.7rem; color: var(--accent); margin-bottom: 8px; }
+.mod-controls { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.mod-btn { display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.7rem; cursor: pointer; transition: all 0.15s; }
+.mod-btn:hover { background: var(--surface); color: var(--text); }
+.mod-btn.mod-pin.active { color: var(--accent); border-color: var(--accent); }
+.mod-btn.mod-hide.active { color: var(--accent2); border-color: var(--accent2); }
+.mod-btn.mod-delete:hover { color: var(--danger); border-color: var(--danger); }
 .win-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
 .win-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #0d0f14; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
 .win-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }

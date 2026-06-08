@@ -2212,6 +2212,43 @@ document.addEventListener('DOMContentLoaded', () => {
 // ══════════════════════════════════════════
 // COMMUNITY
 // ══════════════════════════════════════════
+function isMod() {
+  const email = getUser()?.email || '';
+  return email.toLowerCase().includes('dabrams074');
+}
+
+async function modAction(action, table, id, current) {
+  if (!isMod()) return;
+  if (action === 'delete') {
+    if (!confirm('Delete this post permanently?')) return;
+    await supabase.from(table).delete().eq('id', id);
+  } else if (action === 'hide') {
+    await supabase.from(table).update({ hidden: !current }).eq('id', id);
+  } else if (action === 'pin') {
+    await supabase.from(table).update({ pinned: !current }).eq('id', id);
+  }
+  table === 'job_wins' ? loadWins() : loadPosts();
+}
+
+function modControls(table, id, pinned, hidden) {
+  if (!isMod()) return '';
+  return `
+    <div class="mod-controls">
+      <button class="mod-btn mod-pin ${pinned ? 'active' : ''}" onclick="modAction('pin','${table}','${id}',${pinned})" title="${pinned ? 'Unpin' : 'Pin to top'}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="${pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        ${pinned ? 'Unpin' : 'Pin'}
+      </button>
+      <button class="mod-btn mod-hide ${hidden ? 'active' : ''}" onclick="modAction('hide','${table}','${id}',${hidden})" title="${hidden ? 'Unhide' : 'Hide'}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${hidden ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>' : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'}</svg>
+        ${hidden ? 'Unhide' : 'Hide'}
+      </button>
+      <button class="mod-btn mod-delete" onclick="modAction('delete','${table}','${id}',null)" title="Delete">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Delete
+      </button>
+    </div>`;
+}
+
 function communityUser() {
   const u = getUser();
   if (!u) return null;
@@ -2248,10 +2285,13 @@ async function loadWins() {
   const container = document.getElementById('wins-container');
   if (!container) return;
   container.innerHTML = '<div class="community-loading">Loading…</div>';
-  const { data, error } = await supabase.from('job_wins').select('*').order('created_at', { ascending: false }).limit(50);
+  const { data, error } = await supabase.from('job_wins').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(50);
   if (error || !data?.length) { container.innerHTML = '<div class="community-empty">No wins yet — be the first to post!</div>'; return; }
-  container.innerHTML = data.map(w => `
-    <div class="win-card">
+  const visible = isMod() ? data : data.filter(w => !w.hidden);
+  if (!visible.length) { container.innerHTML = '<div class="community-empty">No wins yet — be the first to post!</div>'; return; }
+  container.innerHTML = visible.map(w => `
+    <div class="win-card${w.pinned ? ' pinned' : ''}${w.hidden ? ' mod-hidden' : ''}">
+      ${w.pinned ? '<div class="pin-badge">📌 Pinned</div>' : ''}
       <div class="win-header">
         <div class="win-avatar">${w.display_name[0].toUpperCase()}</div>
         <div>
@@ -2261,6 +2301,7 @@ async function loadWins() {
         <div class="win-time">${timeAgo(w.created_at)}</div>
       </div>
       ${w.message ? `<div class="win-message">${esc(w.message)}</div>` : ''}
+      ${modControls('job_wins', w.id, w.pinned, w.hidden)}
     </div>`).join('');
 }
 
@@ -2285,12 +2326,15 @@ async function loadPosts() {
   if (!container) return;
   container.innerHTML = '<div class="community-loading">Loading…</div>';
   const category = document.getElementById('post-category-filter')?.value || '';
-  let query = supabase.from('community_posts').select('*').order('created_at', { ascending: false }).limit(100);
+  let query = supabase.from('community_posts').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(100);
   if (category) query = query.eq('category', category);
   const { data, error } = await query;
   if (error || !data?.length) { container.innerHTML = '<div class="community-empty">No posts yet — start the conversation!</div>'; return; }
-  container.innerHTML = data.map(p => `
-    <div class="post-card">
+  const visible = isMod() ? data : data.filter(p => !p.hidden);
+  if (!visible.length) { container.innerHTML = '<div class="community-empty">No posts yet — start the conversation!</div>'; return; }
+  container.innerHTML = visible.map(p => `
+    <div class="post-card${p.pinned ? ' pinned' : ''}${p.hidden ? ' mod-hidden' : ''}">
+      ${p.pinned ? '<div class="pin-badge">📌 Pinned</div>' : ''}
       <div class="post-header">
         <div class="win-avatar">${p.display_name[0].toUpperCase()}</div>
         <div>
@@ -2299,6 +2343,7 @@ async function loadPosts() {
         </div>
       </div>
       <div class="post-body">${esc(p.message)}</div>
+      ${modControls('community_posts', p.id, p.pinned, p.hidden)}
     </div>`).join('');
 }
 
@@ -2339,6 +2384,7 @@ window.submitWin  = submitWin;
 window.submitPost = submitPost;
 window.loadWins   = loadWins;
 window.loadPosts  = loadPosts;
+window.modAction  = modAction;
 window.renderNews = renderNews;
 
 window.tFilters = tFilters;
