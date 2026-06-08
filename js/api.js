@@ -390,34 +390,21 @@ export async function initCachedLibrary() {
   all_jobs = jobs;
   const total = jobs.length;
 
-  // ── 2. Fake animated progress (2–5 s scaled to job count) ────────────────
+  // ── 2. Animated skeleton delay (2–5 s scaled to job count) ───────────────
   const duration =
     total < 4000  ? 2000 :
     total < 7000  ? 3000 :
     total < 10000 ? 4000 : 5000;
 
-  if (progressDiv && progressList) {
-    progressDiv.style.display = 'block';
-    progressList.innerHTML = `
-      <div class="progress-item" id="pi-baseline">
-        <div class="progress-label">Cached jobs</div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-baseline" style="width:0%"></div></div>
-        <div class="progress-count" id="pc-baseline">0 / ${total}</div>
-      </div>`;
-  }
-
-  const pbEl = document.getElementById('pb-baseline');
-  const pcEl = document.getElementById('pc-baseline');
+  // Count up in the status bar while skeletons show
   const start = Date.now();
-
   await new Promise(resolve => {
     const tick = () => {
-      const pct   = Math.min(100, Math.round(((Date.now() - start) / duration) * 100));
-      const shown = Math.round((pct / 100) * total);
-      if (pbEl) pbEl.style.width = pct + '%';
-      if (pcEl) pcEl.textContent  = `${shown.toLocaleString()} / ${total.toLocaleString()}`;
+      const elapsed = Date.now() - start;
+      const pct     = Math.min(100, elapsed / duration);
+      const shown   = Math.round(pct * total);
       if (statusEl) statusEl.textContent = `Loading… ${shown.toLocaleString()} jobs`;
-      if (pct >= 100) { resolve(); return; }
+      if (pct >= 1) { resolve(); return; }
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
