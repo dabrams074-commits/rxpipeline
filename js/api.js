@@ -433,11 +433,14 @@ export async function playBaselineAnimation() {
     }).join('');
   }
 
-  // ── Animate all bars filling up over 2–5 s ────────────────────────────────
-  const duration =
-    total < 4000  ? 2000 :
-    total < 7000  ? 3000 :
-    total < 10000 ? 4000 : 5000;
+  // ── Animate all bars filling up over 15 s ────────────────────────────────
+  const duration = 15000;
+
+  // Disable CSS transition so JS animation runs cleanly
+  for (const [name] of companies) {
+    const pb = document.getElementById('pb-' + name.replace(/[\s&/]/g, '-'));
+    if (pb) pb.style.transition = 'none';
+  }
 
   const start = Date.now();
   await new Promise(resolve => {
