@@ -954,8 +954,8 @@ padding: 14px 0; border-top: 1px solid var(--border); letter-spacing: 0.3px;
 .news-card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .news-source { font-family: 'DM Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent2); }
 .news-date { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); }
-.news-card-title { font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 8px; }
-.news-card-summary { font-size: 0.76rem; color: var(--muted); line-height: 1.5; }
+.news-card-title { font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 8px; overflow-wrap: break-word; word-break: break-word; }
+.news-card-summary { font-size: 0.76rem; color: var(--muted); line-height: 1.5; overflow-wrap: break-word; word-break: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
 .news-filters { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
 .news-filters select { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 12px; font-size: 0.8rem; font-family: 'Instrument Sans', sans-serif; cursor: pointer; min-width: 180px; }
 .news-filters select:disabled { opacity: 0.45; cursor: not-allowed; }

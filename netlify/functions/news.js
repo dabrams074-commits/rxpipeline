@@ -128,7 +128,7 @@ function parseRSS(xml, max = 12) {
       url = (get(chunk, 'link') || get(chunk, 'guid')).trim();
     }
     const date = get(chunk, 'pubDate') || get(chunk, 'published') || get(chunk, 'updated') || get(chunk, 'dc:date');
-    const desc = clean(get(chunk, 'description') || get(chunk, 'summary') || get(chunk, 'content')).slice(0, 220);
+    const desc = clean(get(chunk, 'description') || get(chunk, 'summary') || get(chunk, 'content')).replace(/https?:\/\/\S+/g, '').replace(/\s+/g, ' ').trim().slice(0, 220);
     if (!title || !url) continue;
     const dateMs = date ? new Date(date).getTime() : 0;
 
