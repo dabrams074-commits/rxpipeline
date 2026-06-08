@@ -1,0 +1,41 @@
+name: Update Jobs Baseline
+
+on:
+  # Run every Sunday at 03:00 UTC
+  schedule:
+    - cron: '0 3 * * 0'
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build baseline
+        run: node scripts/build-baseline.js
+
+      - name: Check for changes
+        id: diff
+        run: |
+          git diff --stat public/jobs-baseline.json
+          echo "changed=$(git diff --name-only public/jobs-baseline.json | wc -l)" >> $GITHUB_OUTPUT
+
+      - name: Commit and push updated baseline
+        if: steps.diff.outputs.changed != '0'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/jobs-baseline.json
+          git commit -m "chore: update jobs-baseline.json [$(date -u +%Y-%m-%d)]"
+          git push

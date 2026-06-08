@@ -359,59 +359,93 @@ export async function forceRefreshBaseline() {
 }
 
 export async function initCachedLibrary() {
-  const updateUI = (timeAgo) => {
-    if (all_jobs.length > 1000) {
-      console.warn(`Warning: all_jobs array contains ${all_jobs.length} items. We might need to trim the baseline file.`);
-    }
-    if (all_jobs.length > 0) {
-      const statusEl = document.getElementById('fetch-status');
-      if (statusEl) {
-        statusEl.className = 'fetch-status success';
-        statusEl.textContent = `✓ ${all_jobs.length} roles loaded`;
-      }
-      
-      const rCount = document.getElementById('r-count');
-      if (rCount) rCount.textContent = all_jobs.length + ' roles';
-      
-      const liveBadge = document.getElementById('live-badge');
-      if (liveBadge) liveBadge.textContent = all_jobs.length;
+  const container  = document.getElementById('roles-container');
+  const statusEl   = document.getElementById('fetch-status');
+  const progressDiv = document.getElementById('fetch-progress');
+  const progressList = document.getElementById('progress-list');
 
-      const homeRolesBadge = document.getElementById('home-roles-badge');
-      if (homeRolesBadge) homeRolesBadge.textContent = all_jobs.length + ' roles loaded';
+  // Show skeletons right away so the page feels instant
+  if (container) container.innerHTML = skeletons(8);
+  if (statusEl) { statusEl.className = 'fetch-status loading'; statusEl.textContent = 'Loading jobs…'; }
 
-      buildFilters();
-      renderRoles();
-      
-      const footer = document.getElementById('roles-footer');
-      if (footer) footer.style.display = 'flex';
-      
-      const btn = document.getElementById('btn-fetch');
-      if (btn) {
-        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="fetch-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Refresh Live Jobs`;
-      }
-    }
-  };
-
+  // ── 1. Try IndexedDB cache first, fall back to baseline JSON ──────────────
   await loadCachedJobs();
-  let localCachedJobs = cachedLiveJobs;
-  if (localCachedJobs && localCachedJobs.length > 0) {
-    localCachedJobs = sanitizeData(localCachedJobs);
+  let jobs = cachedLiveJobs && cachedLiveJobs.length > 0 ? sanitizeData(cachedLiveJobs) : null;
+
+  if (!jobs || jobs.length === 0) {
+    try {
+      const res = await fetch('./jobs-baseline.json');
+      if (res.ok) {
+        jobs = sanitizeData(await res.json());
+        await saveCachedJobs(jobs);           // warm the cache for next visit
+      }
+    } catch (e) { console.error('Baseline load failed:', e); }
   }
 
-  if (!localCachedJobs || localCachedJobs.length === 0) {
-    await forceRefreshBaseline();
-  } else {
-    all_jobs = localCachedJobs;
-    let timeAgo = '';
-    if (lastFetchTime) {
-      const mins = Math.floor((Date.now() - new Date(lastFetchTime).getTime())/60000);
-      if (mins < 60) timeAgo = `${mins}m ago`;
-      else {
-        const hrs = Math.floor(mins/60);
-        if (hrs < 24) timeAgo = `${hrs} hours ago`;
-        else timeAgo = `${Math.floor(hrs/24)} days ago`;
-      }
-    }
-    updateUI(timeAgo);
+  if (!jobs || jobs.length === 0) {
+    if (statusEl) { statusEl.className = 'fetch-status error'; statusEl.textContent = '✗ Could not load jobs. Try Refresh Live Jobs.'; }
+    return;
   }
+
+  all_jobs = jobs;
+  const total = jobs.length;
+
+  // ── 2. Fake animated progress (2–5 s scaled to job count) ────────────────
+  const duration =
+    total < 4000  ? 2000 :
+    total < 7000  ? 3000 :
+    total < 10000 ? 4000 : 5000;
+
+  if (progressDiv && progressList) {
+    progressDiv.style.display = 'block';
+    progressList.innerHTML = `
+      <div class="progress-item" id="pi-baseline">
+        <div class="progress-label">Cached jobs</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-baseline" style="width:0%"></div></div>
+        <div class="progress-count" id="pc-baseline">0 / ${total}</div>
+      </div>`;
+  }
+
+  const pbEl = document.getElementById('pb-baseline');
+  const pcEl = document.getElementById('pc-baseline');
+  const start = Date.now();
+
+  await new Promise(resolve => {
+    const tick = () => {
+      const pct   = Math.min(100, Math.round(((Date.now() - start) / duration) * 100));
+      const shown = Math.round((pct / 100) * total);
+      if (pbEl) pbEl.style.width = pct + '%';
+      if (pcEl) pcEl.textContent  = `${shown.toLocaleString()} / ${total.toLocaleString()}`;
+      if (statusEl) statusEl.textContent = `Loading… ${shown.toLocaleString()} jobs`;
+      if (pct >= 100) { resolve(); return; }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+
+  // ── 3. Render real results ────────────────────────────────────────────────
+  buildFilters();
+  renderRoles();
+
+  if (statusEl) { statusEl.className = 'fetch-status success'; statusEl.textContent = `✓ ${total.toLocaleString()} roles loaded`; }
+
+  const sbRoles = document.getElementById('sb-roles');
+  if (sbRoles) sbRoles.textContent = total;
+  const liveCount = document.getElementById('live-roles-count');
+  if (liveCount) liveCount.textContent = total;
+  const footer = document.getElementById('roles-footer');
+  if (footer) footer.style.display = 'flex';
+  const rCount = document.getElementById('r-count');
+  if (rCount) rCount.textContent = total.toLocaleString() + ' roles';
+  const liveBadge = document.getElementById('live-badge');
+  if (liveBadge) liveBadge.textContent = total;
+  const homeRolesBadge = document.getElementById('home-roles-badge');
+  if (homeRolesBadge) homeRolesBadge.textContent = total.toLocaleString() + ' roles loaded';
+
+  const btn = document.getElementById('btn-fetch');
+  if (btn) {
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Refresh Live Jobs`;
+  }
+
+  setTimeout(() => { if (progressDiv) progressDiv.style.display = 'none'; }, 2000);
 }
