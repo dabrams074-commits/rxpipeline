@@ -436,15 +436,22 @@ export async function playBaselineAnimation() {
     fillTime:   (count / maxCount) * fillWin
   }));
 
-  // Render per-company progress rows (hidden until their start time)
+  // Render per-company progress rows with a collapse toggle
   if (progressDiv && progressList) {
     progressDiv.style.display = 'block';
-    progressList.innerHTML = schedule.map(({ name, count, key }) => `
-      <div class="progress-item" id="pi-${key}" style="opacity:0">
-        <div class="progress-label">${name}</div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-${key}" style="width:0%;transition:none"></div></div>
-        <div class="progress-count" id="pc-${key}">0 / ${count.toLocaleString()}</div>
-      </div>`).join('');
+    progressDiv.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 4px 4px;cursor:pointer" onclick="const pl=document.getElementById('progress-list');pl.style.display=pl.style.display==='none'?'flex':'none';this.querySelector('.pg-chevron').style.transform=pl.style.display==='none'?'rotate(-90deg)':''">
+        <span style="font-size:0.72rem;color:var(--muted);font-family:'DM Mono',monospace">Company breakdown</span>
+        <svg class="pg-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" style="transition:transform 0.2s"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="progress-list" id="progress-list" style="display:flex;flex-direction:column;gap:6px;padding:4px 16px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+        ${schedule.map(({ name, count, key }) => `
+          <div class="progress-item" id="pi-${key}" style="opacity:0">
+            <div class="progress-label">${name}</div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-${key}" style="width:0%;transition:none"></div></div>
+            <div class="progress-count" id="pc-${key}">0 / ${count.toLocaleString()}</div>
+          </div>`).join('')}
+      </div>`;
   }
 
   const start = Date.now();
