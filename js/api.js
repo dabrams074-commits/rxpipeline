@@ -401,15 +401,39 @@ export async function initCachedLibrary() {
 
 export async function playBaselineAnimation() {
   baselineAnimationPending = false;
-  const total      = all_jobs.length;
-  const container  = document.getElementById('roles-container');
-  const statusEl   = document.getElementById('fetch-status');
+  const total       = all_jobs.length;
+  const container   = document.getElementById('roles-container');
+  const statusEl    = document.getElementById('fetch-status');
+  const progressDiv = document.getElementById('fetch-progress');
+  const progressList = document.getElementById('progress-list');
 
   // Show skeletons while animating
   if (container) container.innerHTML = skeletons(8);
   if (statusEl) { statusEl.className = 'fetch-status loading'; statusEl.textContent = `Loading… 0 jobs`; }
 
-  // Count up over 2–5 s scaled to job count
+  // ── Build per-company counts from loaded data ─────────────────────────────
+  const companyCounts = {};
+  for (const job of all_jobs) {
+    companyCounts[job.company] = (companyCounts[job.company] || 0) + 1;
+  }
+  const companies = Object.entries(companyCounts)
+    .sort((a, b) => b[1] - a[1]); // sort by count descending
+
+  // Render per-company progress rows (all at 0% to start)
+  if (progressDiv && progressList) {
+    progressDiv.style.display = 'block';
+    progressList.innerHTML = companies.map(([name, count]) => {
+      const key = name.replace(/[\s&/]/g, '-');
+      return `
+        <div class="progress-item" id="pi-${key}">
+          <div class="progress-label">${name}</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-${key}" style="width:0%"></div></div>
+          <div class="progress-count" id="pc-${key}">0 / ${count}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Animate all bars filling up over 2–5 s ────────────────────────────────
   const duration =
     total < 4000  ? 2000 :
     total < 7000  ? 3000 :
@@ -420,14 +444,27 @@ export async function playBaselineAnimation() {
     const tick = () => {
       const pct   = Math.min(1, (Date.now() - start) / duration);
       const shown = Math.round(pct * total);
+
+      // Update status bar count
       if (statusEl) statusEl.textContent = `Loading… ${shown.toLocaleString()} jobs`;
+
+      // Update each company bar
+      for (const [name, count] of companies) {
+        const key   = name.replace(/[\s&/]/g, '-');
+        const pb    = document.getElementById('pb-' + key);
+        const pc    = document.getElementById('pc-' + key);
+        const done  = Math.round(pct * count);
+        if (pb) pb.style.width = Math.round(pct * 100) + '%';
+        if (pc) pc.textContent = `${done.toLocaleString()} / ${count.toLocaleString()}`;
+      }
+
       if (pct >= 1) { resolve(); return; }
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   });
 
-  // Render real results
+  // ── Render real results ───────────────────────────────────────────────────
   buildFilters();
   renderRoles();
 
@@ -444,4 +481,7 @@ export async function playBaselineAnimation() {
   if (btn) {
     btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Refresh Live Jobs`;
   }
+
+  // Keep bars visible for 8 seconds so user can read them, then hide
+  setTimeout(() => { if (progressDiv) progressDiv.style.display = 'none'; }, 8000);
 }
