@@ -149,15 +149,6 @@ export async function fetchAllCompanyJobs(){
   container.innerHTML=skeletons(8); progressDiv.style.display='block'; all_jobs = [];
 
   let filtersBuilt = false;
-  const liveRefresh = setInterval(() => {
-    const n = all_jobs.length;
-    const done = activeQueues.filter(q => q.done).length;
-    const total = activeQueues.length;
-    const sbRoles = document.getElementById('sb-roles');
-    if (sbRoles && n > 0) sbRoles.textContent = n;
-    statusEl.textContent = `⏳ Fetching live from source… ${done} of ${total} companies complete · ${n.toLocaleString()} jobs found — please wait`;
-    if (n > 0 && !filtersBuilt) { buildFilters(); renderRoles(); filtersBuilt = true; }
-  }, 1000);
 
   document.getElementById('progress-list').innerHTML = selected.map(c=>`
     <div class="progress-item" id="pi-${c.name.replace(/\s/g,'-')}">
@@ -179,6 +170,16 @@ export async function fetchAllCompanyJobs(){
     if(q.coStatusEl) q.coStatusEl.textContent = 'fetching...';
     if(q.coCheckEl) q.coCheckEl.classList.add('loading');
   });
+
+  const liveRefresh = setInterval(() => {
+    const n = all_jobs.length;
+    const done = activeQueues.filter(q => q.done).length;
+    const total = activeQueues.length;
+    const sbRoles = document.getElementById('sb-roles');
+    if (sbRoles && n > 0) sbRoles.textContent = n;
+    statusEl.textContent = `⏳ ${done} of ${total} companies complete · ${n.toLocaleString()} jobs found — fetching live, please wait`;
+    if (n > 0 && !filtersBuilt) { buildFilters(); renderRoles(); filtersBuilt = true; }
+  }, 1000);
 
   async function fetchQueue(q, index) {
     await delay(index * 200);
