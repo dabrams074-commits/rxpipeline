@@ -195,5 +195,9 @@ async function fetchGreenhouse(c) {
   console.log(`✓ After dedup: ${deduped.length} jobs`);
 
   fs.writeFileSync(OUT_FILE, JSON.stringify(deduped, null, 2), 'utf8');
-  console.log(`✓ Written to ${OUT_FILE}\n`);
+  console.log(`✓ Written to ${OUT_FILE}`);
+
+  const metaFile = path.join(__dirname, '..', 'public', 'jobs-baseline-meta.json');
+  fs.writeFileSync(metaFile, JSON.stringify({ generatedAt: new Date().toISOString() }), 'utf8');
+  console.log(`✓ Written to ${metaFile}\n`);
 })();

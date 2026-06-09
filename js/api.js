@@ -362,18 +362,27 @@ export async function forceRefreshBaseline() {
 
 // Set to true once baseline data is loaded but animation hasn't run yet
 export let baselineAnimationPending = false;
+let _pendingBaselineDate = null;
 
 export async function initCachedLibrary() {
   // ── 1. Load data silently in the background ───────────────────────────────
   await loadCachedJobs();
   let jobs = cachedLiveJobs && cachedLiveJobs.length >= 1000 ? sanitizeData(cachedLiveJobs) : null;
 
+  let baselineDate = null;
   if (!jobs || jobs.length === 0) {
     try {
-      const res = await fetch('./jobs-baseline.json');
-      if (res.ok) {
-        jobs = sanitizeData(await res.json());
+      const [dataRes, metaRes] = await Promise.all([
+        fetch('./jobs-baseline.json'),
+        fetch('./jobs-baseline-meta.json').catch(() => null)
+      ]);
+      if (dataRes.ok) {
+        jobs = sanitizeData(await dataRes.json());
         await saveCachedJobs(jobs);
+      }
+      if (metaRes?.ok) {
+        const meta = await metaRes.json();
+        baselineDate = meta.generatedAt || null;
       }
     } catch (e) { console.error('Baseline load failed:', e); }
   }
@@ -395,13 +404,15 @@ export async function initCachedLibrary() {
   // ── 2. If Live Roles tab is already active, animate now; otherwise defer ──
   const liveRolesActive = document.getElementById('view-liveroles')?.classList.contains('active');
   if (liveRolesActive) {
-    await playBaselineAnimation();
+    await playBaselineAnimation(baselineDate);
   } else {
+    _pendingBaselineDate = baselineDate;
     baselineAnimationPending = true;
   }
 }
 
-export async function playBaselineAnimation() {
+export async function playBaselineAnimation(baselineDate) {
+  if (baselineDate === undefined) { baselineDate = _pendingBaselineDate; }
   baselineAnimationPending = false;
   const total       = all_jobs.length;
   const container   = document.getElementById('roles-container');
@@ -489,10 +500,12 @@ export async function playBaselineAnimation() {
   buildFilters();
   renderRoles();
 
-  const loadedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const displayDate = baselineDate
+    ? new Date(baselineDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   if (statusEl) {
     statusEl.className = 'fetch-status success';
-    statusEl.innerHTML = `✓ ${total.toLocaleString()} roles loaded &nbsp;·&nbsp; <span style="color:var(--muted);font-size:0.8em">Cached ${loadedDate} &nbsp;·&nbsp; Select companies &amp; click <strong>Refresh Live Jobs</strong> for real-time listings</span>`;
+    statusEl.innerHTML = `✓ ${total.toLocaleString()} roles loaded &nbsp;·&nbsp; <span style="color:var(--muted);font-size:0.8em">Cached ${displayDate} &nbsp;·&nbsp; Select companies &amp; click <strong>Refresh Live Jobs</strong> for real-time listings</span>`;
   }
   const sbRoles = document.getElementById('sb-roles');
   if (sbRoles) sbRoles.textContent = total;
