@@ -409,6 +409,18 @@
       </div>
     </div>
 
+    <div style="margin:8px 0 4px;font-size:0.75rem;color:var(--text2)">
+      <span onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;">⚠️ Some companies not included — why?</span>
+      <div style="display:none;margin-top:6px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;line-height:1.6;">
+        The following companies use ATS platforms that don't expose a public API, so we're unable to pull their listings directly. We recommend checking their career pages manually.<br><br>
+        <strong>iCIMS (no public API):</strong> Bayer, Boehringer Ingelheim, Eisai, ICON plc, Syneos Health<br>
+        <strong>Taleo / Oracle (no public API):</strong> Daiichi Sankyo, UCB, Astellas<br>
+        <strong>SAP SuccessFactors (no public API):</strong> Novo Nordisk<br>
+        <strong>Other unsupported platforms:</strong> Ionis Pharmaceuticals (UKG), Catalent (Phenom), Sun Pharma (TalentBrew)<br>
+        <strong>Bot protection blocks server requests:</strong> Halozyme
+      </div>
+    </div>
+
     <div class="lib-toolbar" id="roles-filters" style="display:none">
       <div class="search-wrap">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
