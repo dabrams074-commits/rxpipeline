@@ -4,7 +4,7 @@ import {
   setJobs, setEditId, setPanelJobId, resetTFilters
 } from './store.js';
 
-import { initAuth, signInWithGoogle, signInWithLinkedIn, signInWithApple, signOut, startCheckout, manageSubscription, toggleSignUp, emailAuth, supabase } from './auth.js';
+import { initAuth, signInWithGoogle, signInWithLinkedIn, signInWithApple, signOut, startCheckout, manageSubscription, toggleSignUp, emailAuth, supabase, getUser } from './auth.js';
 window.rxSignInWithGoogle      = signInWithGoogle;
 window.rxSignInWithLinkedIn    = signInWithLinkedIn;
 window.rxSignInWithApple       = signInWithApple;
