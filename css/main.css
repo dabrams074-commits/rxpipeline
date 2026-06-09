@@ -1108,7 +1108,7 @@ white-space: nowrap;
   padding-bottom: 4px;
 }
 #fetch-progress .progress-list {
-  max-height: 180px;
+  max-height: 420px;
   overflow-y: auto;
 }
 .progress-list {
