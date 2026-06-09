@@ -2215,7 +2215,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ══════════════════════════════════════════
 function isMod() {
   const email = (getUser()?.email || '').toLowerCase();
-  console.log('[isMod] email:', email);
   return email.includes('dabrams074');
 }
 
