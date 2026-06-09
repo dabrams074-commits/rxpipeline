@@ -177,7 +177,7 @@ export async function fetchAllCompanyJobs(){
     const total = activeQueues.length;
     const sbRoles = document.getElementById('sb-roles');
     if (sbRoles && n > 0) sbRoles.textContent = n;
-    statusEl.textContent = `⏳ ${done} of ${total} companies complete · ${n.toLocaleString()} jobs found — fetching live, please wait`;
+    statusEl.textContent = `⏳ ${done} of ${total} companies complete · ${n.toLocaleString()} jobs found — pulling live from source, please be patient`;
     if (n > 0 && !filtersBuilt) { buildFilters(); renderRoles(); filtersBuilt = true; }
   }, 1000);
 
