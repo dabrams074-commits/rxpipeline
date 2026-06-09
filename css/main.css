@@ -1111,6 +1111,15 @@ white-space: nowrap;
   max-height: 420px;
   overflow-y: auto;
 }
+#companyModalOverlay {
+  opacity: 1;
+  pointer-events: none;
+  display: none;
+}
+#companyModalOverlay.open {
+  display: flex;
+  pointer-events: all;
+}
 .progress-list {
 display: flex; flex-direction: column; gap: 6px;
 margin-bottom: 14px; padding: 14px 16px;
