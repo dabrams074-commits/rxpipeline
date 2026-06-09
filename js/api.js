@@ -151,12 +151,12 @@ export async function fetchAllCompanyJobs(){
   let filtersBuilt = false;
   const liveRefresh = setInterval(() => {
     const n = all_jobs.length;
-    if (n > 0) {
-      statusEl.textContent = `Loading… ${n} jobs so far`;
-      const sbRoles = document.getElementById('sb-roles');
-      if (sbRoles) sbRoles.textContent = n;
-      if (!filtersBuilt) { buildFilters(); renderRoles(); filtersBuilt = true; }
-    }
+    const done = activeQueues.filter(q => q.done).length;
+    const total = activeQueues.length;
+    const sbRoles = document.getElementById('sb-roles');
+    if (sbRoles && n > 0) sbRoles.textContent = n;
+    statusEl.textContent = `⏳ Fetching live from source… ${done} of ${total} companies complete · ${n.toLocaleString()} jobs found — please wait`;
+    if (n > 0 && !filtersBuilt) { buildFilters(); renderRoles(); filtersBuilt = true; }
   }, 1000);
 
   document.getElementById('progress-list').innerHTML = selected.map(c=>`
