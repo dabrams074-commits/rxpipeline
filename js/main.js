@@ -13,6 +13,7 @@ window.rxStartCheckout         = startCheckout;
 window.rxManageSubscription    = manageSubscription;
 window.rxToggleSignUp          = toggleSignUp;
 window.rxEmailAuth             = emailAuth;
+window.rxGetUser               = getUser;
 
 import {
   FETCH_COMPANIES, all_jobs, pfizer_filtered, addedRoleSet, selectedCompanies,
@@ -2213,8 +2214,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // COMMUNITY
 // ══════════════════════════════════════════
 function isMod() {
-  const email = getUser()?.email || '';
-  return email.toLowerCase().includes('dabrams074');
+  const email = (getUser()?.email || '').toLowerCase();
+  console.log('[isMod] email:', email);
+  return email.includes('dabrams074');
 }
 
 async function modAction(action, table, id, current) {
