@@ -402,7 +402,7 @@ function deleteJob(id) {
 // COMPANY LIBRARY / INTELLIGENCE
 // ══════════════════════════════════════════
 let starredCos = new Set(JSON.parse(localStorage.getItem('rxp-starred-cos') || '[]'));
-let libView = 'grid';
+let libView = 'list';
 
 export function toggleStar(companyName) {
   if (starredCos.has(companyName)) starredCos.delete(companyName);
