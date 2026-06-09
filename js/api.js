@@ -286,7 +286,9 @@ export async function fetchAllCompanyJobs(){
   const successCount = activeQueues.filter(q => q.jobCount > 0).length;
   const count = all_jobs.length; 
   statusEl.className = count>0 ? 'fetch-status success' : 'fetch-status error';
-  statusEl.textContent = count>0 ? `✓ ${count} jobs loaded from ${successCount} companies · ${new Date().toLocaleTimeString()}` : '✗ Fetch failed. Ensure _redirects file is active on your host.';
+  const liveDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const liveTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  statusEl.innerHTML = count>0 ? `✓ ${count.toLocaleString()} roles loaded &nbsp;·&nbsp; <span style="color:var(--muted);font-size:0.8em">Live data as of ${liveDate} ${liveTime} from ${successCount} companies</span>` : '✗ Fetch failed. Ensure _redirects file is active on your host.';
 
   if(count>0){ 
     buildFilters(); renderRoles(); 
@@ -487,7 +489,11 @@ export async function playBaselineAnimation() {
   buildFilters();
   renderRoles();
 
-  if (statusEl) { statusEl.className = 'fetch-status success'; statusEl.textContent = `✓ ${total.toLocaleString()} roles loaded`; }
+  const loadedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  if (statusEl) {
+    statusEl.className = 'fetch-status success';
+    statusEl.innerHTML = `✓ ${total.toLocaleString()} roles loaded &nbsp;·&nbsp; <span style="color:var(--muted);font-size:0.8em">Cached ${loadedDate} &nbsp;·&nbsp; Select companies &amp; click <strong>Refresh Live Jobs</strong> for real-time listings</span>`;
+  }
   const sbRoles = document.getElementById('sb-roles');
   if (sbRoles) sbRoles.textContent = total;
   const liveCount = document.getElementById('live-roles-count');
