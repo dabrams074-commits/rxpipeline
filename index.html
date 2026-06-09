@@ -387,20 +387,6 @@
       <div class="lib-sub">Real-time job listings from <strong id="live-roles-count">35</strong> pharma companies · Workday, Greenhouse &amp; Workable ATS</div>
     </div>
 
-    <div class="company-selector-wrap">
-      <div class="cs-header" onclick="const cb=document.getElementById('company-checkboxes');const open=cb.style.display!=='none';cb.style.display=open?'none':'grid';this.querySelector('.cs-chevron').style.transform=open?'rotate(-90deg)':'';" style="cursor:pointer">
-        <div class="cs-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Select Companies to Fetch
-          <svg class="cs-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:6px;transition:transform 0.2s;transform:rotate(-90deg)"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="cs-actions" onclick="event.stopPropagation()">
-          <button class="cs-action-btn" onclick="selectAllCompanies()">Select All</button>
-          <button class="cs-action-btn" onclick="selectNoneCompanies()">Clear</button>
-        </div>
-      </div>
-      <div class="company-checkboxes" id="company-checkboxes" style="display:none"></div>
-    </div>
 
 
     <div id="fetch-progress" style="display:none">
@@ -415,6 +401,10 @@
         <button class="btn-export" onclick="forceRefreshBaseline()" title="Restore from Server" style="margin-right:8px;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 21 12 16 7 21"/><line x1="12" y1="16" x2="12" y2="3"/></svg>
           LOAD ALL
+        </button>
+        <button class="btn-export" onclick="openCompanyModal()" style="margin-right:8px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Select Companies
         </button>
         <button class="btn-fetch" id="btn-fetch" onclick="fetchAllCompanyJobs()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="fetch-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
@@ -946,5 +936,20 @@
 <!-- ── End Auth Overlay ─────────────────────────────────────────────────── -->
 
 <script type="module" src="./js/main.js"></script>
+
+<!-- ── Company Picker Modal ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="companyModalOverlay" onclick="if(event.target===this)closeCompanyModal()" style="display:none">
+  <div class="modal" style="max-width:680px;width:90%">
+    <div class="modal-title">Select Companies to Fetch</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="cs-action-btn" onclick="selectAllCompanies()">Select All</button>
+      <button class="cs-action-btn" onclick="selectNoneCompanies()">Clear All</button>
+    </div>
+    <div class="company-checkboxes" id="company-checkboxes" style="max-height:55vh;overflow-y:auto"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-cancel" onclick="closeCompanyModal()">Done</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

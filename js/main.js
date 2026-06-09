@@ -2373,6 +2373,8 @@ window.toggleCoSelect = toggleCoSelect;
 window.selectAllCompanies = selectAllCompanies;
 window.selectNoneCompanies = selectNoneCompanies;
 window.fetchAllCompanyJobs = fetchAllCompanyJobs;
+window.openCompanyModal  = () => { document.getElementById('companyModalOverlay').style.display='flex'; };
+window.closeCompanyModal = () => { document.getElementById('companyModalOverlay').style.display='none'; };
 window.clearRoleFilters = clearRoleFilters;
 window.renderRoles = renderRoles;
 window.exportRolesCSV = exportRolesCSV;
