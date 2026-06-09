@@ -369,20 +369,22 @@ export async function initCachedLibrary() {
   await loadCachedJobs();
   let jobs = cachedLiveJobs && cachedLiveJobs.length >= 1000 ? sanitizeData(cachedLiveJobs) : null;
 
+  // Always fetch the meta file so we show the real baseline build date
   let baselineDate = null;
+  try {
+    const metaRes = await fetch('./jobs-baseline-meta.json');
+    if (metaRes.ok) {
+      const meta = await metaRes.json();
+      baselineDate = meta.generatedAt || null;
+    }
+  } catch (e) { /* silent */ }
+
   if (!jobs || jobs.length === 0) {
     try {
-      const [dataRes, metaRes] = await Promise.all([
-        fetch('./jobs-baseline.json'),
-        fetch('./jobs-baseline-meta.json').catch(() => null)
-      ]);
+      const dataRes = await fetch('./jobs-baseline.json');
       if (dataRes.ok) {
         jobs = sanitizeData(await dataRes.json());
         await saveCachedJobs(jobs);
-      }
-      if (metaRes?.ok) {
-        const meta = await metaRes.json();
-        baselineDate = meta.generatedAt || null;
       }
     } catch (e) { console.error('Baseline load failed:', e); }
   }
