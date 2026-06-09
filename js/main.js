@@ -2226,6 +2226,32 @@ async function modAction(action, table, id, current) {
     await supabase.from(table).update({ hidden: !current }).eq('id', id);
   } else if (action === 'pin') {
     await supabase.from(table).update({ pinned: !current }).eq('id', id);
+  } else if (action === 'edit') {
+    const card = document.querySelector(`[data-post-id="${id}"]`);
+    if (!card) return;
+    const bodyEl = card.querySelector('.post-body');
+    const current = bodyEl?.innerText || '';
+    const textarea = document.createElement('textarea');
+    textarea.value = current;
+    textarea.style.cssText = 'width:100%;min-height:120px;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:0.85rem;font-family:inherit;resize:vertical;margin-top:8px;';
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = 'Save';
+    saveBtn.className = 'mod-btn mod-pin active';
+    saveBtn.style.marginTop = '6px';
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.className = 'mod-btn';
+    cancelBtn.style.marginTop = '6px';
+    bodyEl.replaceWith(textarea);
+    textarea.after(saveBtn, cancelBtn);
+    saveBtn.onclick = async () => {
+      const newText = textarea.value.trim();
+      if (!newText) return;
+      await supabase.from(table).update({ message: newText }).eq('id', id);
+      table === 'job_wins' ? loadWins() : loadPosts();
+    };
+    cancelBtn.onclick = () => { table === 'job_wins' ? loadWins() : loadPosts(); };
+    return;
   }
   table === 'job_wins' ? loadWins() : loadPosts();
 }
@@ -2241,6 +2267,10 @@ function modControls(table, id, pinned, hidden) {
       <button class="mod-btn mod-hide ${hidden ? 'active' : ''}" onclick="modAction('hide','${table}','${id}',${hidden})" title="${hidden ? 'Unhide' : 'Hide'}">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${hidden ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>' : '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'}</svg>
         ${hidden ? 'Unhide' : 'Hide'}
+      </button>
+      <button class="mod-btn" onclick="modAction('edit','${table}','${id}',null)" title="Edit">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
       </button>
       <button class="mod-btn mod-delete" onclick="modAction('delete','${table}','${id}',null)" title="Delete">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
@@ -2333,7 +2363,7 @@ async function loadPosts() {
   const visible = isMod() ? data : data.filter(p => !p.hidden);
   if (!visible.length) { container.innerHTML = '<div class="community-empty">No posts yet — start the conversation!</div>'; return; }
   container.innerHTML = visible.map(p => `
-    <div class="post-card${p.pinned ? ' pinned' : ''}${p.hidden ? ' mod-hidden' : ''}">
+    <div class="post-card${p.pinned ? ' pinned' : ''}${p.hidden ? ' mod-hidden' : ''}" data-post-id="${p.id}">
       ${p.pinned ? '<div class="pin-badge">📌 Pinned</div>' : ''}
       <div class="post-header">
         <div class="win-avatar">${p.display_name[0].toUpperCase()}</div>
