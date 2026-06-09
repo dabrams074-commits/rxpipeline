@@ -22,6 +22,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let _currentUser  = null;
 let _onReadyCalled = false;
+let _isTrialUser = false;
 
 export const getUser = () => _currentUser;
 
@@ -76,6 +77,7 @@ async function _checkAndGate(onReady) {
         onReady?.();
       }
       if (reason === 'trial' && daysLeft != null) {
+        _isTrialUser = true;
         _showTrialBanner(daysLeft);
       }
     } else {
@@ -172,6 +174,8 @@ export async function signOut() {
 
 export async function manageSubscription() {
   if (!_currentUser) return;
+  // Trial users go to checkout instead of billing portal
+  if (_isTrialUser) { return startCheckout(); }
   const btn = document.getElementById('btn-manage-sub');
   if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
 
