@@ -989,7 +989,7 @@ border: 1px solid rgba(124,111,255,0.2);
 padding: 4px 10px; border-radius: 5px; letter-spacing: 0.3px;
 }
 .fetch-status {
-font-family: 'DM Mono', monospace; font-size: 0.7rem;
+font-family: 'DM Mono', monospace; font-size: 0.85rem;
 color: var(--muted); letter-spacing: 0.3px;
 }
 .fetch-status.loading { color: var(--warn); }
