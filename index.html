@@ -385,6 +385,7 @@
     <div class="lib-header">
       <div class="lib-title">Live Roles</div>
       <div class="lib-sub">Real-time job listings from <strong id="live-roles-count">60</strong> pharma companies · Workday, Greenhouse, Lever &amp; Workable ATS</div>
+      <button id="reclassify-admin-btn" class="btn-export" style="display:none" onclick="window.openReclassifyAdmin()">🏷️ Tag Suggestions <span id="reclassify-admin-badge" class="tab-badge" style="display:none"></span></button>
     </div>
 
 
@@ -963,6 +964,17 @@
 <script type="module" src="./js/main.js"></script>
 
 <!-- ── Company Picker Modal ──────────────────────────────────────────────── -->
+<!-- ── Reclassify Admin (Mod) Modal ─────────────────────────────────────── -->
+<div class="modal-overlay" id="reclassifyAdminModalOverlay" onclick="if(event.target===this)window.closeReclassifyAdmin()">
+  <div class="modal" style="max-width:700px;width:92%">
+    <div class="modal-title">Tag Suggestions</div>
+    <div id="reclassify-admin-list" style="max-height:65vh;overflow-y:auto;margin-top:10px"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-cancel" onclick="window.closeReclassifyAdmin()">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Reclassify Job Modal ─────────────────────────────────────────────── -->
 <div class="modal-overlay" id="reclassifyModalOverlay" onclick="if(event.target===this)window.closeReclassifyModal()">
   <div class="modal" style="max-width:480px;width:90%">

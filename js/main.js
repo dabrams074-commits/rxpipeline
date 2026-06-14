@@ -1562,6 +1562,51 @@ window.submitReclassifyFeedback = async function() {
   setTimeout(() => window.closeReclassifyModal(), 1200);
 };
 
+// ── Reclassify admin (mod-only) view ───────────────────────────────────────
+async function refreshReclassifyAdminBadge() {
+  const badge = document.getElementById('reclassify-admin-badge');
+  if (!badge) return;
+  const { count, error } = await supabase.from('job_reclassify_feedback').select('id', { count: 'exact', head: true });
+  if (error) return;
+  if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+  else { badge.style.display = 'none'; }
+}
+
+window.openReclassifyAdmin = async function() {
+  if (!isMod()) return;
+  const listEl = document.getElementById('reclassify-admin-list');
+  listEl.innerHTML = '<div style="padding:12px;font-size:0.85rem;color:var(--text2)">Loading…</div>';
+  document.getElementById('reclassifyAdminModalOverlay').classList.add('open');
+
+  const { data, error } = await supabase.from('job_reclassify_feedback').select('*').order('created_at', { ascending: false });
+  if (error) { listEl.innerHTML = `<div style="padding:12px;font-size:0.85rem;color:#ff6b6b">Error loading suggestions: ${esc(error.message)}</div>`; return; }
+  if (!data || !data.length) { listEl.innerHTML = '<div style="padding:12px;font-size:0.85rem;color:var(--text2)">No suggestions yet.</div>'; return; }
+
+  listEl.innerHTML = data.map(row => `
+    <div class="role-card" style="display:block;margin-bottom:8px" data-feedback-id="${row.id}">
+      <div style="font-weight:600;font-size:0.85rem">${esc(row.job_title || '')}</div>
+      <div style="font-size:0.75rem;color:var(--text2);margin:2px 0 6px">${esc(row.company || '')}${row.dept ? ' · ' + esc(row.dept) : ''}${row.job_url ? ` · <a href="${esc(row.job_url)}" target="_blank" rel="noopener" style="color:var(--accent)">View job</a>` : ''}</div>
+      <div style="font-size:0.8rem;margin-bottom:4px"><strong>Current:</strong> ${esc(row.current_area || '—')} / ${esc(row.current_func || '—')}</div>
+      <div style="font-size:0.8rem;margin-bottom:4px"><strong>Suggested:</strong> ${esc(row.suggested_area || '—')} / ${esc(row.suggested_func || '—')}</div>
+      ${row.notes ? `<div style="font-size:0.8rem;margin-bottom:4px"><strong>Notes:</strong> ${esc(row.notes)}</div>` : ''}
+      <div style="font-size:0.7rem;color:var(--text2);margin-bottom:6px">${row.user_email ? esc(row.user_email) + ' · ' : ''}${row.created_at ? new Date(row.created_at).toLocaleString() : ''}</div>
+      <button class="mod-btn mod-delete" onclick="window.resolveReclassifyFeedback(${row.id})">Mark Reviewed / Remove</button>
+    </div>
+  `).join('');
+};
+
+window.closeReclassifyAdmin = function() {
+  document.getElementById('reclassifyAdminModalOverlay').classList.remove('open');
+};
+
+window.resolveReclassifyFeedback = async function(id) {
+  if (!isMod()) return;
+  await supabase.from('job_reclassify_feedback').delete().eq('id', id);
+  const card = document.querySelector(`[data-feedback-id="${id}"]`);
+  if (card) card.remove();
+  refreshReclassifyAdminBadge();
+};
+
 const AREA_CONDITIONS = {
   'Oncology': [
     'oncol','tumor','tumour','cancer','carcinoma','lymphoma','leukemia','leukaemia',
@@ -2343,6 +2388,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTracker();
     updateHomeCards();
     initCachedLibrary();
+
+    // Show mod-only "Tag Suggestions" button + pending count
+    const reclassBtn = document.getElementById('reclassify-admin-btn');
+    if (reclassBtn && isMod()) {
+      reclassBtn.style.display = '';
+      refreshReclassifyAdminBadge();
+    }
 
     // Show welcome toast after successful Stripe checkout redirect
     const params = new URLSearchParams(window.location.search);
