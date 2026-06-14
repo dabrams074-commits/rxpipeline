@@ -106,6 +106,21 @@ export const FETCH_COMPANIES = [
   { name:'IQVIA',                   group:'CRO, Services & Medical Devices',   ats:'Workday',  subdomain:'iqvia',                 tenant:'IQVIA',                   wdNum:1 },
   { name:'Parexel',                 group:'CRO, Services & Medical Devices',   ats:'Workday',  subdomain:'parexel',               tenant:'Parexel_External_Careers', wdNum:1 },
   { name:'Lonza',                   group:'CRO, Services & Medical Devices',   ats:'Workday',  subdomain:'lonza',                 tenant:'Lonza_Careers',           wdNum:3 },
+  // ── Biotech (newly added) ──
+  { name:'Verve Therapeutics',      group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'verve',               wdNum:0 },
+  { name:'Arvinas',                 group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'arvinas',             wdNum:0 },
+  { name:'Axsome Therapeutics',     group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'axsometherapeutics',  wdNum:0 },
+  { name:'Cogent Biosciences',      group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'cogentbiosciences',   wdNum:0 },
+  { name:'Apogee Therapeutics',     group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'apogeetherapeutics',  wdNum:0 },
+  { name:'Roivant Sciences',        group:'Biotech',          ats:'Greenhouse', subdomain:'', tenant:'roivantsciences',     wdNum:0 },
+  { name:'Praxis Precision Medicines', group:'Biotech',       ats:'Greenhouse', subdomain:'', tenant:'praxis',              wdNum:0 },
+  { name:'Replimune',               group:'Biotech',          ats:'Lever',      subdomain:'', tenant:'replimune',           wdNum:0 },
+  // ── CRO, Services & Medical Devices (newly added) ──
+  { name:'Veracyte',                group:'CRO, Services & Medical Devices', ats:'Greenhouse', subdomain:'', tenant:'veracyte', wdNum:0 },
+  { name:'Dexcom',                  group:'CRO, Services & Medical Devices', ats:'Workday',    subdomain:'dexcom',  tenant:'dexcom',         wdNum:1 },
+  { name:'Stryker',                 group:'CRO, Services & Medical Devices', ats:'Workday',    subdomain:'stryker', tenant:'strykercareers', wdNum:1 },
+  { name:'Edwards Lifesciences',    group:'CRO, Services & Medical Devices', ats:'Workday',    subdomain:'edwards', tenant:'edwardscareers', wdNum:5 },
+  { name:'Insulet',                 group:'CRO, Services & Medical Devices', ats:'Workday',    subdomain:'insulet', tenant:'insuletcareers', wdNum:5 },
 ];
 
 export let all_jobs = []; 
@@ -246,6 +261,10 @@ export async function fetchAllCompanyJobs(){
             const res = await fetch(`/api/greenhouse/${q.company.tenant}`); if(!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             jobs = (data.jobs||[]).map(j=>stamp({ id: String(j.id), company: q.company.name, title: j.title||'', dept: j.departments?.[0]?.name||'', location: j.location?.name||'', posted: j.updated_at ? new Date(j.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: j.absolute_url||`https://boards.greenhouse.io/${q.company.tenant}` }));
+          } else if (q.company.ats === 'Lever') {
+            const res = await fetch(`https://api.lever.co/v0/postings/${q.company.tenant}?mode=json`); if(!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            jobs = (data||[]).map(j=>stamp({ id: j.id||String(Math.random()), company: q.company.name, title: j.text||'', dept: j.categories?.team||'', location: j.categories?.location||'', posted: j.createdAt ? new Date(j.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', url: j.hostedUrl||`https://jobs.lever.co/${q.company.tenant}` }));
           } else if (q.company.ats === 'Workable') {
             const res = await fetch(`/api/workable/${q.company.tenant}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ query: '' }) }); if(!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
