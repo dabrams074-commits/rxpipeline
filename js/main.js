@@ -23,6 +23,29 @@ import {
 } from './api.js';
 
 // ══════════════════════════════════════════
+// CUSTOM CLASSIFICATION RULES (mod-created, overrides inferArea/inferFunc)
+// ══════════════════════════════════════════
+export let customRules = [];
+
+export async function loadClassificationRules() {
+  try {
+    const { data, error } = await supabase.from('classification_rules').select('*');
+    if (error) throw error;
+    customRules = data || [];
+  } catch (e) {
+    customRules = [];
+  }
+}
+
+export function reclassifyAllJobs() {
+  all_jobs.forEach(j => {
+    j._area = inferArea(j.title || '', j.dept || '');
+    j._func = inferFunc(j.title || '', j.dept || '');
+  });
+  if (all_jobs.length) { buildFilters(); renderRoles(); }
+}
+
+// ══════════════════════════════════════════
 // SHARED UTILITIES
 // ══════════════════════════════════════════
 export function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -1563,6 +1586,8 @@ window.submitReclassifyFeedback = async function() {
 };
 
 // ── Reclassify admin (mod-only) view ───────────────────────────────────────
+let _reclassifyAdminData = [];
+
 async function refreshReclassifyAdminBadge() {
   const badge = document.getElementById('reclassify-admin-badge');
   if (!badge) return;
@@ -1582,6 +1607,7 @@ window.openReclassifyAdmin = async function() {
   if (error) { listEl.innerHTML = `<div style="padding:12px;font-size:0.85rem;color:#ff6b6b">Error loading suggestions: ${esc(error.message)}</div>`; return; }
   if (!data || !data.length) { listEl.innerHTML = '<div style="padding:12px;font-size:0.85rem;color:var(--text2)">No suggestions yet.</div>'; return; }
 
+  _reclassifyAdminData = data;
   listEl.innerHTML = data.map(row => `
     <div class="role-card" style="display:block;margin-bottom:8px" data-feedback-id="${row.id}">
       <div style="font-weight:600;font-size:0.85rem">${esc(row.job_title || '')}</div>
@@ -1590,7 +1616,10 @@ window.openReclassifyAdmin = async function() {
       <div style="font-size:0.8rem;margin-bottom:4px"><strong>Suggested:</strong> ${esc(row.suggested_area || '—')} / ${esc(row.suggested_func || '—')}</div>
       ${row.notes ? `<div style="font-size:0.8rem;margin-bottom:4px"><strong>Notes:</strong> ${esc(row.notes)}</div>` : ''}
       <div style="font-size:0.7rem;color:var(--text2);margin-bottom:6px">${row.user_email ? esc(row.user_email) + ' · ' : ''}${row.created_at ? new Date(row.created_at).toLocaleString() : ''}</div>
-      <button class="mod-btn mod-delete" onclick="window.resolveReclassifyFeedback(${row.id})">Mark Reviewed / Remove</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="mod-btn mod-pin active" onclick="window.createReclassifyRule(${row.id})">Create Rule &amp; Apply</button>
+        <button class="mod-btn mod-delete" onclick="window.resolveReclassifyFeedback(${row.id})">Mark Reviewed / Remove</button>
+      </div>
     </div>
   `).join('');
 };
@@ -1605,6 +1634,34 @@ window.resolveReclassifyFeedback = async function(id) {
   const card = document.querySelector(`[data-feedback-id="${id}"]`);
   if (card) card.remove();
   refreshReclassifyAdminBadge();
+};
+
+window.createReclassifyRule = async function(id) {
+  if (!isMod()) return;
+  const row = _reclassifyAdminData.find(r => r.id === id);
+  if (!row) return;
+
+  const area = (row.suggested_area && row.suggested_area !== row.current_area) ? row.suggested_area : null;
+  const func = (row.suggested_func && row.suggested_func !== row.current_func) ? row.suggested_func : null;
+  if (!area && !func) { alert('Nothing to apply — the suggested tags already match the current tags.'); return; }
+
+  const defaultKeyword = (row.job_title || '').toLowerCase();
+  const keyword = prompt(
+    `Create a rule: any job whose title/department contains this text (case-insensitive) will always be tagged as:\n` +
+    `${area ? 'Area = ' + area + '\n' : ''}${func ? 'Function = ' + func + '\n' : ''}\n` +
+    `Edit the keyword below to broaden or narrow the match — e.g. shorten to "sales analytics & operations" to match similar titles.`,
+    defaultKeyword
+  );
+  if (keyword === null) return;
+  const kw = keyword.trim().toLowerCase();
+  if (!kw) { alert('Keyword cannot be empty.'); return; }
+
+  const { error } = await supabase.from('classification_rules').insert({ keyword: kw, area, func });
+  if (error) { alert('Error creating rule: ' + error.message); return; }
+
+  await loadClassificationRules();
+  reclassifyAllJobs();
+  await window.resolveReclassifyFeedback(id);
 };
 
 const AREA_CONDITIONS = {
@@ -1674,6 +1731,7 @@ const AREA_CONDITIONS = {
 
 export function inferArea(title, dept) {
   const t = (title + ' ' + dept).toLowerCase();
+  for (const r of customRules) { if (r.area && r.keyword && t.includes(r.keyword)) return r.area; }
   for (const [area, keywords] of Object.entries(AREA_CONDITIONS)) {
     if (keywords.some(k => t.includes(k))) return area;
   }
@@ -1717,6 +1775,9 @@ FUNC_GROUPS.forEach(g => { FUNC_GROUP_MAP[g.group] = g.group; g.items.forEach(it
 
 export function inferFunc(title, dept) {
   const t = (title + ' ' + dept).toLowerCase();
+
+  // ── Mod-created custom rules take priority over everything below ─────────
+  for (const r of customRules) { if (r.func && r.keyword && t.includes(r.keyword)) return r.func; }
 
   // ── Animal Health / Veterinary — return Other so these can be excluded ────
   if (t.includes('animal health') || t.includes('vétérinaire') || t.includes('veterinaire') || t.includes('veterinary') || t.includes('volaille') || t.includes('livestock') || t.includes('poultry') || t.includes('zoetis') || t.includes('elanco')) return 'Other';
@@ -2367,6 +2428,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Gate everything behind auth + subscription check
   initAuth(async () => {
+    // Load any mod-created classification rules before jobs are fetched/classified
+    await loadClassificationRules();
     const cnt = document.getElementById('lib-count');
     if (cnt) cnt.textContent = FETCH_COMPANIES.length;
     const libBadge = document.getElementById('lib-badge');
