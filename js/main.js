@@ -1612,6 +1612,8 @@ export function inferFunc(title, dept) {
   if (t.includes('call planning')) return 'Call Planning';
   if (t.includes('targeting') && t.includes('segmentation')) return 'Targeting & Segmentation';
   if (t.includes('commercial training') || t.includes('销售培训') || t.includes('培训经理') || t.includes('sales training manager') || t.includes('training manager') && t.includes('sales')) return 'Commercial Training';
+  // Sales Analytics / Sales Ops & Analytics roles → Commercial Analytics & Insights (before broad Field Sales net)
+  if (t.includes('sales analytics') || t.includes('sales & analytics') || (t.includes('sales') && t.includes('analytics') && (t.includes('operations') || t.includes('ops')))) return 'Commercial Analytics';
   // Field Sales — broad net for rep/specialist/territory/account roles
   if (t.includes('pharmaceutical sales') || t.includes('pharma sales')) return 'Field Sales';
   if (t.includes('specialty sales') || t.includes('specialty care sales')) return 'Field Sales';
