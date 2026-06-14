@@ -1457,7 +1457,7 @@ export function renderRoles() {
     <div class="cin-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
     <div class="cin-body">
       <div class="cin-title">A note on job classification</div>
-      <div class="cin-text">Job function and location data is parsed directly from company career pages, which are sometimes inconsistently formatted or missing key details. We're continuously improving accuracy — anomalies will decrease over time. Spotted something off? <a href="mailto:hello@bioboard.io" class="cin-link">Send us a note</a> or click the 🏷️ <strong>Fix tags</strong> button on any role — every suggestion helps.</div>
+      <div class="cin-text">Job function and location data is parsed directly from company career pages, which are sometimes inconsistently formatted or missing key details. We're continuously improving accuracy — anomalies will decrease over time. Spotted something off? <a href="mailto:bioboard@bioboard.io" class="cin-link">Send us a note</a> or click the 🏷️ <strong>Fix tags</strong> button on any role — every suggestion helps.</div>
     </div>
   </div>`;
   if (cardArr.length > 1) cardArr.splice(1, 0, classificationNote);
