@@ -427,38 +427,54 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input class="search-input" type="text" id="r-search" placeholder="Search title, area, department, location…" oninput="clearTimeout(window._rsT);window._rsT=setTimeout(window.resetAndRenderRoles,200)">
       </div>
-      <select class="filter-select" id="r-area" onchange="window.resetAndRenderRoles()">
-        <option value="">All Areas</option>
-        <option>Oncology</option><option>Rare Disease</option><option>Immunology</option>
-        <option>Neuroscience</option><option>Cardiovascular</option><option>Vaccines</option>
-        <option>Metabolic / Endocrine</option><option>Infectious Disease</option>
-        <option>Ophthalmology</option><option>Diversified</option>
-      </select>
-      <select class="filter-select" id="r-company" onchange="window.resetAndRenderRoles()">
-        <option value="">All Companies</option>
-      </select>
-      <select class="filter-select" id="r-func" onchange="window.resetAndRenderRoles()">
-        <option value="">All Functions</option>
-      </select>
-      <select class="filter-select" id="r-loc" onchange="window.onCountryChange()">
-        <option value="">All Countries</option>
-      </select>
-      <select class="filter-select" id="r-state" onchange="window.resetAndRenderRoles()" style="display:none">
-        <option value="">All States</option>
-      </select>
-      <select class="filter-select" id="r-level" onchange="window.resetAndRenderRoles()">
-        <option value="">All Levels</option>
-        <option>VP</option>
-        <option>Head Of / Executive Director</option>
-        <option>Senior Director</option>
-        <option>Director</option>
-        <option>Associate Director</option>
-        <option>Senior Manager</option>
-        <option>Manager</option>
-        <option>Senior</option>
-        <option>Associate</option>
-        <option>Individual Contributor</option>
-      </select>
+      <div class="ms-dropdown" id="msw-area">
+        <button class="filter-select ms-trigger" id="ms-trigger-area" onclick="window.toggleMs('area')">All Areas</button>
+        <div class="ms-panel" id="ms-panel-area">
+          <div class="ms-panel-actions"><span class="ms-clear-link" onclick="window.clearMsFilter('area',event)">Clear</span></div>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Oncology"> Oncology</label>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Rare Disease"> Rare Disease</label>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Immunology"> Immunology</label>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Neuroscience"> Neuroscience</label>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Cardiovascular"> Cardiovascular</label>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Vaccines"> Vaccines</label>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Metabolic / Endocrine"> Metabolic / Endocrine</label>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Infectious Disease"> Infectious Disease</label>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Ophthalmology"> Ophthalmology</label>
+          <label class="ms-option"><input type="checkbox" data-key="area" data-value="Diversified"> Diversified</label>
+        </div>
+      </div>
+      <div class="ms-dropdown" id="msw-company">
+        <button class="filter-select ms-trigger" id="ms-trigger-company" onclick="window.toggleMs('company')">All Companies</button>
+        <div class="ms-panel" id="ms-panel-company"></div>
+      </div>
+      <div class="ms-dropdown" id="msw-func">
+        <button class="filter-select ms-trigger" id="ms-trigger-func" onclick="window.toggleMs('func')">All Functions</button>
+        <div class="ms-panel" id="ms-panel-func"></div>
+      </div>
+      <div class="ms-dropdown" id="msw-country">
+        <button class="filter-select ms-trigger" id="ms-trigger-country" onclick="window.toggleMs('country')">All Countries</button>
+        <div class="ms-panel" id="ms-panel-country"></div>
+      </div>
+      <div class="ms-dropdown" id="msw-state" style="display:none">
+        <button class="filter-select ms-trigger" id="ms-trigger-state" onclick="window.toggleMs('state')">All States</button>
+        <div class="ms-panel" id="ms-panel-state"></div>
+      </div>
+      <div class="ms-dropdown" id="msw-level">
+        <button class="filter-select ms-trigger" id="ms-trigger-level" onclick="window.toggleMs('level')">All Levels</button>
+        <div class="ms-panel" id="ms-panel-level">
+          <div class="ms-panel-actions"><span class="ms-clear-link" onclick="window.clearMsFilter('level',event)">Clear</span></div>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="VP"> VP</label>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="Head Of / Executive Director"> Head Of / Executive Director</label>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="Senior Director"> Senior Director</label>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="Director"> Director</label>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="Associate Director"> Associate Director</label>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="Senior Manager"> Senior Manager</label>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="Manager"> Manager</label>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="Senior"> Senior</label>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="Associate"> Associate</label>
+          <label class="ms-option"><input type="checkbox" data-key="level" data-value="Individual Contributor"> Individual Contributor</label>
+        </div>
+      </div>
       <button class="filter-clear-btn" id="r-clear-btn" onclick="clearRoleFilters()" style="display:none">✕ Clear</button>
       <button class="btn-export-roles" onclick="exportRolesCSV()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>

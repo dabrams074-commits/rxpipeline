@@ -823,14 +823,17 @@ export function buildFilters() {
   if (hasRemote) countries.push('Remote');
   if (hasOther) countries.push('Other (unclassified)');
   const presentFuncs = new Set(all_jobs.map(j => inferFunc(j.title, j.dept || '')).filter(Boolean));
-  const funcOptgroups = FUNC_GROUPS
+  const funcGroupsHTML = FUNC_GROUPS
     .filter(g => g.items.some(i => presentFuncs.has(i)) || presentFuncs.has(g.group))
     .map(g => {
       const regularItems = g.items.filter(i => presentFuncs.has(i) && !i.startsWith('Other /'));
       const otherItem    = g.items.find(i => i.startsWith('Other /') && presentFuncs.has(i));
-      const otherOption  = otherItem ? `<option value="${esc(otherItem)}">Other</option>` : '';
-      return `<optgroup label="${esc(g.group)}"><option value="${esc(g.group)}">— All ${esc(g.group)} —</option>${regularItems.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('')}${otherOption}</optgroup>`;
+      const otherOption  = otherItem ? msOption('func', otherItem, 'Other') : '';
+      return `<div class="ms-group-label">${esc(g.group)}</div>` +
+        msOption('func', g.group, `— All ${g.group} —`, 'ms-group-all') +
+        regularItems.map(i => msOption('func', i, i)).join('') + otherOption;
     }).join('');
+  const funcStandalone = presentFuncs.has('Other') ? msOption('func', 'Other', 'Other') : '';
   // Build state list from US jobs
   const usJobs = all_jobs.filter(j => (j._country || inferCountry(j.location || '')) === 'United States');
   const allStates     = usJobs.map(j => inferState(j.location || '')).filter(Boolean);
@@ -838,13 +841,15 @@ export function buildFilters() {
   const hasNoState    = usJobs.some(j => !inferState(j.location || ''));
   const stateSet      = [...new Set(allStates.filter(s => s !== 'Nationwide'))].sort();
 
-  document.getElementById('r-company').innerHTML = '<option value="">All Companies</option>' + companies.map(d => `<option>${esc(d)}</option>`).join('');
-  document.getElementById('r-func').innerHTML = '<option value="">All Functions</option>' + funcOptgroups + (presentFuncs.has('Other') ? '<option value="Other">Other</option>' : '');
-  document.getElementById('r-loc').innerHTML = '<option value="">All Countries</option>' + countries.map(c => `<option>${esc(c)}</option>`).join('');
-  document.getElementById('r-state').innerHTML = '<option value="">All States</option>' +
-    stateSet.map(s => `<option>${esc(s)}</option>`).join('') +
-    (hasNationwide ? '<option value="Nationwide">Nationwide (no specific state)</option>' : '') +
-    (hasNoState    ? '<option value="__nostate__">Other (no state)</option>' : '');
+  document.getElementById('ms-panel-company').innerHTML = msPanelActions('company') + companies.map(d => msOption('company', d, d)).join('');
+  document.getElementById('ms-panel-func').innerHTML = msPanelActions('func') + funcGroupsHTML + funcStandalone;
+  document.getElementById('ms-panel-country').innerHTML = msPanelActions('country') + countries.map(c => msOption('country', c, c)).join('');
+  document.getElementById('ms-panel-state').innerHTML = msPanelActions('state') +
+    stateSet.map(s => msOption('state', s, s)).join('') +
+    (hasNationwide ? msOption('state', 'Nationwide', 'Nationwide (no specific state)') : '') +
+    (hasNoState    ? msOption('state', '__nostate__', 'Other (no state)') : '');
+  // Re-check any boxes for filters already selected (in case panel was rebuilt)
+  Object.keys(msFilters).forEach(updateMsTrigger);
   document.getElementById('roles-filters').style.display = 'flex';
 }
 
@@ -1300,48 +1305,111 @@ export function inferCountry(location) {
   return '';
 }
 
+// ── Multi-select filter dropdowns ────────────────────────────────────────
+const msFilters = { area: new Set(), company: new Set(), func: new Set(), country: new Set(), state: new Set(), level: new Set() };
+const MS_LABELS = { area: 'All Areas', company: 'All Companies', func: 'All Functions', country: 'All Countries', state: 'All States', level: 'All Levels' };
+
+function msOption(key, value, label, extraClass) {
+  const checked = msFilters[key].has(value) ? 'checked' : '';
+  return `<label class="ms-option${extraClass ? ' ' + extraClass : ''}"><input type="checkbox" data-key="${esc(key)}" data-value="${esc(value)}" ${checked}> ${esc(label)}</label>`;
+}
+
+function msPanelActions(key) {
+  return `<div class="ms-panel-actions"><span class="ms-clear-link" onclick="window.clearMsFilter('${key}',event)">Clear</span></div>`;
+}
+
+function updateMsTrigger(key) {
+  const btn = document.getElementById('ms-trigger-' + key);
+  if (!btn) return;
+  const s = msFilters[key];
+  if (s.size === 0) btn.textContent = MS_LABELS[key];
+  else if (s.size === 1) btn.textContent = [...s][0];
+  else btn.textContent = `${[...s][0]} +${s.size - 1}`;
+}
+
+function handleCountryMsChange() {
+  const stateWrap = document.getElementById('msw-state');
+  const show = msFilters.country.size === 0 || msFilters.country.has('United States');
+  if (stateWrap) stateWrap.style.display = show ? '' : 'none';
+  if (!show && msFilters.state.size) {
+    msFilters.state.clear();
+    document.querySelectorAll('#ms-panel-state input[type=checkbox]').forEach(cb => cb.checked = false);
+    updateMsTrigger('state');
+  }
+}
+
+window.toggleMs = function(key) {
+  const panel = document.getElementById('ms-panel-' + key);
+  if (!panel) return;
+  const willOpen = !panel.classList.contains('open');
+  document.querySelectorAll('.ms-panel.open').forEach(p => p.classList.remove('open'));
+  if (willOpen) panel.classList.add('open');
+};
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ms-dropdown')) {
+    document.querySelectorAll('.ms-panel.open').forEach(p => p.classList.remove('open'));
+  }
+});
+
+document.addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.matches('.ms-panel input[type=checkbox]')) {
+    const key = t.dataset.key, value = t.dataset.value;
+    if (!msFilters[key]) return;
+    if (t.checked) msFilters[key].add(value); else msFilters[key].delete(value);
+    updateMsTrigger(key);
+    if (key === 'country') handleCountryMsChange();
+    window.resetAndRenderRoles();
+  }
+});
+
+window.clearMsFilter = function(key, e) {
+  if (e) e.stopPropagation();
+  msFilters[key].clear();
+  document.querySelectorAll(`#ms-panel-${key} input[type=checkbox]`).forEach(cb => cb.checked = false);
+  updateMsTrigger(key);
+  if (key === 'country') handleCountryMsChange();
+  window.resetAndRenderRoles();
+};
+
+function anyMsFilterActive() {
+  return Object.values(msFilters).some(s => s.size > 0);
+}
+
 function getFilteredRoles() {
-  const q = (document.getElementById('r-search')?.value || '').toLowerCase(); 
-  const areaFilter = document.getElementById('r-area')?.value || '';
-  const funcFilter = document.getElementById('r-func')?.value || '';
-  const co = document.getElementById('r-company')?.value || '';
-  const country = document.getElementById('r-loc')?.value || '';
-  const state   = document.getElementById('r-state')?.value || '';
-  const level   = document.getElementById('r-level')?.value || '';
+  const q = (document.getElementById('r-search')?.value || '').toLowerCase();
+  const areaSet = msFilters.area, funcSet = msFilters.func, coSet = msFilters.company, countrySet = msFilters.country, stateSet = msFilters.state, levelSet = msFilters.level;
   return all_jobs.filter(r => {
     try {
       const area = r._area || inferArea(r.title || '', r.dept || '');
       const func = r._func || inferFunc(r.title || '', r.dept || '');
       const mQ = !q || (r.title||'').toLowerCase().includes(q) || (r.dept||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || (r.company||'').toLowerCase().includes(q) || area.toLowerCase().includes(q);
-      const mArea = !areaFilter || area === areaFilter;
-      const mFunc = !funcFilter || func === funcFilter || FUNC_GROUP_MAP[func] === funcFilter;
+      const mArea = areaSet.size === 0 || areaSet.has(area);
+      const mFunc = funcSet.size === 0 || funcSet.has(func) || funcSet.has(FUNC_GROUP_MAP[func]);
       const rc = (r._country || inferCountry(r.location || '')).replace(/^Multiple$/, '');
-      const mCountry = !country || (country === 'Other (unclassified)' ? !rc : rc === country);
+      const mCountry = countrySet.size === 0 || (countrySet.has('Other (unclassified)') && !rc) || countrySet.has(rc);
       const rs = inferState(r.location || '');
-      const mState = !state || (state === '__nostate__' ? (rc === 'United States' && !rs) : rs === state);
-      const mLevel = !level || inferLevel(r.title || '') === level;
-      return mQ && mArea && mFunc && (!co || r.company === co) && mCountry && mState && mLevel;
+      const mState = stateSet.size === 0 || (stateSet.has('__nostate__') && rc === 'United States' && !rs) || stateSet.has(rs);
+      const mLevel = levelSet.size === 0 || levelSet.has(inferLevel(r.title || ''));
+      const mCo = coSet.size === 0 || coSet.has(r.company);
+      return mQ && mArea && mFunc && mCo && mCountry && mState && mLevel;
     } catch(e) { return false; }
   }).sort((a, b) => { try { return (b._dateMs||0) - (a._dateMs||0); } catch(e) { return 0; } });
 }
 
 function clearRoleFilters() {
-  ['r-search', 'r-area', 'r-func', 'r-company', 'r-loc', 'r-state', 'r-level'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  const stateEl = document.getElementById('r-state'); if (stateEl) stateEl.style.display = 'none';
+  const searchEl = document.getElementById('r-search'); if (searchEl) searchEl.value = '';
+  Object.keys(msFilters).forEach(key => {
+    msFilters[key].clear();
+    document.querySelectorAll(`#ms-panel-${key} input[type=checkbox]`).forEach(cb => cb.checked = false);
+    updateMsTrigger(key);
+  });
+  handleCountryMsChange();
   document.getElementById('r-clear-btn').style.display = 'none';
   rolesPageSize = 100;
   renderRoles();
 }
-
-window.onCountryChange = function() {
-  const country = document.getElementById('r-loc')?.value || '';
-  const stateEl = document.getElementById('r-state');
-  if (stateEl) {
-    stateEl.style.display = country === 'United States' ? '' : 'none';
-    stateEl.value = '';
-  }
-  window.resetAndRenderRoles();
-};
 
 let rolesPageSize = 100;
 
@@ -1358,7 +1426,7 @@ export function renderRoles() {
       countEl.textContent = list.length + ' roles';
     }
   }
-  const cb = document.getElementById('r-clear-btn'); if (cb) cb.style.display = (document.getElementById('r-search')?.value || document.getElementById('r-area')?.value || document.getElementById('r-func')?.value || document.getElementById('r-company')?.value || document.getElementById('r-dept')?.value || document.getElementById('r-loc')?.value || document.getElementById('r-level')?.value) ? 'inline-flex' : 'none';
+  const cb = document.getElementById('r-clear-btn'); if (cb) cb.style.display = ((document.getElementById('r-search')?.value || '') || anyMsFilterActive()) ? 'inline-flex' : 'none';
   if (!list.length && all_jobs.length > 0) { container.innerHTML = '<div class="roles-empty">No roles match your filters</div>'; return; }
   if (!list.length) return;
   const cardArr = list.slice(0, rolesPageSize).map(r => { try { return roleCardHTML(r); } catch(e) { return ''; } });
