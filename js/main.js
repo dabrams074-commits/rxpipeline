@@ -2463,6 +2463,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('checkout') === 'success') {
       setTimeout(() => showToast('🎉 Subscription active — welcome to bioboard.io!'), 600);
+      // Fire Google Ads conversion event for the completed subscription purchase
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'conversion', {
+          'send_to': 'AW-18219392723/CAYICLDehrocENO91-9D',
+          'value': 1.0,
+          'currency': 'USD',
+          'transaction_id': ''
+        });
+      }
       history.replaceState({}, '', window.location.pathname);
     }
   });
