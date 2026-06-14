@@ -2472,6 +2472,15 @@ document.addEventListener('DOMContentLoaded', () => {
           'transaction_id': ''
         });
       }
+      // Fire Microsoft Ads (UET) custom event for the completed subscription purchase
+      window.uetq = window.uetq || [];
+      window.uetq.push('event', 'subscribe', {
+        'event_category': 'Subscription',
+        'event_label': 'Checkout Success',
+        'event_value': 1.0,
+        'revenue_value': 1.0,
+        'currency': 'USD'
+      });
       history.replaceState({}, '', window.location.pathname);
     }
   });
