@@ -963,6 +963,25 @@
 <script type="module" src="./js/main.js"></script>
 
 <!-- ── Company Picker Modal ──────────────────────────────────────────────── -->
+<!-- ── Reclassify Job Modal ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="reclassifyModalOverlay" onclick="if(event.target===this)window.closeReclassifyModal()">
+  <div class="modal" style="max-width:480px;width:90%">
+    <div class="modal-title">Suggest a Classification Fix</div>
+    <div id="reclassify-job-summary" style="font-size:0.85rem;color:var(--text-dim,#888);margin-bottom:14px"></div>
+    <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:4px">Correct Area</label>
+    <select id="reclassify-area" class="filter-select" style="width:100%;margin-bottom:14px"></select>
+    <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:4px">Correct Function</label>
+    <select id="reclassify-func" class="filter-select" style="width:100%;margin-bottom:14px"></select>
+    <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:4px">Notes (optional)</label>
+    <textarea id="reclassify-notes" rows="3" style="width:100%;resize:vertical" placeholder="Anything else that would help us fix this?"></textarea>
+    <div id="reclassify-status" style="font-size:0.8rem;margin-top:8px"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-cancel" onclick="window.closeReclassifyModal()">Cancel</button>
+      <button class="btn-save" onclick="window.submitReclassifyFeedback()">Submit</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="companyModalOverlay" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal" style="max-width:680px;width:90%">
     <div class="modal-title">Select Companies to Fetch</div>

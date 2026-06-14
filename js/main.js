@@ -1471,6 +1471,7 @@ function roleCardHTML(r) {
       `<button class="btn-role-add" onclick="addRoleToTracker(${safeR}, this, 'Sourced')"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Track (Sourced)</button>
          <button class="btn-role-add" onclick="addRoleToTracker(${safeR}, this, 'Applied')"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Track (Applied)</button>`
     }
+      <button class="btn-role-add" title="Suggest a classification fix" onclick="window.openReclassifyModal('${esc(r.id)}')"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg> Fix tags</button>
     </div>
   </div>`;
 }
@@ -1488,6 +1489,78 @@ function addRoleToTracker(r, btn, stage = 'Sourced') {
   btn.classList.add('added'); btn.innerHTML = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Added`; btn.onclick = null;
   document.getElementById('tracker-badge').textContent = jobs.length; updateTrackerStats(); showToast(`${r.company} role added`);
 }
+
+// ── Reclassify feedback modal ──────────────────────────────────────────────
+const RECLASSIFY_AREAS = ['Oncology', 'Rare Disease', 'Immunology', 'Neuroscience', 'Cardiovascular', 'Vaccines', 'Metabolic / Endocrine', 'Infectious Disease', 'Ophthalmology', 'Diversified'];
+
+let _reclassifyJob = null;
+
+window.openReclassifyModal = function(jobId) {
+  const job = all_jobs.find(j => String(j.id) === String(jobId));
+  if (!job) return;
+  const area = job._area || inferArea(job.title || '', job.dept || '');
+  const func = job._func || inferFunc(job.title || '', job.dept || '');
+  _reclassifyJob = { id: job.id, title: job.title, company: job.company, dept: job.dept || '', url: job.url, currentArea: area, currentFunc: func };
+
+  document.getElementById('reclassify-job-summary').innerHTML =
+    `<strong>${esc(job.title)}</strong><br>${esc(job.company)}${job.dept ? ' &middot; ' + esc(job.dept) : ''}<br>Currently tagged: <em>${esc(area)} / ${esc(func)}</em>`;
+
+  const areaSel = document.getElementById('reclassify-area');
+  areaSel.innerHTML = RECLASSIFY_AREAS.map(a => `<option value="${esc(a)}" ${a === area ? 'selected' : ''}>${esc(a)}</option>`).join('');
+
+  const funcSel = document.getElementById('reclassify-func');
+  funcSel.innerHTML = FUNC_GROUPS.map(g => {
+    const opts = g.items.map(i => `<option value="${esc(i)}" ${i === func ? 'selected' : ''}>${esc(i)}</option>`).join('');
+    return `<optgroup label="${esc(g.group)}">${opts}</optgroup>`;
+  }).join('');
+
+  document.getElementById('reclassify-notes').value = '';
+  const statusEl = document.getElementById('reclassify-status');
+  statusEl.textContent = ''; statusEl.style.color = '';
+  document.getElementById('reclassifyModalOverlay').classList.add('open');
+};
+
+window.closeReclassifyModal = function() {
+  document.getElementById('reclassifyModalOverlay').classList.remove('open');
+};
+
+window.submitReclassifyFeedback = async function() {
+  if (!_reclassifyJob) return;
+  const statusEl = document.getElementById('reclassify-status');
+  const suggestedArea = document.getElementById('reclassify-area').value;
+  const suggestedFunc = document.getElementById('reclassify-func').value;
+  const notes = document.getElementById('reclassify-notes').value.trim();
+  if (suggestedArea === _reclassifyJob.currentArea && suggestedFunc === _reclassifyJob.currentFunc && !notes) {
+    statusEl.textContent = 'Please change at least one field or add a note.';
+    statusEl.style.color = '#ff6b6b';
+    return;
+  }
+  statusEl.textContent = 'Submitting…'; statusEl.style.color = '';
+  let user = null;
+  try { user = getUser(); } catch (e) {}
+  const { error } = await supabase.from('job_reclassify_feedback').insert({
+    job_id: String(_reclassifyJob.id),
+    job_title: _reclassifyJob.title,
+    company: _reclassifyJob.company,
+    dept: _reclassifyJob.dept,
+    job_url: _reclassifyJob.url,
+    current_area: _reclassifyJob.currentArea,
+    current_func: _reclassifyJob.currentFunc,
+    suggested_area: suggestedArea,
+    suggested_func: suggestedFunc,
+    notes: notes || null,
+    user_email: user?.email || null,
+  });
+  if (error) {
+    statusEl.textContent = 'Sorry, something went wrong. Please try again later.';
+    statusEl.style.color = '#ff6b6b';
+    console.error('reclassify feedback error', error);
+    return;
+  }
+  statusEl.textContent = "Thanks! We'll review this.";
+  statusEl.style.color = '#2fffa0';
+  setTimeout(() => window.closeReclassifyModal(), 1200);
+};
 
 const AREA_CONDITIONS = {
   'Oncology': [
