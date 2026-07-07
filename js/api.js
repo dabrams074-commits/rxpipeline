@@ -387,10 +387,11 @@ let _pendingBaselineDate = null;
 export async function initCachedLibrary() {
   // ── 1. Load data silently in the background ───────────────────────────────
   await loadCachedJobs();
-  let jobs = cachedLiveJobs && cachedLiveJobs.length >= 1000 ? sanitizeData(cachedLiveJobs) : null;
+  let cachedJobs = cachedLiveJobs && cachedLiveJobs.length >= 1000 ? sanitizeData(cachedLiveJobs) : null;
 
-  // Always fetch the meta file so we show the real baseline build date
+  // Always fetch the baseline — use whichever is larger (baseline is authoritative daily build)
   let baselineDate = null;
+  let baselineJobs = null;
   try {
     const metaRes = await fetch('./jobs-baseline-meta.json');
     if (metaRes.ok) {
@@ -399,14 +400,20 @@ export async function initCachedLibrary() {
     }
   } catch (e) { /* silent */ }
 
-  if (!jobs || jobs.length === 0) {
-    try {
-      const dataRes = await fetch('./jobs-baseline.json');
-      if (dataRes.ok) {
-        jobs = sanitizeData(await dataRes.json());
-        await saveCachedJobs(jobs);
-      }
-    } catch (e) { console.error('Baseline load failed:', e); }
+  try {
+    const dataRes = await fetch('./jobs-baseline.json');
+    if (dataRes.ok) {
+      baselineJobs = sanitizeData(await dataRes.json());
+    }
+  } catch (e) { console.error('Baseline load failed:', e); }
+
+  // Prefer whichever source has more jobs (baseline is updated daily and is authoritative)
+  let jobs;
+  if (baselineJobs && baselineJobs.length > (cachedJobs ? cachedJobs.length : 0)) {
+    jobs = baselineJobs;
+    await saveCachedJobs(jobs);
+  } else {
+    jobs = cachedJobs;
   }
 
   if (!jobs || jobs.length === 0) {
