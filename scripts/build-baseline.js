@@ -21,7 +21,8 @@ const COMPANIES = [
   // Large Pharma
   { name:'Pfizer',                  group:'Large Pharma',    ats:'Workday',        subdomain:'pfizer',                 tenant:'PfizerCareers',            wdNum:1 },
   { name:'Merck',                   group:'Large Pharma',    ats:'Workday',        subdomain:'msd',                    tenant:'SearchJobs',               wdNum:5 },
-  { name:'Eli Lilly',               group:'Large Pharma',    ats:'Workday',        subdomain:'lilly',                  tenant:'LLY',                      wdNum:5 },
+  // { name:'Eli Lilly', ... } — Blocked by Cloudflare bot protection on all server-side requests (same as Halozyme)
+
   { name:'AstraZeneca',             group:'Large Pharma',    ats:'Workday',        subdomain:'astrazeneca',            tenant:'Careers',                  wdNum:3 },
   { name:'Novartis',                group:'Large Pharma',    ats:'Workday',        subdomain:'novartis',               tenant:'Novartis_Careers',         wdNum:3 },
   { name:'Amgen',                   group:'Large Pharma',    ats:'Workday',        subdomain:'amgen',                  tenant:'Careers',                  wdNum:1 },
