@@ -56,7 +56,7 @@ export const FETCH_COMPANIES = [
   // ── Large Pharma ──
   { name:'Pfizer',                  group:'Large Pharma',    ats:'Workday',   subdomain:'pfizer',                 tenant:'PfizerCareers',          wdNum:1 },
   { name:'Merck',                   group:'Large Pharma',    ats:'Workday',   subdomain:'msd',                    tenant:'SearchJobs',              wdNum:5 },
-  { name:'Eli Lilly',               group:'Large Pharma',    ats:'Workday',   subdomain:'lilly',                  tenant:'LLY',                     wdNum:5 },
+  // Eli Lilly — migrated from Workday to Phenom People (careers.lilly.com), blocked by Cloudflare
   { name:'AstraZeneca',             group:'Large Pharma',    ats:'Workday',   subdomain:'astrazeneca',            tenant:'Careers',                 wdNum:3 },
   { name:'Novartis',                group:'Large Pharma',    ats:'Workday',   subdomain:'novartis',               tenant:'Novartis_Careers',        wdNum:3 },
   { name:'GSK',                     group:'Large Pharma',    ats:'Jibe',      subdomain:'',                       tenant:'gsk',                     wdNum:0 },
@@ -126,7 +126,7 @@ export const FETCH_COMPANIES = [
 export let all_jobs = []; 
 export let pfizer_filtered = [];
 export let addedRoleSet = new Set(JSON.parse(localStorage.getItem('rxp-added-roles')||'[]'));
-export let selectedCompanies = new Set(['Pfizer','Merck','Eli Lilly','Regeneron','Biogen','Gilead','Vertex','BMS']);
+export let selectedCompanies = new Set(['Pfizer','Merck','Regeneron','Biogen','Gilead','Vertex','BMS']);
 
 export function setPfizerFiltered(list) { pfizer_filtered = list; }
 export function setAllJobs(list) { all_jobs = list; }
