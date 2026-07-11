@@ -201,10 +201,12 @@ export function showPaywall() {
   _showOverlay('paywall');
 }
 
-export async function startCheckout(plan = 'monthly') {
+export async function startCheckout(plan = 'monthly', triggerEl = null) {
   if (!_currentUser) return;
-  const btns = document.querySelectorAll('.btn-start-trial');
-  btns.forEach(b => { b.disabled = true; b.textContent = 'Redirecting to checkout…'; });
+  // Only disable the clicked button, not all plan buttons
+  const btn = triggerEl instanceof HTMLElement ? triggerEl : document.getElementById('btn-start-trial');
+  const origLabel = btn ? (btn.dataset.label || btn.textContent) : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
 
   try {
     const res = await fetch('/.netlify/functions/create-checkout', {
@@ -220,7 +222,7 @@ export async function startCheckout(plan = 'monthly') {
     }
   } catch (e) {
     alert('Could not start checkout: ' + e.message);
-    btns.forEach(b => { b.disabled = false; b.textContent = b.dataset.label || 'Start 10-Day Free Trial →'; });
+    if (btn) { btn.disabled = false; btn.textContent = origLabel; }
   }
 }
 
