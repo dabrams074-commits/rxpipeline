@@ -4,7 +4,7 @@ import {
   setJobs, setEditId, setPanelJobId, resetTFilters
 } from './store.js';
 
-import { initAuth, signInWithGoogle, signInWithLinkedIn, signInWithApple, signOut, startCheckout, manageSubscription, toggleSignUp, emailAuth, supabase, getUser } from './auth.js';
+import { initAuth, signInWithGoogle, signInWithLinkedIn, signInWithApple, signOut, startCheckout, manageSubscription, toggleSignUp, emailAuth, supabase, getUser, showPaywall } from './auth.js';
 window.rxSignInWithGoogle      = signInWithGoogle;
 window.rxSignInWithLinkedIn    = signInWithLinkedIn;
 window.rxSignInWithApple       = signInWithApple;
@@ -14,6 +14,7 @@ window.rxManageSubscription    = manageSubscription;
 window.rxToggleSignUp          = toggleSignUp;
 window.rxEmailAuth             = emailAuth;
 window.rxGetUser               = getUser;
+window.rxShowPaywall           = showPaywall;
 
 import {
   FETCH_COMPANIES, all_jobs, pfizer_filtered, addedRoleSet, selectedCompanies,
