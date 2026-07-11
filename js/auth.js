@@ -197,16 +197,16 @@ export async function manageSubscription() {
   }
 }
 
-export async function startCheckout() {
+export async function startCheckout(plan = 'monthly') {
   if (!_currentUser) return;
-  const btn = document.getElementById('btn-start-trial');
-  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting to checkout…'; }
+  const btns = document.querySelectorAll('.btn-start-trial');
+  btns.forEach(b => { b.disabled = true; b.textContent = 'Redirecting to checkout…'; });
 
   try {
     const res = await fetch('/.netlify/functions/create-checkout', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email: _currentUser.email, userId: _currentUser.id }),
+      body:    JSON.stringify({ email: _currentUser.email, userId: _currentUser.id, plan }),
     });
     const { url, error } = await res.json();
     if (url) {
@@ -216,7 +216,7 @@ export async function startCheckout() {
     }
   } catch (e) {
     alert('Could not start checkout: ' + e.message);
-    if (btn) { btn.disabled = false; btn.textContent = 'Start 10-Day Free Trial →'; }
+    btns.forEach(b => { b.disabled = false; b.textContent = b.dataset.label || 'Start 10-Day Free Trial →'; });
   }
 }
 

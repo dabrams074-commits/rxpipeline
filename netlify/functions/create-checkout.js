@@ -18,15 +18,18 @@ exports.handler = async (event) => {
     return { statusCode: 405, headers: CORS, body: 'Method Not Allowed' };
   }
 
-  const { email, userId } = JSON.parse(event.body || '{}');
+  const { email, userId, plan } = JSON.parse(event.body || '{}');
   if (!email) {
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'email is required' }) };
   }
 
-  const SECRET   = process.env.STRIPE_SECRET_KEY;
-  const PRICE_ID = process.env.STRIPE_PRICE_ID;
+  const SECRET          = process.env.STRIPE_SECRET_KEY;
+  const PRICE_ID_MONTHLY = process.env.STRIPE_PRICE_ID;
+  const PRICE_ID_6MO     = process.env.STRIPE_PRICE_ID_6MO;
   // Netlify injects the deploy URL automatically; fall back for local dev
   const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'http://localhost:8888';
+
+  const PRICE_ID = (plan === '6mo' && PRICE_ID_6MO) ? PRICE_ID_6MO : PRICE_ID_MONTHLY;
 
   if (!SECRET || !PRICE_ID) {
     return {
