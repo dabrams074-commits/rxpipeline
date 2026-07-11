@@ -174,8 +174,8 @@ export async function signOut() {
 
 export async function manageSubscription() {
   if (!_currentUser) return;
-  // Trial users go to checkout instead of billing portal
-  if (_isTrialUser) { return startCheckout(); }
+  // Trial users see plan picker instead of going straight to monthly checkout
+  if (_isTrialUser) { return showPaywall(); }
   const btn = document.getElementById('btn-manage-sub');
   if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
 
