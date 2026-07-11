@@ -92,6 +92,22 @@ exports.handler = async (event) => {
           body: JSON.stringify({ active: true, status: 'trialing' }),
         };
       }
+
+      // Check one-time 6-month payments (paid within last 6 months)
+      const sixMonthsAgoUnix = Math.floor(Date.now() / 1000) - (6 * 30 * 24 * 60 * 60);
+      const sessions = await stripeGet(
+        `/checkout/sessions?customer=${customer.id}&payment_status=paid&limit=20`
+      );
+      for (const session of (sessions.data || [])) {
+        if (session.metadata?.plan === '6mo' && session.created > sixMonthsAgoUnix) {
+          const expiresAt = new Date((session.created + 6 * 30 * 24 * 60 * 60) * 1000).toISOString();
+          return {
+            statusCode: 200,
+            headers: { ...CORS, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active: true, status: 'one_time_6mo', expiresAt }),
+          };
+        }
+      }
     }
 
     return {

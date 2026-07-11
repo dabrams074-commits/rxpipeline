@@ -39,8 +39,10 @@ exports.handler = async (event) => {
     };
   }
 
+  const isOneTime = (plan === '6mo');
+
   const params = new URLSearchParams({
-    mode:                               'subscription',
+    mode:                               isOneTime ? 'payment' : 'subscription',
     'payment_method_types[0]':          'card',
     'line_items[0][price]':             PRICE_ID,
     'line_items[0][quantity]':          '1',
@@ -49,7 +51,13 @@ exports.handler = async (event) => {
     success_url:                        `${SITE_URL}/?checkout=success`,
     cancel_url:                         `${SITE_URL}/?checkout=cancelled`,
     'metadata[supabase_user_id]':       userId || '',
+    'metadata[plan]':                   plan || 'monthly',
   });
+
+  // Subscriptions get a 10-day free trial; one-time payments don't
+  if (!isOneTime) {
+    params.append('subscription_data[trial_period_days]', '10');
+  }
 
   try {
     const res  = await fetch('https://api.stripe.com/v1/checkout/sessions', {
