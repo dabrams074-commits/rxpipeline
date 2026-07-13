@@ -2449,6 +2449,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (jobs.length > 0) saveJobsToCloud(); // migrate existing data to cloud
     }
 
+    // Seed sample jobs for brand-new users so the tracker isn't empty
+    if (jobs.length === 0) {
+      const today = todayStr();
+      const SEED_JOBS = [
+        { id: uid(), company: 'Pfizer', role: 'Senior Manager, Commercial Analytics', url: 'https://www.pfizer.com/careers', area: 'Oncology', func: 'Commercial Analytics', level: 'Senior Manager', jobtype: 'Full-Time', stage: 'Sourced', priority: 'high', recruiter: '', notes: 'Strong fit — analytics background aligns well.', date: today, interviews: [], activity: [{ text: 'Added as sample role', time: new Date().toISOString() }] },
+        { id: uid(), company: 'Merck', role: 'Associate Director, Market Access', url: 'https://jobs.merck.com', area: 'Vaccines', func: 'Payer Strategy', level: 'Associate Director', jobtype: 'Full-Time', stage: 'Applied', priority: 'high', recruiter: 'Sarah Johnson', notes: 'Applied via LinkedIn. Follow up next week.', date: today, interviews: [], activity: [{ text: 'Added as sample role', time: new Date().toISOString() }] },
+        { id: uid(), company: 'Gilead Sciences', role: 'Director, Medical Affairs — HIV', url: 'https://gilead.com/careers', area: 'Infectious Disease', func: 'Medical Affairs', level: 'Director', jobtype: 'Full-Time', stage: 'Interviewing', priority: 'high', recruiter: 'Tom Rivera', notes: 'Phone screen scheduled. Prep disease area knowledge.', date: today, interviews: [{ date: today, type: 'Phone Screen', notes: 'With hiring manager' }], activity: [{ text: 'Added as sample role', time: new Date().toISOString() }] },
+        { id: uid(), company: 'Regeneron', role: 'Brand Manager, Immunology', url: 'https://careers.regeneron.com', area: 'Immunology', func: 'Brand/Product Management', level: 'Manager', jobtype: 'Full-Time', stage: 'Sourced', priority: 'med', recruiter: '', notes: 'Interesting pipeline — dupilumab expansion.', date: today, interviews: [], activity: [{ text: 'Added as sample role', time: new Date().toISOString() }] },
+      ];
+      setJobs(SEED_JOBS);
+      saveJobsToCloud();
+    }
+
     renderTracker();
     updateHomeCards();
     initCachedLibrary();
