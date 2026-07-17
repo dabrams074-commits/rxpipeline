@@ -44,6 +44,11 @@ export async function initAuth(onReady) {
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user && !_onReadyCalled) {
       _currentUser = session.user;
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'sign_up', {
+          method: session.user.app_metadata?.provider || 'email'
+        });
+      }
       await _checkAndGate(onReady);
     } else if (event === 'SIGNED_OUT') {
       _currentUser    = null;
