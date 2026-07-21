@@ -1344,7 +1344,7 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
 .why-pillar-text p {
   font-size: 0.85rem; color: var(--muted); line-height: 1.65; margin: 0;
 }
-.why-mobile-intro { display: none; }
+.why-mobile-intro { display: none; border: 1px solid var(--border); border-radius: 12px; padding: 20px; background: var(--card); }
 
 @media (max-width: 860px) {
   .auth-login-wrap { flex-direction: column; align-items: center; gap: 32px; }
