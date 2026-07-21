@@ -1302,7 +1302,7 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
 
 /* ── Why bioboard landing layout ── */
 .auth-login-wrap {
-  display: flex; flex-direction: row; align-items: flex-start;
+  display: flex; flex-direction: row-reverse; align-items: flex-start;
   gap: 64px; width: 100%; max-width: 1100px; padding: 40px 20px 80px;
   min-height: calc(100vh - 80px);
 }
@@ -1345,9 +1345,9 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
   font-size: 0.85rem; color: var(--muted); line-height: 1.65; margin: 0;
 }
 @media (max-width: 860px) {
-  .auth-login-wrap { flex-direction: column-reverse; align-items: center; gap: 40px; }
+  .auth-login-wrap { flex-direction: column; align-items: center; gap: 24px; }
   .auth-login-wrap .auth-card { flex: none; position: static; width: 100%; max-width: 460px; }
-  .why-bioboard { text-align: center; }
+  .why-bioboard { display: none; }
   .why-pillar { flex-direction: column; gap: 12px; }
   .why-headline { font-size: 1.8rem; }
 }
