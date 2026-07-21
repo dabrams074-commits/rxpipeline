@@ -527,10 +527,16 @@
         <h2 class="news-title">Industry News</h2>
         <p class="news-sub">Pharma &amp; biotech headlines from leading publications</p>
       </div>
-      <button class="btn-fetch" id="btn-news-refresh" onclick="loadNews()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="news-fetch-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-        Refresh
-      </button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-fetch" onclick="window.openDigestModal()" style="background:var(--accent);color:#0d0f14;font-weight:600;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Get My Digest
+        </button>
+        <button class="btn-fetch" id="btn-news-refresh" onclick="loadNews()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="news-fetch-icon"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+      </div>
     </div>
     <div class="news-filters">
       <select id="news-filter-co" onchange="renderNews()" disabled>
@@ -991,6 +997,54 @@
 
 </div>
 <!-- ── End Auth Overlay ─────────────────────────────────────────────────── -->
+
+<!-- ── Digest Modal ──────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="digestModalOverlay" onclick="if(event.target===this)window.closeDigestModal()" style="display:none;">
+  <div class="modal" style="max-width:420px;width:92%">
+    <div class="modal-title">Get My Personalized Digest</div>
+    <p style="font-size:0.78rem;color:var(--muted);margin:4px 0 18px;line-height:1.5;">We'll email you a curated news digest based on your therapeutic area and job function.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:0.7rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Therapeutic Area</label>
+        <select id="digest-ta" class="modal-input" style="width:100%;padding:9px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85rem;">
+          <option value="">Select therapeutic area...</option>
+          <option>Oncology</option>
+          <option>Immunology</option>
+          <option>Neuroscience</option>
+          <option>Rare Disease</option>
+          <option>Cardiovascular</option>
+          <option>Vaccines</option>
+          <option>Metabolic / Endocrine</option>
+          <option>Infectious Disease</option>
+          <option>Ophthalmology</option>
+          <option>Diversified</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:0.7rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Job Function</label>
+        <select id="digest-func" class="modal-input" style="width:100%;padding:9px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85rem;">
+          <option value="">Select job function...</option>
+          <option>Commercial Analytics</option>
+          <option>Medical Affairs</option>
+          <option>Market Access</option>
+          <option>Field Sales</option>
+          <option>Brand/Product Management</option>
+          <option>Regulatory Affairs</option>
+          <option>Clinical Development</option>
+          <option>Forecasting</option>
+          <option>HEOR</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top:18px;">
+      <button class="btn-cancel" onclick="window.closeDigestModal()">Cancel</button>
+      <button class="btn-save" id="btn-send-digest" onclick="window.sendDigest()">Send to My Email →</button>
+    </div>
+    <p id="digest-status" style="font-size:0.75rem;text-align:center;margin-top:10px;color:var(--accent);display:none;"></p>
+  </div>
+</div>
+<!-- ── End Digest Modal ──────────────────────────────────────────────────── -->
 
 <script type="module" src="./js/main.js"></script>
 

@@ -1548,6 +1548,57 @@ window.closeReclassifyModal = function() {
   document.getElementById('reclassifyModalOverlay').classList.remove('open');
 };
 
+// ── Digest Modal ─────────────────────────────────────────────────────────────
+window.openDigestModal = function() {
+  const overlay = document.getElementById('digestModalOverlay');
+  if (!overlay) return;
+  // Pre-fill from Supabase profile if available
+  overlay.style.display = 'flex';
+};
+
+window.closeDigestModal = function() {
+  document.getElementById('digestModalOverlay').style.display = 'none';
+  document.getElementById('digest-status').style.display = 'none';
+};
+
+window.sendDigest = async function() {
+  const ta   = document.getElementById('digest-ta').value;
+  const func = document.getElementById('digest-func').value;
+  const status = document.getElementById('digest-status');
+  const btn  = document.getElementById('btn-send-digest');
+
+  if (!ta || !func) { showToast('Please select both a therapeutic area and job function'); return; }
+
+  const user = await getUser();
+  if (!user?.email) { showToast('Could not get your email — please sign in again'); return; }
+
+  btn.disabled = true; btn.textContent = 'Sending…';
+  status.style.display = 'none';
+
+  try {
+    const res = await fetch('/.netlify/functions/send-digest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email, therapeuticArea: ta, jobFunction: func }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      status.textContent = `✓ Digest sent to ${user.email}`;
+      status.style.display = 'block';
+      btn.textContent = 'Sent!';
+      // Save preferences to Supabase
+      const { data: { user: u } } = await supabase.auth.getUser();
+      if (u) await supabase.from('profiles').upsert({ id: u.id, therapeutic_area: ta, job_function: func }, { onConflict: 'id' });
+      setTimeout(() => window.closeDigestModal(), 2500);
+    } else {
+      throw new Error(data.error || 'Send failed');
+    }
+  } catch (e) {
+    showToast('Could not send digest: ' + e.message);
+    btn.disabled = false; btn.textContent = 'Send to My Email →';
+  }
+};
+
 window.submitReclassifyFeedback = async function() {
   if (!_reclassifyJob) return;
   const statusEl = document.getElementById('reclassify-status');
