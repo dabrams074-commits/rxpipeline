@@ -1345,7 +1345,7 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
   font-size: 0.85rem; color: var(--muted); line-height: 1.65; margin: 0;
 }
 @media (max-width: 860px) {
-  .auth-login-wrap { flex-direction: column; align-items: center; gap: 40px; }
+  .auth-login-wrap { flex-direction: column-reverse; align-items: center; gap: 40px; }
   .auth-login-wrap .auth-card { flex: none; position: static; width: 100%; max-width: 460px; }
   .why-bioboard { text-align: center; }
   .why-pillar { flex-direction: column; gap: 12px; }
