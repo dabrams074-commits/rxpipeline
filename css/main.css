@@ -1349,10 +1349,12 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
 @media (max-width: 860px) {
   .auth-login-wrap { flex-direction: column; align-items: center; gap: 32px; }
   .auth-login-wrap .auth-card { flex: none; position: static; width: 100%; max-width: 460px; }
-  .why-bioboard { display: none; }
+  .why-bioboard { display: block; width: 100%; max-width: 460px; text-align: left; }
+  .why-body { display: none; }
   .why-mobile-intro { display: block; width: 100%; max-width: 460px; }
   .why-pillar { flex-direction: column; gap: 12px; }
-  .why-headline { font-size: 1.6rem; }
+  .why-headline { display: none; }
+  .why-eyebrow { display: none; }
   .why-body { font-size: 0.85rem; }
 }
 
