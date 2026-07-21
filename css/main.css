@@ -1344,10 +1344,13 @@ header { padding: 0 14px; flex-wrap: wrap; height: auto; padding-top: 10px; }
 .why-pillar-text p {
   font-size: 0.85rem; color: var(--muted); line-height: 1.65; margin: 0;
 }
+.why-mobile-intro { display: none; }
+
 @media (max-width: 860px) {
-  .auth-login-wrap { flex-direction: column; align-items: center; gap: 40px; }
+  .auth-login-wrap { flex-direction: column; align-items: center; gap: 32px; }
   .auth-login-wrap .auth-card { flex: none; position: static; width: 100%; max-width: 460px; }
-  .why-bioboard { display: block; text-align: left; width: 100%; max-width: 460px; }
+  .why-bioboard { display: none; }
+  .why-mobile-intro { display: block; width: 100%; max-width: 460px; }
   .why-pillar { flex-direction: column; gap: 12px; }
   .why-headline { font-size: 1.6rem; }
   .why-body { font-size: 0.85rem; }
