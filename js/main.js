@@ -1552,12 +1552,11 @@ window.closeReclassifyModal = function() {
 window.openDigestModal = function() {
   const overlay = document.getElementById('digestModalOverlay');
   if (!overlay) return;
-  // Pre-fill from Supabase profile if available
-  overlay.style.display = 'flex';
+  overlay.classList.add('open');
 };
 
 window.closeDigestModal = function() {
-  document.getElementById('digestModalOverlay').style.display = 'none';
+  document.getElementById('digestModalOverlay').classList.remove('open');
   document.getElementById('digest-status').style.display = 'none';
 };
 
