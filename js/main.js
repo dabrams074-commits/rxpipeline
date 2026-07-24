@@ -1495,8 +1495,8 @@ export function renderRoles() {
       <div class="cin-text">Job function and location data is parsed directly from company career pages, which are sometimes inconsistently formatted or missing key details. We're continuously improving accuracy — anomalies will decrease over time. Spotted something off? <a href="mailto:bioboard@bioboard.io" class="cin-link">Send us a note</a> or click the 🏷️ <strong>Fix tags</strong> button on any role — every suggestion helps.</div>
     </div>
   </div>`;
-  if (cardArr.length > 1) cardArr.splice(1, 0, classificationNote);
-  else if (cardArr.length === 1) cardArr.push(classificationNote);
+  if (cardArr.length > 2) cardArr.splice(2, 0, classificationNote);
+  else if (cardArr.length > 0) cardArr.push(classificationNote);
   container.innerHTML = '<div class="roles-grid">' + cardArr.join('') + '</div>';
   const lmWrap = document.getElementById('load-more-wrap');
   const lmBtn  = document.getElementById('load-more-btn');
