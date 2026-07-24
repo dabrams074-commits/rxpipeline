@@ -881,7 +881,7 @@ export function buildFilters() {
     (hasNoState    ? msOption('state', '__nostate__', 'Other (no state)') : '');
   // Re-check any boxes for filters already selected (in case panel was rebuilt)
   Object.keys(msFilters).forEach(updateMsTrigger);
-  document.getElementById('roles-filters').style.display = 'flex';
+  if (getAuthState().user) document.getElementById('roles-filters').style.display = 'flex';
 }
 
 export function parsePostedDate(posted) {
@@ -1462,10 +1462,9 @@ export function renderRoles() {
   if (!list.length) return;
   const cardArr = list.slice(0, rolesPageSize).map(r => { try { return roleCardHTML(r); } catch(e) { return ''; } });
 
-  // Inject inline sign-in CTA for unauthenticated users
+  // Inject inline sign-in CTA as first card for unauthenticated users
   const { user: _ctaUser } = getAuthState();
   if (!_ctaUser) {
-    const INSERT_AT = 8;
     const ctaCard = `<div class="role-card inline-cta-card">
           <div class="inline-cta-body">
             <div class="inline-cta-icon">🔒</div>
@@ -1477,8 +1476,16 @@ export function renderRoles() {
           </div>
           <div class="inline-cta-note">Free access · No credit card required</div>
         </div>`;
-    if (cardArr.length > INSERT_AT) cardArr.splice(INSERT_AT, 0, ctaCard);
-    else cardArr.push(ctaCard);
+    cardArr.unshift(ctaCard);
+  }
+  // Show/hide filters and fetch button based on auth state
+  const filtersEl = document.getElementById('roles-filters');
+  const fetchBtn  = document.getElementById('btn-fetch');
+  if (!_ctaUser) {
+    if (filtersEl) filtersEl.style.display = 'none';
+    if (fetchBtn)  { fetchBtn.disabled = true; fetchBtn.title = 'Sign in to fetch live jobs'; }
+  } else {
+    if (fetchBtn)  { fetchBtn.disabled = false; fetchBtn.title = ''; }
   }
 
   const classificationNote = `<div class="role-card classification-inline-note">
