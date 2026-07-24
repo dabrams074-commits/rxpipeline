@@ -931,6 +931,28 @@ padding: 14px 0; border-top: 1px solid var(--border); letter-spacing: 0.3px;
 .cin-link:hover { text-decoration: underline; }
 .roles-empty { text-align: center; padding: 60px 24px; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
+/* Inline signup/subscribe CTA embedded in the live roles list */
+.inline-cta-card {
+  background: linear-gradient(135deg, rgba(13,110,79,0.06) 0%, rgba(79,255,176,0.06) 100%);
+  border: 1.5px solid var(--accent) !important;
+  cursor: default !important;
+  padding: 20px 20px 14px;
+  flex-direction: column;
+  gap: 10px;
+}
+.inline-cta-card:hover { transform: none !important; box-shadow: 0 0 0 3px rgba(13,110,79,0.12) !important; }
+.inline-cta-body { display: flex; align-items: center; gap: 14px; }
+.inline-cta-icon { font-size: 1.4rem; flex-shrink: 0; }
+.inline-cta-text { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.inline-cta-text strong { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+.inline-cta-text span { font-size: 0.78rem; color: var(--muted); line-height: 1.45; }
+.inline-cta-btn { flex-shrink: 0; font-size: 0.8rem; padding: 9px 18px; white-space: nowrap; }
+.inline-cta-note { font-size: 0.65rem; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.3px; padding-left: 2px; }
+@media (max-width: 600px) {
+  .inline-cta-body { flex-direction: column; align-items: flex-start; }
+  .inline-cta-btn { width: 100%; text-align: center; }
+}
+
 /* ── COMMUNITY PAGE ── */
 .community-page { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
 .community-section { margin-bottom: 40px; }

@@ -4,7 +4,7 @@ import {
   setJobs, setEditId, setPanelJobId, resetTFilters
 } from './store.js';
 
-import { initAuth, signInWithGoogle, signInWithLinkedIn, signInWithApple, signOut, startCheckout, manageSubscription, toggleSignUp, emailAuth, supabase, getUser, showPaywall } from './auth.js';
+import { initAuth, signInWithGoogle, signInWithLinkedIn, signInWithApple, signOut, startCheckout, manageSubscription, toggleSignUp, emailAuth, supabase, getUser, showPaywall, getAuthState } from './auth.js';
 window.rxSignInWithGoogle      = signInWithGoogle;
 window.rxSignInWithLinkedIn    = signInWithLinkedIn;
 window.rxSignInWithApple       = signInWithApple;
@@ -60,6 +60,14 @@ export function showToast(msg) { const t = document.getElementById('toast'); t.t
 // ══════════════════════════════════════════
 let currentView = 'home';
 function switchView(v) {
+  // Gate auth-required tabs for unauthenticated or unsubscribed users
+  const AUTH_TABS = ['tracker', 'library', 'news', 'community', 'home'];
+  if (AUTH_TABS.includes(v)) {
+    const { user, needsUpgrade } = getAuthState();
+    if (!user) { showPaywall(); return; }
+    if (needsUpgrade) { showPaywall(); return; }
+  }
+
   currentView = v;
   ['home', 'tracker', 'library', 'liveroles', 'news', 'community'].forEach(id => {
     document.getElementById('view-' + id).classList.toggle('active', v === id);
@@ -1454,6 +1462,38 @@ export function renderRoles() {
   if (!list.length && all_jobs.length > 0) { container.innerHTML = '<div class="roles-empty">No roles match your filters</div>'; return; }
   if (!list.length) return;
   const cardArr = list.slice(0, rolesPageSize).map(r => { try { return roleCardHTML(r); } catch(e) { return ''; } });
+
+  // Inject inline sign-up / subscribe CTA for unauthenticated or unsubscribed users
+  const { user: _ctaUser, needsUpgrade: _ctaNeedsUpgrade } = getAuthState();
+  if (!_ctaUser || _ctaNeedsUpgrade) {
+    const INSERT_AT = 8;
+    const ctaCard = _ctaUser
+      ? `<div class="role-card inline-cta-card">
+          <div class="inline-cta-body">
+            <div class="inline-cta-icon">⚡</div>
+            <div class="inline-cta-text">
+              <strong>Unlock full access</strong>
+              <span>Track applications, filter by TA &amp; function, and get your personalized digest.</span>
+            </div>
+            <button class="btn-fetch inline-cta-btn" onclick="window.rxShowPaywall()">Subscribe — from $10/mo</button>
+          </div>
+          <div class="inline-cta-note">10-day free trial · No credit card required</div>
+        </div>`
+      : `<div class="role-card inline-cta-card">
+          <div class="inline-cta-body">
+            <div class="inline-cta-icon">🔒</div>
+            <div class="inline-cta-text">
+              <strong>Sign in to track &amp; filter roles</strong>
+              <span>Add jobs to your pipeline, filter by therapeutic area, and manage your search.</span>
+            </div>
+            <button class="btn-fetch inline-cta-btn" onclick="window.rxShowPaywall()">Sign in free — 10-day trial</button>
+          </div>
+          <div class="inline-cta-note">No credit card required · From $10/mo after trial</div>
+        </div>`;
+    if (cardArr.length > INSERT_AT) cardArr.splice(INSERT_AT, 0, ctaCard);
+    else cardArr.push(ctaCard);
+  }
+
   const classificationNote = `<div class="role-card classification-inline-note">
     <div class="cin-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
     <div class="cin-body">

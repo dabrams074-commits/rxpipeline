@@ -23,8 +23,14 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let _currentUser  = null;
 let _onReadyCalled = false;
 let _isTrialUser = false;
+let _needsUpgrade = false; // signed in but no active subscription
 
 export const getUser = () => _currentUser;
+export const getAuthState = () => ({
+  user: _currentUser,
+  needsUpgrade: _needsUpgrade,
+  isTrial: _isTrialUser,
+});
 
 // ── Entry point called from main.js DOMContentLoaded ────────────────────────
 export async function initAuth(onReady) {
@@ -37,7 +43,9 @@ export async function initAuth(onReady) {
     _currentUser = session.user;
     await _checkAndGate(onReady);
   } else {
-    _showOverlay('login');
+    // Let unauthenticated users see Live Roles — inline CTA handles conversion
+    _hideOverlay();
+    if (!_onReadyCalled) { _onReadyCalled = true; onReady?.(); }
   }
 
   // Keep listening so sign-in / sign-out elsewhere updates state
@@ -53,7 +61,11 @@ export async function initAuth(onReady) {
     } else if (event === 'SIGNED_OUT') {
       _currentUser    = null;
       _onReadyCalled  = false;
-      _showOverlay('login');
+      _needsUpgrade   = false;
+      _isTrialUser    = false;
+      _hideOverlay();
+      // Re-render roles so inline CTA updates to sign-in state
+      if (typeof window.renderRoles === 'function') window.renderRoles();
     }
   });
 }
@@ -76,6 +88,7 @@ async function _checkAndGate(onReady) {
     const { active, reason, daysLeft } = await res.json();
 
     if (active) {
+      _needsUpgrade = false;
       _hideOverlay();
       if (!_onReadyCalled) {
         _onReadyCalled = true;
@@ -86,7 +99,13 @@ async function _checkAndGate(onReady) {
         _showTrialBanner(daysLeft);
       }
     } else {
-      _showOverlay('paywall');
+      // Signed in but no subscription — let them see Live Roles, inline CTA converts them
+      _needsUpgrade = true;
+      _hideOverlay();
+      if (!_onReadyCalled) {
+        _onReadyCalled = true;
+        onReady?.();
+      }
     }
   } catch {
     // Network hiccup — let the user in and check again next visit
@@ -203,7 +222,7 @@ export async function manageSubscription() {
 }
 
 export function showPaywall() {
-  _showOverlay('paywall');
+  _showOverlay(_currentUser ? 'paywall' : 'login');
 }
 
 export async function startCheckout(plan = 'monthly', triggerEl = null) {
