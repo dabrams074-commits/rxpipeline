@@ -70,50 +70,14 @@ export async function initAuth(onReady) {
   });
 }
 
-// ── Checks Stripe and either shows the app or the paywall ───────────────────
+// ── Grant access to any signed-in user (free access, no subscription required) ──
 async function _checkAndGate(onReady) {
-  _showOverlay('loading');
   _updateUserPill();
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
-    const res = await fetch('/.netlify/functions/check-subscription', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email: _currentUser.email, createdAt: _currentUser.created_at }),
-      signal:  controller.signal,
-    });
-    clearTimeout(timeout);
-    const { active, reason, daysLeft } = await res.json();
-
-    if (active) {
-      _needsUpgrade = false;
-      _hideOverlay();
-      if (!_onReadyCalled) {
-        _onReadyCalled = true;
-        onReady?.();
-      }
-      if (reason === 'trial' && daysLeft != null) {
-        _isTrialUser = true;
-        _showTrialBanner(daysLeft);
-      }
-    } else {
-      // Signed in but no subscription — let them see Live Roles, inline CTA converts them
-      _needsUpgrade = true;
-      _hideOverlay();
-      if (!_onReadyCalled) {
-        _onReadyCalled = true;
-        onReady?.();
-      }
-    }
-  } catch {
-    // Network hiccup — let the user in and check again next visit
-    _hideOverlay();
-    if (!_onReadyCalled) {
-      _onReadyCalled = true;
-      onReady?.();
-    }
+  _needsUpgrade = false;
+  _hideOverlay();
+  if (!_onReadyCalled) {
+    _onReadyCalled = true;
+    onReady?.();
   }
 }
 

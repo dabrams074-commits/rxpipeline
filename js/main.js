@@ -60,12 +60,11 @@ export function showToast(msg) { const t = document.getElementById('toast'); t.t
 // ══════════════════════════════════════════
 let currentView = 'home';
 function switchView(v) {
-  // Gate auth-required tabs for unauthenticated or unsubscribed users
+  // Gate auth-required tabs — sign-in required, but free access once signed in
   const AUTH_TABS = ['tracker', 'library', 'news', 'community', 'home'];
   if (AUTH_TABS.includes(v)) {
-    const { user, needsUpgrade } = getAuthState();
+    const { user } = getAuthState();
     if (!user) { showPaywall(); return; }
-    if (needsUpgrade) { showPaywall(); return; }
   }
 
   currentView = v;
@@ -1463,32 +1462,20 @@ export function renderRoles() {
   if (!list.length) return;
   const cardArr = list.slice(0, rolesPageSize).map(r => { try { return roleCardHTML(r); } catch(e) { return ''; } });
 
-  // Inject inline sign-up / subscribe CTA for unauthenticated or unsubscribed users
-  const { user: _ctaUser, needsUpgrade: _ctaNeedsUpgrade } = getAuthState();
-  if (!_ctaUser || _ctaNeedsUpgrade) {
+  // Inject inline sign-in CTA for unauthenticated users
+  const { user: _ctaUser } = getAuthState();
+  if (!_ctaUser) {
     const INSERT_AT = 8;
-    const ctaCard = _ctaUser
-      ? `<div class="role-card inline-cta-card">
-          <div class="inline-cta-body">
-            <div class="inline-cta-icon">⚡</div>
-            <div class="inline-cta-text">
-              <strong>Unlock full access</strong>
-              <span>Track applications, filter by TA &amp; function, and get your personalized digest.</span>
-            </div>
-            <button class="btn-fetch inline-cta-btn" onclick="window.rxShowPaywall()">Subscribe — from $10/mo</button>
-          </div>
-          <div class="inline-cta-note">10-day free trial · No credit card required</div>
-        </div>`
-      : `<div class="role-card inline-cta-card">
+    const ctaCard = `<div class="role-card inline-cta-card">
           <div class="inline-cta-body">
             <div class="inline-cta-icon">🔒</div>
             <div class="inline-cta-text">
-              <strong>Sign in to track &amp; filter roles</strong>
-              <span>Add jobs to your pipeline, filter by therapeutic area, and manage your search.</span>
+              <strong>Sign in for free to track &amp; filter roles</strong>
+              <span>Add jobs to your pipeline, filter by therapeutic area, and manage your search — 100% free.</span>
             </div>
-            <button class="btn-fetch inline-cta-btn" onclick="window.rxShowPaywall()">Sign in free — 10-day trial</button>
+            <button class="btn-fetch inline-cta-btn" onclick="window.rxShowPaywall()">Sign in — it's free</button>
           </div>
-          <div class="inline-cta-note">No credit card required · From $10/mo after trial</div>
+          <div class="inline-cta-note">Free access · No credit card required</div>
         </div>`;
     if (cardArr.length > INSERT_AT) cardArr.splice(INSERT_AT, 0, ctaCard);
     else cardArr.push(ctaCard);
