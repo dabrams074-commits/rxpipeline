@@ -1646,8 +1646,18 @@ window.downloadDigestPDF = async function() {
   btn.disabled = true; btn.textContent = 'Generating…';
 
   try {
-    // Use already-loaded newsArticles (same pool as the News tab) filtered by TA
-    if (!newsArticles.length) throw new Error('News not loaded yet — go to the News tab first to load articles, then try again');
+    // Ensure news is loaded — fetch now if not already available
+    if (!newsArticles.length) {
+      btn.textContent = 'Loading news…';
+      try {
+        const res = await fetch('/.netlify/functions/news');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const articles = await res.json();
+        newsArticles = articles.map(tagArticle);
+      } catch(e) {
+        throw new Error('Could not load news articles: ' + e.message);
+      }
+    }
     const taNews       = newsArticles.filter(a => a._tas && a._tas.includes(ta)).slice(0, 12);
     const industryNews = newsArticles.filter(a => !a._tas?.includes(ta) && a.topic !== 'Company News').slice(0, 6);
     const weekOf = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
