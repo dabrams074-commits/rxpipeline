@@ -1644,23 +1644,80 @@ window.downloadDigestPDF = async function() {
   btn.disabled = true; btn.textContent = 'Generating…';
 
   try {
+    // Fetch news from server (needs server for Google News CORS)
     const res = await fetch('/.netlify/functions/send-digest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: user.email, therapeuticArea: ta, jobFunction: func, pdfOnly: true }),
     });
-    const data = await res.json();
-    if (!data.html) throw new Error(data.error || 'No content returned');
+    const { taNews = [], industryNews = [], weekOf, error } = await res.json();
+    if (error) throw new Error(error);
+
+    // Filter live jobs by TA and function from already-loaded data
+    const matchingJobs = all_jobs.filter(j => {
+      const jArea = j._area || inferArea(j.title || '', j.dept || '');
+      const jFunc = j._func || inferFunc(j.title || '', j.dept || '');
+      return jArea === ta || jFunc === func;
+    }).slice(0, 10);
+
+    const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+    const newsItemHTML = item => `
+      <tr><td style="padding:12px 0;border-bottom:1px solid #e2e6ea;">
+        <a href="${item.url}" style="font-size:13px;font-weight:600;color:#0d1117;text-decoration:none;display:block;margin-bottom:3px;line-height:1.4;">${item.title}</a>
+        ${item.desc ? `<p style="margin:0;font-size:11px;color:#5a6370;line-height:1.5;">${item.desc}</p>` : ''}
+        ${item.dateStr ? `<p style="margin:3px 0 0;font-size:10px;color:#9aa3ad;font-family:monospace;">${item.dateStr}</p>` : ''}
+      </td></tr>`;
+
+    const jobRowHTML = j => `
+      <tr><td style="padding:10px 0;border-bottom:1px solid #e2e6ea;">
+        <p style="margin:0 0 1px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#0d6e4f;font-family:monospace;">${esc(j.company)}</p>
+        <a href="${esc(j.url)}" style="font-size:13px;font-weight:600;color:#0d1117;text-decoration:none;display:block;line-height:1.4;">${esc(j.title)}</a>
+        ${j.location ? `<p style="margin:2px 0 0;font-size:11px;color:#5a6370;">📍 ${esc(j.location)}</p>` : ''}
+      </td></tr>`;
+
+    const sectionHTML = (label, rows) => rows.length === 0 ? '' : `
+      <tr><td style="padding-top:22px;">
+        <p style="margin:0 0 10px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9aa3ad;font-family:monospace;border-bottom:1px solid #e2e6ea;padding-bottom:6px;">${label}</p>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">${rows.join('')}</table>
+      </td></tr>`;
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+      <title>bioboard.io Digest — ${ta} · ${func}</title>
+      <style>
+        body { margin:0; padding:0; background:#f5f6f8; font-family:-apple-system,'Helvetica Neue',Arial,sans-serif; }
+        @media print { body { background:#fff; } .no-print { display:none; } }
+      </style>
+    </head><body>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f6f8;padding:24px 16px;">
+    <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#fff;border-radius:8px;overflow:hidden;">
+      <tr><td style="background:#0a1f17;padding:24px 32px 20px;border-bottom:3px solid #4fffb0;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td style="font-size:18px;font-weight:700;color:#fff;">bio<span style="color:#4fffb0;">board</span>.io</td>
+          <td align="right" style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#4fffb0;font-family:monospace;">${weekOf}</td>
+        </tr></table>
+        <div style="display:inline-block;background:#4fffb0;color:#0a1f17;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:99px;margin:12px 0 8px;">${ta}</div>
+        <h1 style="margin:0;font-size:20px;font-weight:700;color:#fff;line-height:1.3;">Your pharma digest</h1>
+        <p style="margin:4px 0 0;font-size:12px;color:rgba(255,255,255,0.55);">${ta} · ${func}</p>
+      </td></tr>
+      <tr><td style="padding:8px 32px 32px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          ${sectionHTML(`Open Roles — ${ta} &amp; ${func}`, matchingJobs.map(jobRowHTML))}
+          ${sectionHTML(`${ta} — Top Stories`, taNews.map(newsItemHTML))}
+          ${sectionHTML('Industry Headlines', industryNews.map(newsItemHTML))}
+        </table>
+      </td></tr>
+      <tr><td style="background:#f0f2f5;padding:16px 32px;text-align:center;border-top:1px solid #e2e6ea;">
+        <p style="margin:0;font-size:11px;color:#9aa3ad;">bioboard.io · Generated ${weekOf}</p>
+      </td></tr>
+    </table>
+    </td></tr></table>
+    <script>window.onload=function(){window.print();}<\/script>
+    </body></html>`;
 
     const win = window.open('', '_blank');
-    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>bioboard.io Digest — ${ta}</title>
-      <style>
-        @media print { body { margin: 0; } }
-        body { font-family: -apple-system, Helvetica, Arial, sans-serif; background: #f5f6f8; }
-      </style>
-    </head><body>${data.html}
-      <script>window.onload = function(){ window.print(); }<\/script>
-    </body></html>`);
+    win.document.write(html);
     win.document.close();
   } catch(e) {
     showToast('Could not generate PDF: ' + e.message);

@@ -176,9 +176,9 @@ exports.handler = async (event) => {
 
   const html = buildEmailHTML({ email, therapeuticArea, jobFunction, taNews, funcNews, industryNews, weekOf });
 
-  // PDF-only mode — return HTML for client-side print
+  // PDF-only mode — return raw news items so client can build PDF with live jobs
   if (pdfOnly) {
-    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ html }) };
+    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ taNews, industryNews, weekOf }) };
   }
 
   const RESEND_KEY = process.env.RESEND_API_KEY;
