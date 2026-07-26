@@ -1633,8 +1633,9 @@ window.sendDigest = async function() {
 };
 
 window.downloadDigestPDF = async function() {
-  const ta   = document.getElementById('digest-ta').value;
-  const func = document.getElementById('digest-func').value;
+  const ta       = document.getElementById('digest-ta').value;
+  const func     = document.getElementById('digest-func').value;
+  const location = document.getElementById('digest-location').value.trim();
   if (!ta || !func) { showToast('Please select both a therapeutic area and job function'); return; }
 
   const user = getUser();
@@ -1653,11 +1654,14 @@ window.downloadDigestPDF = async function() {
     const { taNews = [], industryNews = [], weekOf, error } = await res.json();
     if (error) throw new Error(error);
 
-    // Filter live jobs by TA and function from already-loaded data
+    // Filter live jobs by TA and/or function and optional location
+    const locLower = location.toLowerCase();
     const matchingJobs = all_jobs.filter(j => {
       const jArea = j._area || inferArea(j.title || '', j.dept || '');
       const jFunc = j._func || inferFunc(j.title || '', j.dept || '');
-      return jArea === ta || jFunc === func;
+      const matchesRole = jArea === ta || jFunc === func;
+      const matchesLoc  = !location || (j.location || '').toLowerCase().includes(locLower);
+      return matchesRole && matchesLoc;
     }).slice(0, 10);
 
     const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1699,21 +1703,21 @@ window.downloadDigestPDF = async function() {
         </tr></table>
         <div style="display:inline-block;background:#4fffb0;color:#0a1f17;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:99px;margin:12px 0 8px;">${ta}</div>
         <h1 style="margin:0;font-size:20px;font-weight:700;color:#fff;line-height:1.3;">Your pharma digest</h1>
-        <p style="margin:4px 0 0;font-size:12px;color:rgba(255,255,255,0.55);">${ta} · ${func}</p>
+        <p style="margin:4px 0 0;font-size:12px;color:rgba(255,255,255,0.55);">${ta} · ${func}${location ? ' · ' + location : ''}</p>
       </td></tr>
       <tr><td style="padding:8px 32px 32px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          ${sectionHTML(`Open Roles — ${ta} &amp; ${func}`, matchingJobs.map(jobRowHTML))}
           ${sectionHTML(`${ta} — Top Stories`, taNews.map(newsItemHTML))}
           ${sectionHTML('Industry Headlines', industryNews.map(newsItemHTML))}
+          ${sectionHTML(`Open Roles — ${ta} &amp; ${func}${location ? ' · ' + location : ''}`, matchingJobs.map(jobRowHTML))}
         </table>
       </td></tr>
       <tr><td style="background:#f0f2f5;padding:16px 32px;text-align:center;border-top:1px solid #e2e6ea;">
-        <p style="margin:0;font-size:11px;color:#9aa3ad;">bioboard.io · Generated ${weekOf}</p>
+        <p style="margin:0 0 10px;font-size:11px;color:#9aa3ad;">bioboard.io · Generated ${weekOf}</p>
+        <button onclick="window.print()" style="background:#0d6e4f;color:#fff;border:none;border-radius:6px;padding:9px 20px;font-size:12px;font-weight:600;cursor:pointer;">Save as PDF</button>
       </td></tr>
     </table>
     </td></tr></table>
-    <script>window.onload=function(){window.print();}<\/script>
     </body></html>`;
 
     const win = window.open('', '_blank');
