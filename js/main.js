@@ -1677,8 +1677,10 @@ window.downloadDigestPDF = async function() {
     const newsItemHTML = item => `
       <tr><td style="padding:12px 0;border-bottom:1px solid #e2e6ea;">
         <a href="${item.url}" style="font-size:13px;font-weight:600;color:#0d1117;text-decoration:none;display:block;margin-bottom:3px;line-height:1.4;">${item.title}</a>
-        ${item.desc ? `<p style="margin:0;font-size:11px;color:#5a6370;line-height:1.5;">${item.desc}</p>` : ''}
-        ${item.dateStr ? `<p style="margin:3px 0 0;font-size:10px;color:#9aa3ad;font-family:monospace;">${item.dateStr}</p>` : ''}
+        ${item.summary ? `<p style="margin:3px 0 4px;font-size:11px;color:#5a6370;line-height:1.5;">${item.summary}</p>` : ''}
+        <p style="margin:0;font-size:10px;color:#9aa3ad;font-family:monospace;">
+          ${item.source ? `<strong style="color:#0d6e4f;">${item.source}</strong>` : ''}${item.source && item.date ? ' &nbsp;·&nbsp; ' : ''}${item.date || ''}
+        </p>
       </td></tr>`;
 
     const jobRowHTML = j => `
