@@ -1036,88 +1036,32 @@
       </div>
       <div>
         <label style="font-size:0.7rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">Job Function</label>
-        <select id="digest-func" class="modal-input" style="width:100%;padding:9px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:0.85rem;">
-          <option value="">Select job function...</option>
-          <optgroup label="Commercial Operations">
-            <option>Field Sales</option>
-            <option>Sales Force Effectiveness</option>
-            <option>Incentive Compensation</option>
-            <option>Commercial Training</option>
-            <option>Field Force Deployment</option>
-            <option>Targeting &amp; Segmentation</option>
-          </optgroup>
-          <optgroup label="Marketing">
-            <option>Brand/Product Management</option>
-            <option>Omnichannel Marketing</option>
-            <option>Digital Marketing</option>
-            <option>HCP Marketing</option>
-            <option>Patient Marketing</option>
-            <option>Promotional Review (MLR)</option>
-          </optgroup>
-          <optgroup label="Market Access &amp; Pricing">
-            <option>Payer Strategy</option>
-            <option>HEOR</option>
-            <option>Reimbursement</option>
-            <option>Contracting &amp; Pricing</option>
-            <option>Government Affairs</option>
-          </optgroup>
-          <optgroup label="Commercial Analytics &amp; Insights">
-            <option>Commercial Analytics</option>
-            <option>Forecasting</option>
-            <option>Market Research</option>
-            <option>Competitive Intelligence</option>
-            <option>Real-World Evidence (RWE)</option>
-            <option>Data Science</option>
-          </optgroup>
-          <optgroup label="Medical Affairs">
-            <option>Medical Affairs</option>
-            <option>Medical Science Liaisons (MSLs)</option>
-            <option>Medical Communications</option>
-            <option>Publication Planning</option>
-            <option>Medical Education</option>
-          </optgroup>
-          <optgroup label="Clinical Development">
-            <option>Clinical Operations</option>
-            <option>Clinical Project Management</option>
-            <option>Biostatistics</option>
-            <option>Clinical Pharmacology</option>
-            <option>Patient Recruitment</option>
-          </optgroup>
-          <optgroup label="Regulatory Affairs">
-            <option>Regulatory Strategy</option>
-            <option>Submissions</option>
-            <option>Pharmacovigilance/Drug Safety</option>
-            <option>CMC Regulatory</option>
-            <option>International Regulatory</option>
-          </optgroup>
-          <optgroup label="Research &amp; Discovery">
-            <option>Drug Discovery</option>
-            <option>Translational Medicine</option>
-            <option>Biology</option>
-            <option>Chemistry</option>
-            <option>Computational Biology</option>
-          </optgroup>
-          <optgroup label="Manufacturing &amp; Supply Chain">
-            <option>Manufacturing Sciences</option>
-            <option>Quality Assurance</option>
-            <option>Supply Chain Planning</option>
-            <option>Technical Operations</option>
-          </optgroup>
-          <optgroup label="Business Development &amp; Strategy">
-            <option>Corporate Strategy</option>
-            <option>Licensing &amp; Acquisitions</option>
-            <option>Portfolio Strategy</option>
-          </optgroup>
-          <optgroup label="IT &amp; Digital">
-            <option>Digital Health</option>
-            <option>Data Engineering</option>
-            <option>AI/ML</option>
-          </optgroup>
-          <optgroup label="HR &amp; Talent">
-            <option>Talent Acquisition</option>
-            <option>HR Business Partners</option>
-          </optgroup>
-        </select>
+        <div class="ms-dropdown" id="digest-func-dropdown" style="width:100%;">
+          <button type="button" class="filter-select ms-trigger" id="digest-func-trigger" onclick="window.toggleDigestFunc()" style="width:100%;max-width:100%;justify-content:space-between;">
+            <span id="digest-func-label">Select job functions…</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="ms-panel" id="digest-func-panel" style="width:100%;min-width:unset;">
+            <div class="ms-panel-actions"><span class="ms-clear-link" onclick="window.clearDigestFuncs()">Clear all</span></div>
+            ${[
+              ['Commercial Operations', ['Field Sales','Sales Force Effectiveness','Incentive Compensation','Commercial Training','Field Force Deployment','Targeting & Segmentation']],
+              ['Marketing', ['Brand/Product Management','Omnichannel Marketing','Digital Marketing','HCP Marketing','Patient Marketing','Promotional Review (MLR)']],
+              ['Market Access & Pricing', ['Payer Strategy','HEOR','Reimbursement','Contracting & Pricing','Government Affairs']],
+              ['Commercial Analytics & Insights', ['Commercial Analytics','Forecasting','Market Research','Competitive Intelligence','Real-World Evidence (RWE)','Data Science']],
+              ['Medical Affairs', ['Medical Affairs','Medical Science Liaisons (MSLs)','Medical Communications','Publication Planning','Medical Education']],
+              ['Clinical Development', ['Clinical Operations','Clinical Project Management','Biostatistics','Clinical Pharmacology','Patient Recruitment']],
+              ['Regulatory Affairs', ['Regulatory Strategy','Submissions','Pharmacovigilance/Drug Safety','CMC Regulatory','International Regulatory']],
+              ['Research & Discovery', ['Drug Discovery','Translational Medicine','Biology','Chemistry','Computational Biology']],
+              ['Manufacturing & Supply Chain', ['Manufacturing Sciences','Quality Assurance','Supply Chain Planning','Technical Operations']],
+              ['Business Development & Strategy', ['Corporate Strategy','Licensing & Acquisitions','Portfolio Strategy']],
+              ['IT & Digital', ['Digital Health','Data Engineering','AI/ML']],
+              ['HR & Talent', ['Talent Acquisition','HR Business Partners']],
+            ].map(([grp, items]) => `
+              <div class="ms-group-label" style="padding:8px 6px 3px;">${grp}</div>
+              ${items.map(f => `<label class="ms-option"><input type="checkbox" class="digest-func-cb" value="${f}" onchange="window.updateDigestFuncLabel()"> ${f}</label>`).join('')}
+            `).join('')}
+          </div>
+        </div>
       </div>
     </div>
       <div>

@@ -1584,6 +1584,24 @@ window.closeReclassifyModal = function() {
 };
 
 // ── Digest Modal ─────────────────────────────────────────────────────────────
+window.toggleDigestFunc = function() {
+  document.getElementById('digest-func-panel').classList.toggle('open');
+};
+window.clearDigestFuncs = function() {
+  document.querySelectorAll('.digest-func-cb').forEach(cb => cb.checked = false);
+  document.getElementById('digest-func-label').textContent = 'Select job functions…';
+};
+window.updateDigestFuncLabel = function() {
+  const checked = [...document.querySelectorAll('.digest-func-cb:checked')].map(cb => cb.value);
+  const label = document.getElementById('digest-func-label');
+  label.textContent = checked.length === 0 ? 'Select job functions…' : checked.length === 1 ? checked[0] : `${checked.length} functions selected`;
+};
+// Close digest func panel when clicking outside
+document.addEventListener('click', e => {
+  const dd = document.getElementById('digest-func-dropdown');
+  if (dd && !dd.contains(e.target)) document.getElementById('digest-func-panel')?.classList.remove('open');
+});
+
 window.openDigestModal = function() {
   const overlay = document.getElementById('digestModalOverlay');
   if (!overlay) return;
@@ -1635,9 +1653,10 @@ window.sendDigest = async function() {
 
 window.downloadDigestPDF = async function() {
   const ta       = document.getElementById('digest-ta').value;
-  const func     = document.getElementById('digest-func').value;
+  const funcs    = [...document.querySelectorAll('.digest-func-cb:checked')].map(cb => cb.value);
   const location = document.getElementById('digest-location').value.trim();
-  if (!ta || !func) { showToast('Please select both a therapeutic area and job function'); return; }
+  if (!ta || !funcs.length) { showToast('Please select a therapeutic area and at least one job function'); return; }
+  const func = funcs.join(', '); // for display in PDF header
 
   const user = getUser();
   if (!user?.email) { showToast('Could not get your email — please sign in again'); return; }
@@ -1664,12 +1683,12 @@ window.downloadDigestPDF = async function() {
 
     // Filter live jobs by TA and/or function and optional location
     const locLower = location.toLowerCase();
-    // Strict match: TA AND function AND location (if specified)
+    // Strict match: TA AND any selected function AND location (if specified)
     const matchingJobs = all_jobs.filter(j => {
       const jArea = j._area || inferArea(j.title || '', j.dept || '');
       const jFunc = j._func || inferFunc(j.title || '', j.dept || '');
       const matchesTA   = jArea === ta;
-      const matchesFunc = jFunc === func;
+      const matchesFunc = funcs.includes(jFunc);
       const matchesLoc  = !location || (j.location || '').toLowerCase().includes(locLower);
       return matchesTA && matchesFunc && matchesLoc;
     }).slice(0, 12);
