@@ -49,28 +49,30 @@ const COMPANY_FEEDS = [
 
 // ── Industry / topic feeds ────────────────────────────────────────────────────
 const TOPIC_FEEDS = [
-  { url:'https://www.prnewswire.com/rss/news-releases-list.rss',        source:'PR Newswire',    topic:'Company News' },
-  { url:'https://www.fiercepharma.com/rss/xml',                         source:'FiercePharma',   topic:'Industry' },
-  { url:'https://www.biopharmadive.com/feeds/news/',                    source:'BioPharma Dive', topic:'Industry' },
-  { url:'https://www.statnews.com/feed/',                               source:'STAT News',      topic:'Industry' },
-  { url:'https://endpts.com/feed/',                                     source:'Endpoints News', topic:'Industry' },
-  { url:GN('FDA drug approval announcement'),                           source:'FDA',            topic:'Regulatory' },
-  { url:GN('FDA press release pharmaceutical'),                         source:'FDA News',       topic:'Regulatory' },
-  { url:GN('pharma biotech drug pipeline clinical trial'),              source:'Google News',    topic:'Pipeline' },
-  { url:GN('pharma biotech merger acquisition deal'),                   source:'Google News',    topic:'M&A' },
-  { url:GN('pharma biotech earnings revenue quarterly results'),        source:'Google News',    topic:'Earnings' },
-  // ── Medical Journals (direct feeds that allow server-side fetch) ──────────
-  { url:'https://jamanetwork.com/rss/site_3/67.xml',                                      source:'JAMA',                 topic:'Journals' },
-  { url:'https://www.nature.com/nm.rss',                                                  source:'Nature Medicine',      topic:'Journals' },
-  { url:'https://www.nature.com/nbt.rss',                                                 source:'Nature Biotechnology', topic:'Journals' },
-  // ── Medical Journals (Google News for sites that block direct RSS) ─────────
-  { url:GN('"New England Journal of Medicine" OR "NEJM" clinical trial results'),         source:'NEJM',                 topic:'Journals' },
-  { url:GN('"The Lancet" clinical trial results pharmaceutical'),                          source:'The Lancet',           topic:'Journals' },
-  { url:GN('"Journal of Clinical Oncology" OR "JCO" cancer treatment'),                   source:'J Clin Oncology',      topic:'Journals' },
-  { url:GN('"Clinical Cancer Research" AACR drug approval'),                               source:'Clin Cancer Res',      topic:'Journals' },
-  { url:GN('"Blood journal" OR "ASH" hematology treatment'),                               source:'Blood (ASH)',          topic:'Journals' },
-  { url:GN('"Cell" journal drug discovery breakthrough pharmaceutical'),                    source:'Cell',                 topic:'Journals' },
-  { url:GN('FDA MedWatch drug safety alert recall'),                                        source:'FDA MedWatch',         topic:'Journals' },
+  // ── Industry publications ─────────────────────────────────────────────────
+  { url:'https://www.fiercepharma.com/rss/xml',                         source:'FiercePharma',     topic:'Industry' },
+  { url:'https://www.biopharmadive.com/feeds/news/',                    source:'BioPharma Dive',   topic:'Industry' },
+  { url:'https://www.statnews.com/feed/',                               source:'STAT News',        topic:'Industry' },
+  { url:'https://endpts.com/feed/',                                     source:'Endpoints News',   topic:'Industry' },
+  { url:'https://www.prnewswire.com/rss/news-releases-list.rss',        source:'PR Newswire',      topic:'Company News' },
+  { url:GN('pharma biotech merger acquisition deal'),                   source:'Google News',      topic:'M&A' },
+  { url:GN('pharma biotech earnings revenue quarterly results'),        source:'Google News',      topic:'Earnings' },
+  { url:GN('pharma biotech drug pipeline clinical trial phase 3'),      source:'Google News',      topic:'Pipeline' },
+  // ── FDA (official RSS feeds) ──────────────────────────────────────────────
+  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-announcements/rss.xml',         source:'FDA',          topic:'Regulatory' },
+  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/drug-approvals-and-databases/rss.xml',source:'FDA Approvals', topic:'Regulatory' },
+  { url:'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/medwatch-safety-alerts/rss.xml',      source:'FDA MedWatch',  topic:'Regulatory' },
+  { url:GN('FDA drug approval NDA BLA PDUFA'),                          source:'FDA News',         topic:'Regulatory' },
+  { url:GN('FDA breakthrough therapy priority review fast track'),      source:'FDA Designations', topic:'Regulatory' },
+  { url:GN('EMA European Medicines Agency drug approval'),              source:'EMA',              topic:'Regulatory' },
+  // ── Medical Journals ──────────────────────────────────────────────────────
+  { url:'https://jamanetwork.com/rss/site_3/67.xml',                    source:'JAMA',                 topic:'Journals' },
+  { url:'https://www.nature.com/nm.rss',                                source:'Nature Medicine',      topic:'Journals' },
+  { url:'https://www.nature.com/nbt.rss',                               source:'Nature Biotechnology', topic:'Journals' },
+  { url:GN('"New England Journal of Medicine" OR "NEJM" clinical trial results'),  source:'NEJM',           topic:'Journals' },
+  { url:GN('"The Lancet" clinical trial results pharmaceutical'),                   source:'The Lancet',     topic:'Journals' },
+  { url:GN('"Journal of Clinical Oncology" OR "JCO" cancer treatment'),             source:'J Clin Oncology',topic:'Journals' },
+  { url:GN('"Blood journal" OR "ASH" hematology treatment'),                        source:'Blood (ASH)',    topic:'Journals' },
 ];
 
 exports.handler = async () => {
@@ -93,11 +95,11 @@ exports.handler = async () => {
     }))
   ]);
 
-  const fourMonthsAgo = Date.now() - (4 * 30 * 24 * 60 * 60 * 1000);
+  const threeMonthsAgo = Date.now() - (3 * 30 * 24 * 60 * 60 * 1000);
+  const isRecent = a => !a.dateMs || a.dateMs >= threeMonthsAgo;
 
-  const coArticles    = coResults.flatMap(r    => r.status === 'fulfilled' ? r.value : [])
-    .filter(a => !a.dateMs || a.dateMs >= fourMonthsAgo);
-  const topicArticles = topicResults.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+  const coArticles    = coResults.flatMap(r    => r.status === 'fulfilled' ? r.value : []).filter(isRecent);
+  const topicArticles = topicResults.flatMap(r => r.status === 'fulfilled' ? r.value : []).filter(isRecent);
 
   const seen = new Set();
   const dedup = arr => arr.filter(a => { if (!a.url || seen.has(a.url)) return false; seen.add(a.url); return true; });
