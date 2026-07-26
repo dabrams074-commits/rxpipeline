@@ -157,13 +157,10 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: CORS, body: 'Method Not Allowed' };
 
-  const { email, therapeuticArea, jobFunction } = JSON.parse(event.body || '{}');
+  const { email, therapeuticArea, jobFunction, pdfOnly } = JSON.parse(event.body || '{}');
   if (!email || !therapeuticArea || !jobFunction) {
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'email, therapeuticArea, and jobFunction are required' }) };
   }
-
-  const RESEND_KEY = process.env.RESEND_API_KEY;
-  if (!RESEND_KEY) return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'RESEND_API_KEY not set' }) };
 
   // Fetch news in parallel
   const taKeyword  = TA_KEYWORDS[therapeuticArea]  || therapeuticArea;
@@ -178,6 +175,14 @@ exports.handler = async (event) => {
   const weekOf = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   const html = buildEmailHTML({ email, therapeuticArea, jobFunction, taNews, funcNews, industryNews, weekOf });
+
+  // PDF-only mode — return HTML for client-side print
+  if (pdfOnly) {
+    return { statusCode: 200, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ html }) };
+  }
+
+  const RESEND_KEY = process.env.RESEND_API_KEY;
+  if (!RESEND_KEY) return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'RESEND_API_KEY not set' }) };
 
   // Send via Resend
   try {

@@ -1039,6 +1039,10 @@
     </div>
     <div class="modal-actions" style="margin-top:18px;">
       <button class="btn-cancel" onclick="window.closeDigestModal()">Cancel</button>
+      <button class="btn-export" id="btn-pdf-digest" onclick="window.downloadDigestPDF()" style="display:flex;align-items:center;gap:6px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF
+      </button>
       <button class="btn-save" id="btn-send-digest" onclick="window.sendDigest()">Send to My Email →</button>
     </div>
     <p id="digest-status" style="font-size:0.75rem;text-align:center;margin-top:10px;color:var(--accent);display:none;"></p>

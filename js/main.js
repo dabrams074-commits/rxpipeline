@@ -1632,6 +1632,44 @@ window.sendDigest = async function() {
   }
 };
 
+window.downloadDigestPDF = async function() {
+  const ta   = document.getElementById('digest-ta').value;
+  const func = document.getElementById('digest-func').value;
+  if (!ta || !func) { showToast('Please select both a therapeutic area and job function'); return; }
+
+  const user = getUser();
+  if (!user?.email) { showToast('Could not get your email — please sign in again'); return; }
+
+  const btn = document.getElementById('btn-pdf-digest');
+  btn.disabled = true; btn.textContent = 'Generating…';
+
+  try {
+    const res = await fetch('/.netlify/functions/send-digest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email, therapeuticArea: ta, jobFunction: func, pdfOnly: true }),
+    });
+    const data = await res.json();
+    if (!data.html) throw new Error(data.error || 'No content returned');
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>bioboard.io Digest — ${ta}</title>
+      <style>
+        @media print { body { margin: 0; } }
+        body { font-family: -apple-system, Helvetica, Arial, sans-serif; background: #f5f6f8; }
+      </style>
+    </head><body>${data.html}
+      <script>window.onload = function(){ window.print(); }<\/script>
+    </body></html>`);
+    win.document.close();
+  } catch(e) {
+    showToast('Could not generate PDF: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
+  }
+};
+
 window.submitReclassifyFeedback = async function() {
   if (!_reclassifyJob) return;
   const statusEl = document.getElementById('reclassify-status');
