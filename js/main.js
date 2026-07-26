@@ -1584,6 +1584,30 @@ window.closeReclassifyModal = function() {
 };
 
 // ── Digest Modal ─────────────────────────────────────────────────────────────
+const DIGEST_FUNC_GROUPS = [
+  ['Commercial Operations', ['Field Sales','Sales Force Effectiveness','Incentive Compensation','Commercial Training','Field Force Deployment','Targeting & Segmentation']],
+  ['Marketing', ['Brand/Product Management','Omnichannel Marketing','Digital Marketing','HCP Marketing','Patient Marketing','Promotional Review (MLR)']],
+  ['Market Access & Pricing', ['Payer Strategy','HEOR','Reimbursement','Contracting & Pricing','Government Affairs']],
+  ['Commercial Analytics & Insights', ['Commercial Analytics','Forecasting','Market Research','Competitive Intelligence','Real-World Evidence (RWE)','Data Science']],
+  ['Medical Affairs', ['Medical Affairs','Medical Science Liaisons (MSLs)','Medical Communications','Publication Planning','Medical Education']],
+  ['Clinical Development', ['Clinical Operations','Clinical Project Management','Biostatistics','Clinical Pharmacology','Patient Recruitment']],
+  ['Regulatory Affairs', ['Regulatory Strategy','Submissions','Pharmacovigilance/Drug Safety','CMC Regulatory','International Regulatory']],
+  ['Research & Discovery', ['Drug Discovery','Translational Medicine','Biology','Chemistry','Computational Biology']],
+  ['Manufacturing & Supply Chain', ['Manufacturing Sciences','Quality Assurance','Supply Chain Planning','Technical Operations']],
+  ['Business Development & Strategy', ['Corporate Strategy','Licensing & Acquisitions','Portfolio Strategy']],
+  ['IT & Digital', ['Digital Health','Data Engineering','AI/ML']],
+  ['HR & Talent', ['Talent Acquisition','HR Business Partners']],
+];
+
+function buildDigestFuncOptions() {
+  const el = document.getElementById('digest-func-options');
+  if (!el || el.children.length) return;
+  el.innerHTML = DIGEST_FUNC_GROUPS.map(([grp, items]) =>
+    `<div class="ms-group-label" style="padding:8px 6px 3px;">${grp}</div>` +
+    items.map(f => `<label class="ms-option"><input type="checkbox" class="digest-func-cb" value="${f}" onchange="window.updateDigestFuncLabel()"> ${f}</label>`).join('')
+  ).join('');
+}
+
 window.toggleDigestFunc = function() {
   document.getElementById('digest-func-panel').classList.toggle('open');
 };
@@ -1605,6 +1629,7 @@ document.addEventListener('click', e => {
 window.openDigestModal = function() {
   const overlay = document.getElementById('digestModalOverlay');
   if (!overlay) return;
+  buildDigestFuncOptions();
   overlay.classList.add('open');
 };
 
