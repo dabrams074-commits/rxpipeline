@@ -1664,24 +1664,15 @@ window.downloadDigestPDF = async function() {
 
     // Filter live jobs by TA and/or function and optional location
     const locLower = location.toLowerCase();
-    // Match jobs on TA AND function (strict), then fall back to TA-only if too few results
-    const scoreJob = j => {
+    // Strict match: TA AND function AND location (if specified)
+    const matchingJobs = all_jobs.filter(j => {
       const jArea = j._area || inferArea(j.title || '', j.dept || '');
       const jFunc = j._func || inferFunc(j.title || '', j.dept || '');
       const matchesTA   = jArea === ta;
       const matchesFunc = jFunc === func;
       const matchesLoc  = !location || (j.location || '').toLowerCase().includes(locLower);
-      if (!matchesLoc) return 0;
-      if (matchesTA && matchesFunc) return 2; // exact match
-      if (matchesFunc) return 1;              // function-only fallback
-      return 0;
-    };
-    const matchingJobs = all_jobs
-      .map(j => ({ j, score: scoreJob(j) }))
-      .filter(({ score }) => score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 12)
-      .map(({ j }) => j);
+      return matchesTA && matchesFunc && matchesLoc;
+    }).slice(0, 12);
 
     const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
