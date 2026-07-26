@@ -76,8 +76,9 @@ function switchView(v) {
     if (el) el.classList.toggle('active', v === id);
   });
   if (v === 'library') { renderLibrary(); preloadNews(); }
+  if (v === 'liveroles') preloadNews();
   if (v === 'tracker') renderTracker();
-  if (v === 'home') updateHomeCards();
+  if (v === 'home') { updateHomeCards(); preloadNews(); }
   if (v === 'news') loadNews();
   if (v === 'community') { loadWins(); loadPosts(); }
   if (v === 'liveroles' && baselineAnimationPending) { playBaselineAnimation(); }
@@ -1645,14 +1646,11 @@ window.downloadDigestPDF = async function() {
   btn.disabled = true; btn.textContent = 'Generating…';
 
   try {
-    // Fetch news from server (needs server for Google News CORS)
-    const res = await fetch('/.netlify/functions/send-digest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: user.email, therapeuticArea: ta, jobFunction: func, pdfOnly: true }),
-    });
-    const { taNews = [], industryNews = [], weekOf, error } = await res.json();
-    if (error) throw new Error(error);
+    // Use already-loaded newsArticles (same pool as the News tab) filtered by TA
+    if (!newsArticles.length) throw new Error('News not loaded yet — go to the News tab first to load articles, then try again');
+    const taNews       = newsArticles.filter(a => a._tas && a._tas.includes(ta)).slice(0, 12);
+    const industryNews = newsArticles.filter(a => !a._tas?.includes(ta) && a.topic !== 'Company News').slice(0, 6);
+    const weekOf = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
     // Filter live jobs by TA and/or function and optional location
     const locLower = location.toLowerCase();
