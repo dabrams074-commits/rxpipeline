@@ -181,7 +181,7 @@ export async function manageSubscription() {
     }
   } catch (e) {
     alert('Could not open billing portal: ' + e.message);
-    if (btn) { btn.disabled = false; btn.textContent = 'Manage subscription'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Manage or Cancel Subscription'; }
   }
 }
 
@@ -257,7 +257,7 @@ function _updateUserPill() {
   pill.innerHTML = `
     ${avatar ? `<img src="${avatar}" class="user-avatar" alt="">` : `<div class="user-avatar-initial">${name[0].toUpperCase()}</div>`}
     <span class="user-name">${name}</span>
-    <button id="btn-manage-sub" class="user-manage-btn" onclick="window.rxManageSubscription()">Manage subscription</button>
+    <button id="btn-manage-sub" class="user-manage-btn" onclick="window.rxManageSubscription()">Manage or Cancel Subscription</button>
     <button class="user-signout-btn" onclick="window.rxSignOut()">Sign out</button>
   `;
   pill.style.display = 'flex';
